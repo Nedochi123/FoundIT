@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../../lib/api";
+import PasswordInput from "./PasswordInput";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -54,14 +55,12 @@ export default function ResetPasswordForm({ token, onDone }) {
         <label htmlFor="reset-password" className={labelClass}>
           New password
         </label>
-        <input
+        <PasswordInput
           id="reset-password"
-          type="password"
           required
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={inputClass}
           placeholder="At least 8 characters"
         />
       </div>
@@ -69,14 +68,12 @@ export default function ResetPasswordForm({ token, onDone }) {
         <label htmlFor="reset-confirm-password" className={labelClass}>
           Confirm new password
         </label>
-        <input
+        <PasswordInput
           id="reset-confirm-password"
-          type="password"
           required
           minLength={8}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className={inputClass}
           placeholder="Type it again"
         />
       </div>

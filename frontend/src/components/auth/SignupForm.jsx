@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import PasswordInput from "./PasswordInput";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -55,7 +56,7 @@ export default function SignupForm({ onSwitchToLogin }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={inputClass}
-          placeholder="yourname@nileuniversity.edu.ng"
+          placeholder="yourIDnumber@nileuniversity.edu.ng"
         />
         <p className={hintClass}>Open to students, lecturers, and staff.</p>
       </div>
@@ -71,12 +72,12 @@ export default function SignupForm({ onSwitchToLogin }) {
           value={idNumber}
           onChange={(e) => setIdNumber(e.target.value)}
           className={inputClass}
-          placeholder="252120246"
+          placeholder="123456789"
           pattern="\d{9}"
-          title="Format: 9 digits, e.g. 252120246"
+          title="Format: 9 digits, e.g. 123456789"
         />
         <p className={hintClass}>
-          Format: 9 digits, e.g. 252120246. You'll only need to enter this once — we'll ask when you first report a
+          Format: 9 digits, e.g. 123456789. You'll only need to enter this once — we'll ask when you first report a
           found item if you skip it now.
         </p>
       </div>
@@ -84,14 +85,12 @@ export default function SignupForm({ onSwitchToLogin }) {
         <label htmlFor="signup-password" className={labelClass}>
           Password
         </label>
-        <input
+        <PasswordInput
           id="signup-password"
-          type="password"
           required
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={inputClass}
           placeholder="At least 8 characters"
         />
       </div>

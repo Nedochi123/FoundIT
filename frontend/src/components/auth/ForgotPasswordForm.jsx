@@ -59,7 +59,7 @@ export default function ForgotPasswordForm({ onSwitchToLogin }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={inputClass}
-          placeholder="yourname@nileuniversity.edu.ng"
+          placeholder="yourIDnumber@nileuniversity.edu.ng"
         />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}

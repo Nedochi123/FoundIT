@@ -106,12 +106,12 @@ export default function FoundForm({ onNavigate }) {
               value={idNumber}
               onChange={(e) => setIdNumber(e.target.value)}
               className={inputClass}
-              placeholder="252120246"
+              placeholder="123456789"
               pattern="\d{9}"
-              title="Format: 9 digits, e.g. 252120246"
+              title="Format: 9 digits, e.g. 123456789"
             />
             <p className="mt-1 text-xs text-slate-400">
-              Format: 9 digits, e.g. 252120246. We'll remember this — you won't be asked again.
+              Format: 9 digits, e.g. 123456789. We'll remember this — you won't be asked again.
             </p>
           </div>
         )}

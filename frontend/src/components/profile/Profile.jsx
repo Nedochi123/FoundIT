@@ -101,11 +101,11 @@ export default function Profile() {
             value={idNumber}
             onChange={(e) => setIdNumber(e.target.value)}
             className={inputClass}
-            placeholder="252120246"
+            placeholder="123456789"
             pattern="\d{9}"
-            title="Format: 9 digits, e.g. 252120246"
+            title="Format: 9 digits, e.g. 123456789"
           />
-          <p className="mt-1 text-xs text-slate-400">Format: 9 digits, e.g. 252120246</p>
+          <p className="mt-1 text-xs text-slate-400">Format: 9 digits, e.g. 123456789</p>
         </div>
         {message && <p className="text-sm text-slate-300">{message}</p>}
         <button

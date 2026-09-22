@@ -54,6 +54,13 @@ export default function NotificationsPrompt() {
               On iPhone, add FoundIT to your Home Screen first (Share → Add to Home Screen), then enable
               notifications from your Profile — iOS only supports this after installing.
             </p>
+          ) : status === "denied" ? (
+            <p className="mt-1 text-xs text-slate-200">
+              Notifications are blocked for this site. Click the icon next to the address bar, set Notifications to
+              Allow, then reload and try again.
+            </p>
+          ) : status === "unsupported" ? (
+            <p className="mt-1 text-xs text-slate-200">Notifications aren't supported in this browser.</p>
           ) : (
             <p className="mt-1 text-xs text-slate-200">
               Get notified the moment someone reports something lost or found on campus.
