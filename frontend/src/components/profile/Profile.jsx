@@ -15,6 +15,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [notifStatus, setNotifStatus] = useState("idle");
+  const [notifDetail, setNotifDetail] = useState("");
 
   async function handleSave(e) {
     e.preventDefault();
@@ -38,6 +39,7 @@ export default function Profile() {
     setNotifStatus("requesting");
     const result = await enablePushNotifications();
     setNotifStatus(result.ok ? "enabled" : result.reason);
+    setNotifDetail(result.detail || "");
   }
 
   return (
@@ -63,6 +65,18 @@ export default function Profile() {
           <p className="text-sm text-slate-300">
             Notifications are blocked. Enable them for FoundIT in your browser's site settings to turn this on.
           </p>
+        ) : notifStatus === "subscribe_failed" ? (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-slate-300">
+              Something went wrong turning this on{notifDetail ? `: ${notifDetail}` : ""}.
+            </p>
+            <button
+              onClick={handleEnableNotifications}
+              className="self-start rounded-lg bg-brand-gradient px-4 py-2 text-sm font-semibold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98]"
+            >
+              Try again
+            </button>
+          </div>
         ) : !pushSupported() ? (
           <p className="text-sm text-slate-300">Notifications aren't supported in this browser.</p>
         ) : (

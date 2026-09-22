@@ -34,18 +34,28 @@ export async function enablePushNotifications() {
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return { ok: false, reason: "denied" };
 
-  const registration = await navigator.serviceWorker.ready;
-  const { publicKey } = await api.getVapidPublicKey();
-  if (!publicKey) return { ok: false, reason: "not_configured" };
+  // Everything past this point can throw for reasons that have nothing to
+  // do with the permission prompt (network failure, the push service
+  // being unreachable, a stale service worker) — without a catch here,
+  // the caller's await never resolves and the UI hangs on "Requesting..."
+  // forever with no indication of what went wrong.
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const { publicKey } = await api.getVapidPublicKey();
+    if (!publicKey) return { ok: false, reason: "not_configured" };
 
-  let subscription = await registration.pushManager.getSubscription();
-  if (!subscription) {
-    subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey),
-    });
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+    }
+
+    await api.subscribePush(subscription.toJSON());
+    return { ok: true };
+  } catch (err) {
+    console.error("Push subscription failed:", err);
+    return { ok: false, reason: "subscribe_failed", detail: err.message };
   }
-
-  await api.subscribePush(subscription.toJSON());
-  return { ok: true };
 }

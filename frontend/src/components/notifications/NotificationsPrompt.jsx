@@ -7,6 +7,7 @@ const DISMISSED_KEY = "foundit_notif_prompt_dismissed";
 export default function NotificationsPrompt() {
   const [visible, setVisible] = useState(false);
   const [status, setStatus] = useState("idle");
+  const [detail, setDetail] = useState("");
 
   useEffect(() => {
     let dismissed = false;
@@ -38,6 +39,7 @@ export default function NotificationsPrompt() {
       dismiss();
     } else {
       setStatus(result.reason);
+      setDetail(result.detail || "");
     }
   }
 
@@ -61,6 +63,10 @@ export default function NotificationsPrompt() {
             </p>
           ) : status === "unsupported" ? (
             <p className="mt-1 text-xs text-slate-200">Notifications aren't supported in this browser.</p>
+          ) : status === "subscribe_failed" ? (
+            <p className="mt-1 text-xs text-slate-200">
+              Something went wrong turning this on{detail ? `: ${detail}` : ""}. Try again in a moment.
+            </p>
           ) : (
             <p className="mt-1 text-xs text-slate-200">
               Get notified the moment someone reports something lost or found on campus.
