@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* A calm, static version of the intro's navy palette, with a faint
+     brand-teal/blue tint low in the frame — the intro's animated glow
+     blobs are a one-time "hero" moment and would be visual noise on
+     every other screen, but a hint of the brand color keeps the app
+     from reading as generic dark-mode grey. */
+  background: radial-gradient(circle at 50% -10%, #182544 0%, #0a0e1a 45%, #05070d 100%) fixed,
+    radial-gradient(ellipse 900px 500px at 15% 115%, rgba(17, 154, 160, 0.16) 0%, transparent 60%) fixed,
+    radial-gradient(ellipse 900px 500px at 100% 0%, rgba(36, 103, 230, 0.14) 0%, transparent 55%) fixed;
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.01em;
+}
+
+/* Slow drifting glow blobs behind every screen — a quieter, permanent
+   echo of the intro animation's energy so the app never reads as flat,
+   static dark-mode grey. Fixed + very low opacity so it never competes
+   with foreground content. */
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bg-glow::before,
+.bg-glow::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.16;
+}
+.bg-glow::before {
+  width: 380px;
+  height: 380px;
+  background: #17b8ae;
+  top: -6%;
+  right: -10%;
+  animation: bg-glow-drift 16s ease-in-out infinite alternate;
+}
+.bg-glow::after {
+  width: 420px;
+  height: 420px;
+  background: #2467e6;
+  bottom: -10%;
+  left: -12%;
+  animation: bg-glow-drift 20s ease-in-out infinite alternate-reverse;
+}
+@keyframes bg-glow-drift {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(30px, -24px) scale(1.12);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-glow::before,
+  .bg-glow::after {
+    animation: none !important;
+  }
+  .animate-fade-up {
+    animation: none !important;
+  }
+}

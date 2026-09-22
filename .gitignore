@@ -1,0 +1,11 @@
+.claude/
+node_modules/
+dist/
+.env
+.env.local
+dev.db
+dev.db-shm
+dev.db-wal
+dev.db-journal
+uploads/
+.vercel
