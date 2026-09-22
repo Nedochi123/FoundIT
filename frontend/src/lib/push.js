@@ -28,18 +28,30 @@ export function isIosNotStandalone() {
   return isIos && !isStandalone;
 }
 
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} timed out`)), ms)),
+  ]);
+}
+
+// Wraps the ENTIRE flow, including the permission prompt itself — some
+// browsers (observed in Edge) can leave `Notification.requestPermission()`
+// neither resolving nor rejecting under certain "quiet UI" states, and
+// without a catch spanning that call too, the caller's await never
+// settles and the UI hangs on "Requesting..." forever with nothing in
+// the console to explain why.
 export async function enablePushNotifications() {
   if (!pushSupported()) return { ok: false, reason: "unsupported" };
 
-  const permission = await Notification.requestPermission();
-  if (permission !== "granted") return { ok: false, reason: "denied" };
-
-  // Everything past this point can throw for reasons that have nothing to
-  // do with the permission prompt (network failure, the push service
-  // being unreachable, a stale service worker) — without a catch here,
-  // the caller's await never resolves and the UI hangs on "Requesting..."
-  // forever with no indication of what went wrong.
   try {
+    const permission = await withTimeout(
+      Notification.requestPermission(),
+      20000,
+      "Notification.requestPermission()"
+    );
+    if (permission !== "granted") return { ok: false, reason: "denied" };
+
     const registration = await navigator.serviceWorker.ready;
     const { publicKey } = await api.getVapidPublicKey();
     if (!publicKey) return { ok: false, reason: "not_configured" };
