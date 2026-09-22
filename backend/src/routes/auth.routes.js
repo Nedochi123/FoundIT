@@ -14,6 +14,7 @@ const {
 } = require("../utils/tokens");
 const { sendEmail, welcomeEmail, passwordResetEmail, verifyEmailStandaloneEmail } = require("../utils/email");
 const { requireAuth } = require("../middleware/auth");
+const { idNumberSchema } = require("../utils/idNumber");
 
 const router = express.Router();
 
@@ -81,7 +82,7 @@ const signupSchema = z.object({
       `Signup requires a @${ALLOWED_EMAIL_DOMAIN} email address.`
     ),
   password: z.string().min(8, "Password must be at least 8 characters."),
-  idNumber: z.string().trim().min(1).optional(),
+  idNumber: idNumberSchema,
 });
 
 router.post("/signup", authLimiter, async (req, res, next) => {

@@ -2,12 +2,13 @@ const express = require("express");
 const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
+const { idNumberSchema } = require("../utils/idNumber");
 
 const router = express.Router();
 
 const updateSchema = z.object({
   name: z.string().trim().min(1).optional(),
-  idNumber: z.string().trim().min(1).optional(),
+  idNumber: idNumberSchema,
 });
 
 router.patch("/me", requireAuth, (req, res, next) => {

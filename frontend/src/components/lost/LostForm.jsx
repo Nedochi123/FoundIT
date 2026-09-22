@@ -112,8 +112,12 @@ export default function LostForm({ onNavigate }) {
               onChange={(e) => setIdNumber(e.target.value)}
               className={inputClass}
               placeholder="NUN/2024/001"
+              pattern="[Nn][Uu][Nn]/\d{4}/\d{2,6}"
+              title="Format: NUN/2024/001"
             />
-            <p className="mt-1 text-xs text-slate-400">We'll remember this — you won't be asked again.</p>
+            <p className="mt-1 text-xs text-slate-400">
+              Format: NUN/2024/001. We'll remember this — you won't be asked again.
+            </p>
           </div>
         )}
 

@@ -70,9 +70,12 @@ export default function SignupForm({ onSwitchToLogin }) {
           onChange={(e) => setIdNumber(e.target.value)}
           className={inputClass}
           placeholder="NUN/2024/001"
+          pattern="[Nn][Uu][Nn]/\d{4}/\d{2,6}"
+          title="Format: NUN/2024/001"
         />
         <p className={hintClass}>
-          You'll only need to enter this once — we'll ask when you first report a found item if you skip it now.
+          Format: NUN/2024/001. You'll only need to enter this once — we'll ask when you first report a found item if
+          you skip it now.
         </p>
       </div>
       <div>

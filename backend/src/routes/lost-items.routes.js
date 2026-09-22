@@ -4,6 +4,7 @@ const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth, requireOwnedLostItem } = require("../middleware/auth");
 const { broadcastPush } = require("../utils/push");
+const { idNumberSchema } = require("../utils/idNumber");
 
 const router = express.Router();
 
@@ -35,7 +36,7 @@ router.get("/", requireAuth, (req, res) => {
 const createSchema = z.object({
   description: z.string().trim().min(1, "Describe what you lost.").max(1000),
   location: z.string().trim().max(200).optional(),
-  idNumber: z.string().trim().min(1).optional(),
+  idNumber: idNumberSchema,
 });
 
 router.post("/", requireAuth, (req, res, next) => {

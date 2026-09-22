@@ -7,6 +7,7 @@ const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth, requireOwnedFoundItem } = require("../middleware/auth");
 const { broadcastPush } = require("../utils/push");
+const { idNumberSchema } = require("../utils/idNumber");
 
 const router = express.Router();
 
@@ -59,7 +60,7 @@ router.get("/", (req, res) => {
 const createSchema = z.object({
   description: z.string().trim().max(1000).optional(),
   location: z.string().trim().max(200).optional(),
-  idNumber: z.string().trim().min(1).optional(),
+  idNumber: idNumberSchema,
 });
 
 router.post("/", requireAuth, upload.single("photo"), (req, res, next) => {
