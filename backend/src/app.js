@@ -63,6 +63,11 @@ app.use("/api/found-items", foundItemsRoutes);
 app.use("/api/conversations", conversationsRoutes);
 app.use("/api/push", pushRoutes);
 
+// Temporary — verifying Sentry capture, removed right after confirming.
+app.get("/api/debug/sentry-test", () => {
+  throw new Error("FoundIT Sentry verification test — safe to ignore.");
+});
+
 // 404
 app.use((req, res) => {
   res.status(404).json({ error: "Not found." });
