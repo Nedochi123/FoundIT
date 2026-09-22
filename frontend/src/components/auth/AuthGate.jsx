@@ -2,10 +2,46 @@ import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
+import ForgotPasswordForm from "./ForgotPasswordForm";
+import ResetPasswordForm from "./ResetPasswordForm";
+
+function getResetTokenFromUrl() {
+  return new URLSearchParams(window.location.search).get("resetToken");
+}
 
 export default function AuthGate({ children }) {
   const { user, loading } = useAuth();
-  const [mode, setMode] = useState("login");
+  const [resetToken, setResetToken] = useState(getResetTokenFromUrl);
+  const [mode, setMode] = useState(resetToken ? "reset" : "login");
+
+  function clearResetToken() {
+    setResetToken(null);
+    setMode("login");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("resetToken");
+    window.history.replaceState({}, "", url);
+  }
+
+  // A password-reset link should work even if the browser still has an
+  // old session logged in — take priority over the "already logged in"
+  // shortcut below.
+  if (resetToken) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4 py-10">
+        <div className="bg-glow" aria-hidden="true" />
+        <div className="w-full max-w-sm animate-fade-up">
+          <div className="mb-8 flex flex-col items-center gap-1.5">
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">
+              Found<span className="text-brand-teal">IT</span>
+            </h1>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
+            <ResetPasswordForm token={resetToken} onDone={clearResetToken} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -46,7 +82,9 @@ export default function AuthGate({ children }) {
         </div>
         <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
           {mode === "login" ? (
-            <LoginForm onSwitchToSignup={() => setMode("signup")} />
+            <LoginForm onSwitchToSignup={() => setMode("signup")} onForgotPassword={() => setMode("forgot")} />
+          ) : mode === "forgot" ? (
+            <ForgotPasswordForm onSwitchToLogin={() => setMode("login")} />
           ) : (
             <SignupForm onSwitchToLogin={() => setMode("login")} />
           )}

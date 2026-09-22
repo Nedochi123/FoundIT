@@ -5,7 +5,7 @@ const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 
-export default function LoginForm({ onSwitchToSignup }) {
+export default function LoginForm({ onSwitchToSignup, onForgotPassword }) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,6 +54,13 @@ export default function LoginForm({ onSwitchToSignup }) {
           className={inputClass}
           placeholder="Your password"
         />
+        <button
+          type="button"
+          onClick={onForgotPassword}
+          className="mt-1.5 text-xs font-medium text-slate-400 hover:text-brand-teal"
+        >
+          Forgot password?
+        </button>
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}
       <button
