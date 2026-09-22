@@ -96,14 +96,16 @@ export default function Profile() {
           <input
             id="profile-idnumber"
             type="text"
+            inputMode="numeric"
+            maxLength={9}
             value={idNumber}
             onChange={(e) => setIdNumber(e.target.value)}
             className={inputClass}
-            placeholder="NUN/2024/001"
-            pattern="[Nn][Uu][Nn]/\d{4}/\d{2,6}"
-            title="Format: NUN/2024/001"
+            placeholder="252120246"
+            pattern="\d{9}"
+            title="Format: 9 digits, e.g. 252120246"
           />
-          <p className="mt-1 text-xs text-slate-400">Format: NUN/2024/001</p>
+          <p className="mt-1 text-xs text-slate-400">Format: 9 digits, e.g. 252120246</p>
         </div>
         {message && <p className="text-sm text-slate-300">{message}</p>}
         <button
