@@ -5,3 +5,4 @@ dev.db-shm
 dev.db-wal
 dev.db-journal
 uploads/
+backups/

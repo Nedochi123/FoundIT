@@ -14,10 +14,10 @@ import NotificationsPrompt from "./components/notifications/NotificationsPrompt"
 import TokensScreen from "./components/tokens/TokensScreen";
 import LegalScreen from "./components/legal/LegalScreen";
 
-// Split out of the main bundle — the admin cash-out review screen is only
-// ever loaded by one account, so every other visitor's initial load
-// shouldn't pay to parse and ship its JS.
-const AdminCashoutScreen = lazy(() => import("./components/admin/AdminCashoutScreen"));
+// Split out of the main bundle — the admin screen is only ever loaded by
+// one account, so every other visitor's initial load shouldn't pay to
+// parse and ship its JS.
+const AdminScreen = lazy(() => import("./components/admin/AdminScreen"));
 
 // Supports a direct link into the Admin screen (?admin=1) — read once on
 // mount so it still works after logging in, since the query string
@@ -65,7 +65,7 @@ function Screens() {
   } else if (view === "admin") {
     content = user?.isAdmin ? (
       <Suspense fallback={<p className="text-sm text-slate-300">Loading...</p>}>
-        <AdminCashoutScreen />
+        <AdminScreen />
       </Suspense>
     ) : (
       <Home onNavigate={navigate} />

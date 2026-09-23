@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ShieldCheck, Check, X, Banknote } from "lucide-react";
+import { Check, X, Banknote } from "lucide-react";
 import { api } from "../../lib/api";
 
 const FILTERS = [
@@ -53,14 +53,6 @@ export default function AdminCashoutScreen() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center gap-2">
-        <ShieldCheck className="h-5 w-5 text-amber-400" />
-        <div>
-          <h1 className="text-xl font-bold text-slate-50">Cash-out requests</h1>
-          <p className="text-sm text-slate-300">Review and pay out student token cash-outs.</p>
-        </div>
-      </div>
-
       <div className="flex gap-1.5">
         {FILTERS.map((f) => (
           <button
