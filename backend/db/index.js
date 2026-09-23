@@ -66,3 +66,4 @@ runMigrations();
 
 module.exports = db;
 module.exports.transaction = transaction;
+module.exports.dbPath = resolveDbPath();

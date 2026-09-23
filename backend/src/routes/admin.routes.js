@@ -1,11 +1,43 @@
 const express = require("express");
+const path = require("node:path");
 const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth, requireAdmin } = require("../middleware/auth");
+const { runBackup, listBackups, BACKUP_DIR } = require("../utils/backup");
 
 const router = express.Router();
 
 router.use(requireAuth, requireAdmin);
+
+router.get("/backups", (req, res) => {
+  res.json({ backups: listBackups() });
+});
+
+// On-demand snapshot, independent of the daily schedule — useful right
+// before a risky manual change.
+router.post("/backups", (req, res, next) => {
+  try {
+    const { file } = runBackup();
+    res.status(201).json({ file });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Lets an admin pull a copy off the Railway volume entirely (onto their
+// own machine) — the daily snapshots alone only protect against
+// application-level mistakes, not total volume loss, since they live on
+// that same volume. Filename is validated against the exact pattern
+// runBackup() generates, so this can't be used to read arbitrary paths.
+const BACKUP_FILENAME_PATTERN = /^backup-[0-9TZ-]+\.db$/;
+router.get("/backups/:filename", (req, res) => {
+  if (!BACKUP_FILENAME_PATTERN.test(req.params.filename)) {
+    return res.status(400).json({ error: "Invalid backup filename." });
+  }
+  res.download(path.join(BACKUP_DIR, req.params.filename), (err) => {
+    if (err && !res.headersSent) res.status(404).json({ error: "Backup not found." });
+  });
+});
 
 router.get("/cashout-requests", (req, res) => {
   const status = req.query.status;
