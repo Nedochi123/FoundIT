@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LogOut, Bell } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { enablePushNotifications, isIosNotStandalone, pushSupported } from "../../lib/push";
+import ChangePasswordForm from "./ChangePasswordForm";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -130,6 +131,8 @@ export default function Profile() {
           {saving ? "Saving..." : "Save changes"}
         </button>
       </form>
+
+      <ChangePasswordForm />
 
       <button
         onClick={logout}

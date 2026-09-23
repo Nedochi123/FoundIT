@@ -265,6 +265,37 @@ router.post("/reset-password", authLimiter, async (req, res, next) => {
   }
 });
 
+// Change password while logged in — separate from forgot/reset-password
+// (which is for someone locked out entirely). Requires the current
+// password, unlike reset, since the caller is already authenticated
+// and this isn't recovering from a lost password.
+router.post("/change-password", authLimiter, requireAuth, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body || {};
+    if (!currentPassword || !newPassword || newPassword.length < 8) {
+      return res.status(400).json({ error: "Current password and a new 8+ character password are required." });
+    }
+
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+    const valid = await verifyPassword(currentPassword, user.password_hash);
+    if (!valid) return res.status(400).json({ error: "Current password is incorrect." });
+
+    const passwordHash = await hashPassword(newPassword);
+    db.prepare("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?").run(
+      passwordHash,
+      user.id
+    );
+
+    // Same as reset-password: revokes every session, this one included,
+    // so a stolen-but-still-valid refresh token elsewhere is locked out.
+    revokeAllRefreshTokensForUser(user.id);
+
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post("/resend-verification", authLimiter, requireAuth, (req, res) => {
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
   if (!user || user.email_verified_at) {

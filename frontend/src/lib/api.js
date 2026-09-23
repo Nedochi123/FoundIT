@@ -106,6 +106,8 @@ export const api = {
   verifyEmail: (token) =>
     apiRequest("/api/auth/verify-email", { method: "POST", body: JSON.stringify({ token }) }),
   resendVerification: () => apiRequest("/api/auth/resend-verification", { method: "POST" }),
+  changePassword: (currentPassword, newPassword) =>
+    apiRequest("/api/auth/change-password", { method: "POST", body: JSON.stringify({ currentPassword, newPassword }) }),
   updateProfile: (body) => apiRequest("/api/users/me", { method: "PATCH", body: JSON.stringify(body) }),
 
   // Found items
