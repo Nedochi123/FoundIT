@@ -87,12 +87,35 @@ function Screens() {
   );
 }
 
+const INTRO_SEEN_KEY = "foundit_intro_seen";
+
+// The 2.8s animated intro is a nice first-impression moment, but it's
+// pure unnecessary delay on every return visit for someone who already
+// knows what FoundIT is — play it once per device, not on every open.
+function getInitialShowIntro() {
+  try {
+    return !localStorage.getItem(INTRO_SEEN_KEY);
+  } catch {
+    return true;
+  }
+}
+
 export default function App() {
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(getInitialShowIntro);
+
+  function handleIntroDone() {
+    setShowIntro(false);
+    try {
+      localStorage.setItem(INTRO_SEEN_KEY, "1");
+    } catch {
+      // Private browsing / storage quota — the intro just replays next
+      // time, which is a harmless fallback, not a broken feature.
+    }
+  }
 
   return (
     <AuthProvider>
-      {showIntro && <IntroAnimation onDone={() => setShowIntro(false)} />}
+      {showIntro && <IntroAnimation onDone={handleIntroDone} />}
       <AuthGate>
         <Screens />
       </AuthGate>
