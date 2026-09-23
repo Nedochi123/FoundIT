@@ -35,37 +35,40 @@ function withTimeout(promise, ms, label) {
   ]);
 }
 
-// Wraps the ENTIRE flow, including the permission prompt itself — some
-// browsers (observed in Edge) can leave `Notification.requestPermission()`
-// neither resolving nor rejecting under certain "quiet UI" states, and
-// without a catch spanning that call too, the caller's await never
-// settles and the UI hangs on "Requesting..." forever with nothing in
-// the console to explain why.
-export async function enablePushNotifications() {
+async function enablePushNotificationsInner() {
   if (!pushSupported()) return { ok: false, reason: "unsupported" };
 
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") return { ok: false, reason: "denied" };
+
+  const registration = await navigator.serviceWorker.ready;
+  const { publicKey } = await api.getVapidPublicKey();
+  if (!publicKey) return { ok: false, reason: "not_configured" };
+
+  let subscription = await registration.pushManager.getSubscription();
+  if (!subscription) {
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    });
+  }
+
+  await api.subscribePush(subscription.toJSON());
+  return { ok: true };
+}
+
+// Wraps the ENTIRE flow in one overall timeout, not just the permission
+// prompt. The permission prompt itself can hang (observed in Edge's
+// "quiet UI" state), but so can later steps that are just as capable of
+// leaving the caller's await unsettled forever with nothing in the
+// console to explain why — `navigator.serviceWorker.ready` never
+// resolves if the service worker fails to activate, and
+// `pushManager.subscribe()` has been observed to silently hang rather
+// than reject on some iOS Safari versions. Any of those leaves the UI
+// stuck on "Requesting..." with no way out short of this backstop.
+export async function enablePushNotifications() {
   try {
-    const permission = await withTimeout(
-      Notification.requestPermission(),
-      20000,
-      "Notification.requestPermission()"
-    );
-    if (permission !== "granted") return { ok: false, reason: "denied" };
-
-    const registration = await navigator.serviceWorker.ready;
-    const { publicKey } = await api.getVapidPublicKey();
-    if (!publicKey) return { ok: false, reason: "not_configured" };
-
-    let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
-      });
-    }
-
-    await api.subscribePush(subscription.toJSON());
-    return { ok: true };
+    return await withTimeout(enablePushNotificationsInner(), 20000, "Enabling notifications");
   } catch (err) {
     console.error("Push subscription failed:", err);
     return { ok: false, reason: "subscribe_failed", detail: err.message };
