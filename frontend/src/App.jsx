@@ -2,6 +2,7 @@ import { useState, lazy, Suspense } from "react";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import IntroAnimation from "./components/IntroAnimation";
 import AuthGate from "./components/auth/AuthGate";
+import EmailVerifyHandler from "./components/auth/EmailVerifyHandler";
 import Layout from "./components/layout/Layout";
 import Home from "./components/Home";
 import LostForm from "./components/lost/LostForm";
@@ -119,6 +120,7 @@ export default function App() {
   return (
     <AuthProvider>
       {showIntro && <IntroAnimation onDone={handleIntroDone} />}
+      <EmailVerifyHandler />
       <AuthGate>
         <Screens />
       </AuthGate>

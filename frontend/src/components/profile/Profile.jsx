@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { LogOut, Bell } from "lucide-react";
+import { LogOut, Bell, MailCheck } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { enablePushNotifications, isIosNotStandalone, pushSupported } from "../../lib/push";
+import { api } from "../../lib/api";
 import ChangePasswordForm from "./ChangePasswordForm";
 
 const inputClass =
@@ -17,6 +18,17 @@ export default function Profile({ onNavigate }) {
   const [message, setMessage] = useState("");
   const [notifStatus, setNotifStatus] = useState("idle");
   const [notifDetail, setNotifDetail] = useState("");
+  const [resendStatus, setResendStatus] = useState("idle");
+
+  async function handleResendVerification() {
+    setResendStatus("sending");
+    try {
+      await api.resendVerification();
+      setResendStatus("sent");
+    } catch {
+      setResendStatus("idle");
+    }
+  }
 
   async function handleSave(e) {
     e.preventDefault();
@@ -49,6 +61,33 @@ export default function Profile({ onNavigate }) {
         <h1 className="text-xl font-bold text-slate-50">Profile</h1>
         <p className="mt-1 text-sm text-slate-300">{user?.email}</p>
       </div>
+
+      {!user?.emailVerified && (
+        <div className={cardClass}>
+          <div className="mb-2 flex items-center gap-2 text-slate-100">
+            <MailCheck className="h-4 w-4" />
+            <p className="text-sm font-semibold">Verify your email</p>
+          </div>
+          {resendStatus === "sent" ? (
+            <p className="text-sm text-emerald-400">
+              Sent — check {user?.email} (and your spam folder) for the link.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-slate-300">
+                We emailed you a verification link when you signed up. Didn't get it?
+              </p>
+              <button
+                onClick={handleResendVerification}
+                disabled={resendStatus === "sending"}
+                className="self-start rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800 disabled:opacity-60"
+              >
+                {resendStatus === "sending" ? "Sending..." : "Resend verification email"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className={cardClass}>
         <div className="mb-3 flex items-center gap-2 text-slate-100">
