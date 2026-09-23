@@ -5,11 +5,13 @@ export default function ItemCard({ item, currentUserId, onMessage, onResolve, me
   const isOwn = item.posterId === currentUserId;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/70 shadow-lg shadow-black/20 backdrop-blur transition hover:-translate-y-0.5 hover:border-white/20 hover:shadow-xl">
+    <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/85 shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:border-white/20 hover:shadow-xl">
       <img
         src={resolvePhotoUrl(item.photoUrl)}
         alt={item.description || "Found item"}
         className="h-44 w-full object-cover"
+        loading="lazy"
+        decoding="async"
       />
       <div className="p-3">
         {item.description && <p className="text-sm text-slate-100 line-clamp-2">{item.description}</p>}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import IntroAnimation from "./components/IntroAnimation";
 import AuthGate from "./components/auth/AuthGate";
@@ -12,7 +12,11 @@ import ConversationView from "./components/messages/ConversationView";
 import Profile from "./components/profile/Profile";
 import NotificationsPrompt from "./components/notifications/NotificationsPrompt";
 import TokensScreen from "./components/tokens/TokensScreen";
-import AdminCashoutScreen from "./components/admin/AdminCashoutScreen";
+
+// Split out of the main bundle — the admin cash-out review screen is only
+// ever loaded by one account, so every other visitor's initial load
+// shouldn't pay to parse and ship its JS.
+const AdminCashoutScreen = lazy(() => import("./components/admin/AdminCashoutScreen"));
 
 // Supports a direct link into the Admin screen (?admin=1) — read once on
 // mount so it still works after logging in, since the query string
@@ -56,7 +60,13 @@ function Screens() {
   } else if (view === "tokens") {
     content = <TokensScreen />;
   } else if (view === "admin") {
-    content = user?.isAdmin ? <AdminCashoutScreen /> : <Home onNavigate={navigate} />;
+    content = user?.isAdmin ? (
+      <Suspense fallback={<p className="text-sm text-slate-300">Loading...</p>}>
+        <AdminCashoutScreen />
+      </Suspense>
+    ) : (
+      <Home onNavigate={navigate} />
+    );
   } else {
     content = (
       <>

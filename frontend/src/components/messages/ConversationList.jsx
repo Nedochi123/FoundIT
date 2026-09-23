@@ -49,9 +49,15 @@ export default function ConversationList({ onOpenConversation, onUnreadChange })
         <button
           key={c.id}
           onClick={() => onOpenConversation(c.id)}
-          className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/70 p-3 text-left shadow-lg shadow-black/20 backdrop-blur transition hover:border-brand-teal/40"
+          className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/85 p-3 text-left shadow-lg shadow-black/20 transition hover:border-brand-teal/40"
         >
-          <img src={resolvePhotoUrl(c.itemPhotoUrl)} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+          <img
+            src={resolvePhotoUrl(c.itemPhotoUrl)}
+            alt=""
+            className="h-12 w-12 shrink-0 rounded-lg object-cover"
+            loading="lazy"
+            decoding="async"
+          />
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
               <p className="truncate font-semibold text-slate-50">{c.otherUserName}</p>

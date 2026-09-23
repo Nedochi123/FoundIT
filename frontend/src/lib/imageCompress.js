@@ -1,11 +1,13 @@
 // Client-side downscale+recompress via canvas before upload. A raw
-// phone camera photo is routinely 3-8MB; compressing to ~1600px wide
-// JPEG at 0.8 quality cuts that to a few hundred KB, which matters on
-// campus mobile data and keeps storage from filling with full-size
-// originals for what's ultimately shown as a gallery thumbnail. The
-// server's own 5MB limit + mimetype check remain the real safety net —
-// this is a bandwidth/storage optimization, not a security control.
-export async function compressImage(file, { maxWidth = 1600, quality = 0.8 } = {}) {
+// phone camera photo is routinely 3-8MB; the photo is only ever
+// displayed back as a small gallery thumbnail (h-44 in a 2-column
+// grid), so 800px wide is already well above what that ever needs at
+// retina density — compressing to that at 0.8 quality cuts a multi-MB
+// original to tens of KB, which matters both for the uploader's mobile
+// data and for every other student re-downloading it in the gallery.
+// The server's own 5MB limit + mimetype check remain the real safety
+// net — this is a bandwidth/storage optimization, not a security control.
+export async function compressImage(file, { maxWidth = 800, quality = 0.8 } = {}) {
   try {
     const bitmap = await createImageBitmap(file);
     const scale = Math.min(1, maxWidth / bitmap.width);
