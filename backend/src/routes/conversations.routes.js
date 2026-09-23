@@ -3,6 +3,9 @@ const crypto = require("crypto");
 const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
+const { notifyUser } = require("../utils/push");
+
+const TOKENS_PER_FIND = 2;
 
 const router = express.Router();
 
@@ -93,6 +96,10 @@ router.get("/:id/messages", requireAuth, requireConversationAccess, (req, res) =
     "UPDATE messages SET read_at = datetime('now') WHERE conversation_id = ? AND sender_id != ? AND read_at IS NULL"
   ).run(req.params.id, req.user.id);
 
+  const foundItem = db
+    .prepare("SELECT return_confirmed_at FROM found_items WHERE id = ?")
+    .get(req.conversation.found_item_id);
+
   res.json({
     messages: messages.map((m) => ({
       id: m.id,
@@ -101,6 +108,8 @@ router.get("/:id/messages", requireAuth, requireConversationAccess, (req, res) =
       createdAt: m.created_at,
       readAt: m.read_at,
     })),
+    isSeeker: req.conversation.seeker_id === req.user.id,
+    returnConfirmed: !!foundItem?.return_confirmed_at,
   });
 });
 
@@ -133,6 +142,59 @@ router.post("/:id/messages", requireAuth, requireConversationAccess, (req, res, 
         readAt: message.read_at,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Only the seeker can confirm — a finder marking their own return
+// "confirmed" would trivially farm tokens. Idempotent: once
+// found_items.return_confirmed_at is set, this item can never pay out
+// a second time, even if called again or from a different conversation
+// on the same item.
+router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req, res, next) => {
+  try {
+    const convo = req.conversation;
+    if (convo.seeker_id !== req.user.id) {
+      return res.status(403).json({ error: "Only the person who lost the item can confirm its return." });
+    }
+
+    const foundItem = db.prepare("SELECT * FROM found_items WHERE id = ?").get(convo.found_item_id);
+    if (!foundItem) return res.status(404).json({ error: "Found item not found." });
+    if (foundItem.return_confirmed_at) {
+      return res.status(400).json({ error: "This return has already been confirmed." });
+    }
+
+    const run = db.transaction(() => {
+      db.prepare(
+        `UPDATE found_items
+         SET return_confirmed_at = datetime('now'), status = 'resolved',
+             resolved_at = COALESCE(resolved_at, datetime('now')), updated_at = datetime('now')
+         WHERE id = ?`
+      ).run(foundItem.id);
+
+      db.prepare("UPDATE users SET tokens = tokens + ?, updated_at = datetime('now') WHERE id = ?").run(
+        TOKENS_PER_FIND,
+        convo.finder_id
+      );
+
+      const ledgerId = crypto.randomUUID();
+      db.prepare(
+        `INSERT INTO token_ledger (id, user_id, delta, reason, note, found_item_id)
+         VALUES (?, ?, ?, 'find_confirmed', ?, ?)`
+      ).run(ledgerId, convo.finder_id, TOKENS_PER_FIND, "Confirmed return of a found item", foundItem.id);
+
+      return db.prepare("SELECT tokens FROM users WHERE id = ?").get(convo.finder_id);
+    });
+
+    const { tokens } = run();
+
+    notifyUser(convo.finder_id, {
+      title: "Return confirmed! 🎉",
+      body: `+${TOKENS_PER_FIND} tokens — the owner confirmed they got their item back.`,
+    }).catch(() => {});
+
+    res.json({ ok: true, tokens });
   } catch (err) {
     next(err);
   }

@@ -11,6 +11,7 @@ import ConversationList from "./components/messages/ConversationList";
 import ConversationView from "./components/messages/ConversationView";
 import Profile from "./components/profile/Profile";
 import NotificationsPrompt from "./components/notifications/NotificationsPrompt";
+import TokensScreen from "./components/tokens/TokensScreen";
 
 function Screens() {
   const { user } = useAuth();
@@ -43,6 +44,8 @@ function Screens() {
     content = <FoundForm onNavigate={navigate} />;
   } else if (view === "profile") {
     content = <Profile />;
+  } else if (view === "tokens") {
+    content = <TokensScreen />;
   } else {
     content = (
       <>

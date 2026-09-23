@@ -60,6 +60,7 @@ function publicUser(row) {
     email: row.email,
     idNumber: row.id_number,
     emailVerified: !!row.email_verified_at,
+    tokens: row.tokens,
   };
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, PartyPopper, Coins } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import { usePolling } from "../../hooks/usePolling";
@@ -15,16 +15,36 @@ export default function ConversationView({ conversationId, onBack }) {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [isSeeker, setIsSeeker] = useState(false);
+  const [returnConfirmed, setReturnConfirmed] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [justConfirmed, setJustConfirmed] = useState(false);
   const bottomRef = useRef(null);
 
   usePolling(
     async () => {
-      const { messages } = await api.getMessages(conversationId);
-      setMessages(messages);
+      const data = await api.getMessages(conversationId);
+      setMessages(data.messages);
+      setIsSeeker(data.isSeeker);
+      setReturnConfirmed(data.returnConfirmed);
     },
     4000,
     [conversationId]
   );
+
+  async function handleConfirmReturn() {
+    setConfirming(true);
+    setError("");
+    try {
+      await api.confirmReturn(conversationId);
+      setReturnConfirmed(true);
+      setJustConfirmed(true);
+    } catch (err) {
+      setError(err.message || "Couldn't confirm the return. Try again.");
+    } finally {
+      setConfirming(false);
+    }
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,6 +77,30 @@ export default function ConversationView({ conversationId, onBack }) {
       >
         <ArrowLeft className="h-4 w-4" /> Back to messages
       </button>
+
+      {justConfirmed ? (
+        <div className="mb-3 flex items-center gap-3 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3">
+          <PartyPopper className="h-5 w-5 shrink-0 text-amber-400" />
+          <p className="text-sm text-slate-100">
+            Return confirmed — the finder just earned <span className="font-bold text-amber-300">+2 tokens</span>.
+          </p>
+        </div>
+      ) : isSeeker && !returnConfirmed ? (
+        <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-4 py-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-slate-50">Got your item back?</p>
+            <p className="text-xs text-slate-300">Confirming awards the finder 2 tokens.</p>
+          </div>
+          <button
+            onClick={handleConfirmReturn}
+            disabled={confirming}
+            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-2 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95 disabled:opacity-60"
+          >
+            <Coins className="h-3.5 w-3.5" />
+            {confirming ? "Confirming..." : "Confirm"}
+          </button>
+        </div>
+      ) : null}
 
       <div className="flex-1 space-y-2 overflow-y-auto pb-3">
         {messages.map((m) => {

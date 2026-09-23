@@ -1,8 +1,9 @@
-import { Home, Images, MessageCircle, User } from "lucide-react";
+import { Home, Images, MessageCircle, User, Coins } from "lucide-react";
 
 const TABS = [
   { key: "home", label: "Home", Icon: Home },
   { key: "gallery", label: "Gallery", Icon: Images },
+  { key: "tokens", label: "Tokens", Icon: Coins, accent: "amber" },
   { key: "conversations", label: "Messages", Icon: MessageCircle },
   { key: "profile", label: "Profile", Icon: User },
 ];
@@ -14,14 +15,15 @@ export default function NavBar({ view, onNavigate, unreadCount = 0 }) {
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       <div className="mx-auto flex max-w-md gap-1 px-2 py-2">
-        {TABS.map(({ key, label, Icon }) => {
+        {TABS.map(({ key, label, Icon, accent }) => {
           const active = view === key;
+          const activeColor = accent === "amber" ? "text-amber-400" : "text-brand-teal";
           return (
             <button
               key={key}
               onClick={() => onNavigate(key)}
               className={`relative flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-semibold transition active:scale-95 ${
-                active ? "bg-white/[0.06] text-brand-teal" : "text-slate-500 hover:text-slate-300"
+                active ? `bg-white/[0.06] ${activeColor}` : "text-slate-500 hover:text-slate-300"
               }`}
             >
               <span className="relative">

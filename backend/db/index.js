@@ -51,6 +51,8 @@ function runMigrations() {
   const migrations = [
     // [table, column, "ALTER TABLE ... ADD COLUMN ..."] — add future
     // migrations here as the schema evolves after launch.
+    ["users", "tokens", "ALTER TABLE users ADD COLUMN tokens INTEGER NOT NULL DEFAULT 0"],
+    ["found_items", "return_confirmed_at", "ALTER TABLE found_items ADD COLUMN return_confirmed_at TEXT"],
   ];
   for (const [table, column, ddl] of migrations) {
     if (!columnExists(table, column)) {

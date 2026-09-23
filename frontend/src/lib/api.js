@@ -128,6 +128,13 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ body }),
     }),
+  confirmReturn: (conversationId) =>
+    apiRequest(`/api/conversations/${conversationId}/confirm-return`, { method: "POST" }),
+
+  // Tokens
+  getTokenLedger: () => apiRequest("/api/tokens/ledger"),
+  getCashoutRequests: () => apiRequest("/api/tokens/cashout-requests"),
+  cashoutTokens: (body) => apiRequest("/api/tokens/cashout", { method: "POST", body: JSON.stringify(body) }),
 
   // Push
   getVapidPublicKey: () => apiRequest("/api/push/vapid-public-key"),

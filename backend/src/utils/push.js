@@ -11,20 +11,7 @@ if (configured) {
   );
 }
 
-// Broadcasts to every subscription except the poster's own (so the
-// person who just posted doesn't get notified about their own action).
-// Degrades to a console log when VAPID keys aren't configured, matching
-// the email.js "optional integration" pattern used elsewhere.
-async function broadcastPush({ title, body, url = "/", excludeUserId }) {
-  if (!configured) {
-    console.log(`[push disabled — no VAPID keys configured] Would broadcast: "${title}" — ${body}`);
-    return;
-  }
-
-  const subs = excludeUserId
-    ? db.prepare("SELECT * FROM push_subscriptions WHERE user_id != ?").all(excludeUserId)
-    : db.prepare("SELECT * FROM push_subscriptions").all();
-
+async function sendToSubscriptions(subs, title, body, url) {
   const payload = JSON.stringify({ title, body, url });
 
   const results = await Promise.allSettled(
@@ -45,7 +32,37 @@ async function broadcastPush({ title, body, url = "/", excludeUserId }) {
   });
 }
 
+// Broadcasts to every subscription except the poster's own (so the
+// person who just posted doesn't get notified about their own action).
+// Degrades to a console log when VAPID keys aren't configured, matching
+// the email.js "optional integration" pattern used elsewhere.
+async function broadcastPush({ title, body, url = "/", excludeUserId }) {
+  if (!configured) {
+    console.log(`[push disabled — no VAPID keys configured] Would broadcast: "${title}" — ${body}`);
+    return;
+  }
+
+  const subs = excludeUserId
+    ? db.prepare("SELECT * FROM push_subscriptions WHERE user_id != ?").all(excludeUserId)
+    : db.prepare("SELECT * FROM push_subscriptions").all();
+
+  await sendToSubscriptions(subs, title, body, url);
+}
+
+// Targets one specific user's device(s) — used for things like "your
+// return was confirmed, +2 tokens" that only matter to that one person.
+async function notifyUser(userId, { title, body, url = "/" }) {
+  if (!configured) {
+    console.log(`[push disabled — no VAPID keys configured] Would notify ${userId}: "${title}" — ${body}`);
+    return;
+  }
+
+  const subs = db.prepare("SELECT * FROM push_subscriptions WHERE user_id = ?").all(userId);
+  await sendToSubscriptions(subs, title, body, url);
+}
+
 module.exports = {
   broadcastPush,
+  notifyUser,
   vapidPublicKey: process.env.VAPID_PUBLIC_KEY || null,
 };
