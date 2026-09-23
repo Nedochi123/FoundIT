@@ -141,6 +141,7 @@ export const api = {
     apiRequest(`/api/admin/cashout-requests${status ? `?status=${status}` : ""}`),
   updateAdminCashoutRequest: (id, status) =>
     apiRequest(`/api/admin/cashout-requests/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  getAdminStats: () => apiRequest("/api/admin/stats"),
 
   // Push
   getVapidPublicKey: () => apiRequest("/api/push/vapid-public-key"),

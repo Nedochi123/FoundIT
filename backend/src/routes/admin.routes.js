@@ -96,4 +96,57 @@ router.patch("/cashout-requests/:id", (req, res, next) => {
   }
 });
 
+// Every number here is derived straight from existing timestamped rows
+// (found_items, token_ledger, cashout_requests) — nothing new is
+// tracked separately. This just aggregates what's already recorded, so
+// a growth-over-time report can be built later without needing to
+// backfill anything.
+router.get("/stats", (req, res) => {
+  const totalUsers = db.prepare("SELECT COUNT(*) c FROM users").get().c;
+  const totalFoundItems = db.prepare("SELECT COUNT(*) c FROM found_items").get().c;
+  const totalLostItems = db.prepare("SELECT COUNT(*) c FROM lost_items").get().c;
+  const totalConfirmedReturns = db
+    .prepare("SELECT COUNT(*) c FROM found_items WHERE return_confirmed_at IS NOT NULL")
+    .get().c;
+  const totalTokensAwarded =
+    db.prepare("SELECT COALESCE(SUM(delta), 0) s FROM token_ledger WHERE reason = 'find_confirmed'").get().s;
+  const totalNairaPaidOut =
+    db.prepare("SELECT COALESCE(SUM(amount_naira), 0) s FROM cashout_requests WHERE status = 'paid'").get().s;
+
+  const monthlyFoundItems = db
+    .prepare(
+      `SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS count
+       FROM found_items GROUP BY month ORDER BY month ASC`
+    )
+    .all();
+  const monthlyConfirmedReturns = db
+    .prepare(
+      `SELECT strftime('%Y-%m', return_confirmed_at) AS month, COUNT(*) AS count
+       FROM found_items WHERE return_confirmed_at IS NOT NULL GROUP BY month ORDER BY month ASC`
+    )
+    .all();
+  const monthlySignups = db
+    .prepare(
+      `SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS count
+       FROM users GROUP BY month ORDER BY month ASC`
+    )
+    .all();
+
+  res.json({
+    totals: {
+      users: totalUsers,
+      foundItems: totalFoundItems,
+      lostItems: totalLostItems,
+      confirmedReturns: totalConfirmedReturns,
+      tokensAwarded: totalTokensAwarded,
+      nairaPaidOut: totalNairaPaidOut,
+    },
+    monthly: {
+      foundItems: monthlyFoundItems,
+      confirmedReturns: monthlyConfirmedReturns,
+      signups: monthlySignups,
+    },
+  });
+});
+
 module.exports = router;
