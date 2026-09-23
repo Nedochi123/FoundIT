@@ -22,10 +22,14 @@ h1, h2, h3 {
   letter-spacing: -0.01em;
 }
 
-/* Slow drifting glow blobs behind every screen — a quieter, permanent
-   echo of the intro animation's energy so the app never reads as flat,
-   static dark-mode grey. Fixed + very low opacity so it never competes
-   with foreground content. */
+/* Static glow blobs behind every screen — a quiet echo of the intro
+   animation's energy so the app never reads as flat, static dark-mode
+   grey. Deliberately NOT animated: a large filter:blur() element is
+   expensive to composite on mobile GPUs, and animating its transform
+   forces that blur to recompute every frame, forever, on every screen
+   — a real, continuous perf cost for a decoration nobody consciously
+   watches move. Fixed + very low opacity so it never competes with
+   foreground content either way. */
 .bg-glow {
   position: fixed;
   inset: 0;
@@ -47,7 +51,6 @@ h1, h2, h3 {
   background: #17b8ae;
   top: -6%;
   right: -10%;
-  animation: bg-glow-drift 16s ease-in-out infinite alternate;
 }
 .bg-glow::after {
   width: 420px;
@@ -55,15 +58,6 @@ h1, h2, h3 {
   background: #2467e6;
   bottom: -10%;
   left: -12%;
-  animation: bg-glow-drift 20s ease-in-out infinite alternate-reverse;
-}
-@keyframes bg-glow-drift {
-  from {
-    transform: translate(0, 0) scale(1);
-  }
-  to {
-    transform: translate(30px, -24px) scale(1.12);
-  }
 }
 
 @keyframes fade-up {
@@ -82,10 +76,6 @@ h1, h2, h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bg-glow::before,
-  .bg-glow::after {
-    animation: none !important;
-  }
   .animate-fade-up {
     animation: none !important;
   }

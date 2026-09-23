@@ -14,9 +14,17 @@ import NotificationsPrompt from "./components/notifications/NotificationsPrompt"
 import TokensScreen from "./components/tokens/TokensScreen";
 import AdminCashoutScreen from "./components/admin/AdminCashoutScreen";
 
+// Supports a direct link into the Admin screen (?admin=1) — read once on
+// mount so it still works after logging in, since the query string
+// survives the login flow (no page navigation happens, just React state).
+function getInitialView() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("admin") === "1" ? "admin" : "home";
+}
+
 function Screens() {
   const { user } = useAuth();
-  const [view, setView] = useState("home");
+  const [view, setView] = useState(getInitialView);
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
