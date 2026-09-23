@@ -12,6 +12,7 @@ import ConversationView from "./components/messages/ConversationView";
 import Profile from "./components/profile/Profile";
 import NotificationsPrompt from "./components/notifications/NotificationsPrompt";
 import TokensScreen from "./components/tokens/TokensScreen";
+import LegalScreen from "./components/legal/LegalScreen";
 
 // Split out of the main bundle — the admin cash-out review screen is only
 // ever loaded by one account, so every other visitor's initial load
@@ -56,7 +57,9 @@ function Screens() {
   } else if (view === "found") {
     content = <FoundForm onNavigate={navigate} />;
   } else if (view === "profile") {
-    content = <Profile />;
+    content = <Profile onNavigate={navigate} />;
+  } else if (view === "legal") {
+    content = <LegalScreen onBack={() => navigate("profile")} />;
   } else if (view === "tokens") {
     content = <TokensScreen />;
   } else if (view === "admin") {

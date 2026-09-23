@@ -4,6 +4,7 @@ import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 import ResetPasswordForm from "./ResetPasswordForm";
+import LegalScreen from "../legal/LegalScreen";
 
 function getResetTokenFromUrl() {
   return new URLSearchParams(window.location.search).get("resetToken");
@@ -13,6 +14,18 @@ export default function AuthGate({ children }) {
   const { user, loading } = useAuth();
   const [resetToken, setResetToken] = useState(getResetTokenFromUrl);
   const [mode, setMode] = useState(resetToken ? "reset" : "login");
+  const [showLegal, setShowLegal] = useState(false);
+
+  if (showLegal) {
+    return (
+      <div className="flex min-h-screen justify-center px-4 py-10">
+        <div className="bg-glow" aria-hidden="true" />
+        <div className="w-full max-w-sm">
+          <LegalScreen onBack={() => setShowLegal(false)} />
+        </div>
+      </div>
+    );
+  }
 
   function clearResetToken() {
     setResetToken(null);
@@ -89,6 +102,12 @@ export default function AuthGate({ children }) {
             <SignupForm onSwitchToLogin={() => setMode("login")} />
           )}
         </div>
+        <button
+          onClick={() => setShowLegal(true)}
+          className="mt-4 w-full text-center text-xs text-slate-400 underline hover:text-slate-200"
+        >
+          Privacy &amp; Terms
+        </button>
       </div>
     </div>
   );

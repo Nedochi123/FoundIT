@@ -9,7 +9,7 @@ const inputClass =
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
 
-export default function Profile() {
+export default function Profile({ onNavigate }) {
   const { user, updateProfile, logout } = useAuth();
   const [name, setName] = useState(user?.name || "");
   const [idNumber, setIdNumber] = useState(user?.idNumber || "");
@@ -139,6 +139,13 @@ export default function Profile() {
         className="flex items-center justify-center gap-2 rounded-lg border border-slate-700 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-800"
       >
         <LogOut className="h-4 w-4" /> Log out
+      </button>
+
+      <button
+        onClick={() => onNavigate?.("legal")}
+        className="text-center text-xs text-slate-400 underline hover:text-slate-200"
+      >
+        Privacy &amp; Terms
       </button>
 
       <p className="text-center text-xs text-slate-400">
