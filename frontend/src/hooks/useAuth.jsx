@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { api, getStoredTokens, clearStoredTokens } from "../lib/api";
+import { api, getStoredTokens, clearStoredTokens, getStoredUser, setStoredUser } from "../lib/api";
 
 const AuthContext = createContext(null);
 
@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
     try {
       const { user } = await api.me();
       setUser(user);
+      setStoredUser(user);
     } catch {
       setUser(null);
       clearStoredTokens();
@@ -26,29 +27,48 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
+
+    // Every request on this connection pays several hundred ms of fixed
+    // network latency no matter how fast the app code is, so a returning
+    // visit renders instantly from the last-known user instead of
+    // blocking behind that round trip — refreshMe() still runs to
+    // confirm/update the session, just in the background rather than
+    // gating the UI.
+    const cachedUser = getStoredUser();
+    if (cachedUser) {
+      setUser(cachedUser);
+      setLoading(false);
+      refreshMe();
+      return;
+    }
+
     refreshMe().finally(() => setLoading(false));
   }, [refreshMe]);
 
   const login = useCallback(async (email, password) => {
     const { user } = await api.login({ email, password });
     setUser(user);
+    setStoredUser(user);
     return user;
   }, []);
 
   const signup = useCallback(async (body) => {
     const { user } = await api.signup(body);
     setUser(user);
+    setStoredUser(user);
     return user;
   }, []);
 
   const logout = useCallback(async () => {
     await api.logout().catch(() => {});
     setUser(null);
+    setStoredUser(null);
   }, []);
 
   const updateProfile = useCallback(async (body) => {
     const { user } = await api.updateProfile(body);
     setUser(user);
+    setStoredUser(user);
     return user;
   }, []);
 

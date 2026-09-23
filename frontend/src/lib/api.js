@@ -3,6 +3,15 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 const TOKEN_STORAGE_KEY = "foundit_auth_tokens";
+// A cached copy of the last-known user, purely for optimistic startup
+// rendering — every network round-trip on this connection costs a fixed
+// few hundred ms regardless of app code (Railway's region is far from
+// Nile University), so on a returning visit the UI renders instantly
+// from this cache instead of showing a blocking "Loading..." screen
+// while /api/auth/me confirms the session in the background. It is
+// never treated as authoritative — a failed background refresh still
+// clears it and logs the user out.
+const USER_STORAGE_KEY = "foundit_cached_user";
 
 function getStoredTokens() {
   try {
@@ -28,6 +37,29 @@ function setStoredTokens(tokens) {
 
 function clearStoredTokens() {
   setStoredTokens(null);
+  setStoredUser(null);
+}
+
+function getStoredUser() {
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setStoredUser(user) {
+  try {
+    if (user) {
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(USER_STORAGE_KEY);
+    }
+  } catch {
+    // Same private-browsing/quota case as setStoredTokens — the cache
+    // is an optimization, not a requirement.
+  }
 }
 
 // Paths that must never trigger the silent-refresh-and-retry — prevents
@@ -158,4 +190,4 @@ export function resolvePhotoUrl(url) {
   return url.startsWith("/") ? `${API_BASE_URL}${url}` : url;
 }
 
-export { getStoredTokens, setStoredTokens, clearStoredTokens, API_BASE_URL };
+export { getStoredTokens, setStoredTokens, clearStoredTokens, getStoredUser, setStoredUser, API_BASE_URL };
