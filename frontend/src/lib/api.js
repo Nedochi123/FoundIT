@@ -136,6 +136,12 @@ export const api = {
   getCashoutRequests: () => apiRequest("/api/tokens/cashout-requests"),
   cashoutTokens: (body) => apiRequest("/api/tokens/cashout", { method: "POST", body: JSON.stringify(body) }),
 
+  // Admin
+  getAdminCashoutRequests: (status) =>
+    apiRequest(`/api/admin/cashout-requests${status ? `?status=${status}` : ""}`),
+  updateAdminCashoutRequest: (id, status) =>
+    apiRequest(`/api/admin/cashout-requests/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
+
   // Push
   getVapidPublicKey: () => apiRequest("/api/push/vapid-public-key"),
   subscribePush: (subscription) =>

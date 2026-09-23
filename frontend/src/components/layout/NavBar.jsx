@@ -1,4 +1,5 @@
-import { Home, Images, MessageCircle, User, Coins } from "lucide-react";
+import { Home, Images, MessageCircle, User, Coins, ShieldCheck } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
 
 const TABS = [
   { key: "home", label: "Home", Icon: Home },
@@ -8,14 +9,19 @@ const TABS = [
   { key: "profile", label: "Profile", Icon: User },
 ];
 
+const ADMIN_TAB = { key: "admin", label: "Admin", Icon: ShieldCheck, accent: "amber" };
+
 export default function NavBar({ view, onNavigate, unreadCount = 0 }) {
+  const { user } = useAuth();
+  const tabs = user?.isAdmin ? [...TABS, ADMIN_TAB] : TABS;
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-[#0a0e1acc] backdrop-blur-md"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       <div className="mx-auto flex max-w-md gap-1 px-2 py-2">
-        {TABS.map(({ key, label, Icon, accent }) => {
+        {tabs.map(({ key, label, Icon, accent }) => {
           const active = view === key;
           const activeColor = accent === "amber" ? "text-amber-400" : "text-brand-teal";
           return (

@@ -15,6 +15,7 @@ const {
 const { sendEmail, welcomeEmail, passwordResetEmail, verifyEmailStandaloneEmail } = require("../utils/email");
 const { requireAuth } = require("../middleware/auth");
 const { idNumberSchema } = require("../utils/idNumber");
+const { isAdminEmail } = require("../utils/admin");
 
 const router = express.Router();
 
@@ -61,6 +62,7 @@ function publicUser(row) {
     idNumber: row.id_number,
     emailVerified: !!row.email_verified_at,
     tokens: row.tokens,
+    isAdmin: isAdminEmail(row.email),
   };
 }
 
@@ -79,7 +81,7 @@ const signupSchema = z.object({
     .toLowerCase()
     .email("Enter a valid email address.")
     .refine(
-      (email) => email.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`),
+      (email) => email.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`) || isAdminEmail(email),
       `Signup requires a @${ALLOWED_EMAIL_DOMAIN} email address.`
     ),
   password: z.string().min(8, "Password must be at least 8 characters."),

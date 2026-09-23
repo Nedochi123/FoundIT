@@ -12,6 +12,7 @@ import ConversationView from "./components/messages/ConversationView";
 import Profile from "./components/profile/Profile";
 import NotificationsPrompt from "./components/notifications/NotificationsPrompt";
 import TokensScreen from "./components/tokens/TokensScreen";
+import AdminCashoutScreen from "./components/admin/AdminCashoutScreen";
 
 function Screens() {
   const { user } = useAuth();
@@ -46,6 +47,8 @@ function Screens() {
     content = <Profile />;
   } else if (view === "tokens") {
     content = <TokensScreen />;
+  } else if (view === "admin") {
+    content = user?.isAdmin ? <AdminCashoutScreen /> : <Home onNavigate={navigate} />;
   } else {
     content = (
       <>

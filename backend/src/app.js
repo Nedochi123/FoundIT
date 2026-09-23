@@ -13,6 +13,7 @@ const foundItemsRoutes = require("./routes/found-items.routes");
 const conversationsRoutes = require("./routes/conversations.routes");
 const pushRoutes = require("./routes/push.routes");
 const tokensRoutes = require("./routes/tokens.routes");
+const adminRoutes = require("./routes/admin.routes");
 
 const app = express();
 
@@ -64,6 +65,7 @@ app.use("/api/found-items", foundItemsRoutes);
 app.use("/api/conversations", conversationsRoutes);
 app.use("/api/push", pushRoutes);
 app.use("/api/tokens", tokensRoutes);
+app.use("/api/admin", adminRoutes);
 
 // 404
 app.use((req, res) => {
