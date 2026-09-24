@@ -306,6 +306,44 @@ router.post("/change-password", authLimiter, requireAuth, async (req, res, next)
   }
 });
 
+// Soft delete, not a cascade: a hard delete would take the user's
+// found/lost item posts and every conversation they're part of down
+// with them, which would silently break things for the other person in
+// that conversation -- someone still trying to reclaim an item from a
+// poster who just deleted their account shouldn't lose that thread. So
+// this scrubs the personal data the privacy policy actually promises
+// removing (name, email, password, ID number) and leaves their posts
+// and messages attributed to "Deleted User", the same way most
+// marketplaces and forums handle it.
+router.post("/delete-account", authLimiter, requireAuth, async (req, res, next) => {
+  try {
+    const { password } = req.body || {};
+    if (!password) {
+      return res.status(400).json({ error: "Enter your password to confirm." });
+    }
+
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+    const valid = await verifyPassword(password, user.password_hash);
+    if (!valid) return res.status(400).json({ error: "Incorrect password." });
+
+    const anonymizedEmail = `deleted-${crypto.randomUUID()}@deleted.foundit.local`;
+    const unusablePasswordHash = await hashPassword(crypto.randomBytes(32).toString("hex"));
+    db.prepare(
+      `UPDATE users
+       SET name = 'Deleted User', email = ?, password_hash = ?, id_number = NULL,
+           deleted_at = datetime('now'), updated_at = datetime('now')
+       WHERE id = ?`
+    ).run(anonymizedEmail, unusablePasswordHash, user.id);
+
+    revokeAllRefreshTokensForUser(user.id);
+    clearAuthCookies(res);
+
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post("/resend-verification", authLimiter, requireAuth, (req, res) => {
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
   if (!user || user.email_verified_at) {

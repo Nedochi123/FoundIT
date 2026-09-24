@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified_at  TEXT,
   tokens             INTEGER NOT NULL DEFAULT 0,
   suspended_at       TEXT,
+  deleted_at         TEXT,
   created_at         TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at         TEXT NOT NULL DEFAULT (datetime('now'))
 );

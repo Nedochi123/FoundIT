@@ -140,6 +140,8 @@ export const api = {
   resendVerification: () => apiRequest("/api/auth/resend-verification", { method: "POST" }),
   changePassword: (currentPassword, newPassword) =>
     apiRequest("/api/auth/change-password", { method: "POST", body: JSON.stringify({ currentPassword, newPassword }) }),
+  deleteAccount: (password) =>
+    apiRequest("/api/auth/delete-account", { method: "POST", body: JSON.stringify({ password }) }),
   updateProfile: (body) => apiRequest("/api/users/me", { method: "PATCH", body: JSON.stringify(body) }),
 
   // Found items

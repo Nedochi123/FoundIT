@@ -20,13 +20,19 @@ function requireAuth(req, res, next) {
   try {
     const payload = verifyAccessToken(token);
 
-    // Checked on every request (not just login) so a suspension takes
-    // effect immediately, even against an access token issued before
-    // the suspension that hasn't expired yet — the DB lookup is a local
-    // SQLite query, not a network round trip, so this is cheap.
-    const row = db.prepare("SELECT suspended_at FROM users WHERE id = ?").get(payload.sub);
+    // Checked on every request (not just login) so a suspension or
+    // deletion takes effect immediately, even against an access token
+    // issued before it that hasn't expired yet — the deleted case
+    // mainly matters for a second device/tab that was still logged in
+    // when the account was deleted elsewhere, since deletion already
+    // revokes the deleting session's own tokens directly. The DB lookup
+    // is a local SQLite query, not a network round trip, so this is cheap.
+    const row = db.prepare("SELECT suspended_at, deleted_at FROM users WHERE id = ?").get(payload.sub);
     if (row?.suspended_at) {
       return res.status(403).json({ error: "This account has been suspended." });
+    }
+    if (row?.deleted_at) {
+      return res.status(401).json({ error: "This account no longer exists." });
     }
 
     req.user = { id: payload.sub, email: payload.email, name: payload.name };

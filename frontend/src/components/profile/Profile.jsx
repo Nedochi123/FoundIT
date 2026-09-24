@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { enablePushNotifications, isIosNotStandalone, pushSupported } from "../../lib/push";
 import { api } from "../../lib/api";
 import ChangePasswordForm from "./ChangePasswordForm";
+import DeleteAccountForm from "./DeleteAccountForm";
 
 function PreferenceToggle({ label, checked, onChange }) {
   return (
@@ -244,6 +245,8 @@ export default function Profile({ onNavigate }) {
       >
         Privacy &amp; Terms
       </button>
+
+      <DeleteAccountForm />
 
       <p className="text-center text-xs text-slate-400">
         FoundIT is founded and created by Nedochi Publications.

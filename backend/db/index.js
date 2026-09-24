@@ -66,6 +66,7 @@ function runMigrations() {
       "ALTER TABLE push_subscriptions ADD COLUMN notify_found INTEGER NOT NULL DEFAULT 1",
     ],
     ["users", "suspended_at", "ALTER TABLE users ADD COLUMN suspended_at TEXT"],
+    ["users", "deleted_at", "ALTER TABLE users ADD COLUMN deleted_at TEXT"],
   ];
   for (const [table, column, ddl] of migrations) {
     if (!columnExists(table, column)) {

@@ -27,7 +27,7 @@ export default function LegalScreen({ onBack }) {
 
       <div>
         <h1 className="text-xl font-bold text-slate-50">Privacy &amp; Terms</h1>
-        <p className="mt-1 text-sm text-slate-400">Last updated 23 September 2026</p>
+        <p className="mt-1 text-sm text-slate-400">Last updated 24 September 2026</p>
       </div>
 
       <div className={`flex flex-col gap-5 ${cardClass}`}>
@@ -98,12 +98,17 @@ export default function LegalScreen({ onBack }) {
 
         <Section title="Account deletion">
           <p>
-            FoundIT doesn't yet have a self-service delete-account button. To have your account and data
-            removed, email{" "}
+            You can delete your account yourself from Profile at any time. Your name, email, password,
+            and ID number are permanently removed. Items you've posted and messages you've sent stay
+            visible to others (attributed to "Deleted User") so conversations and open item reports
+            other people are relying on aren't broken by your deletion.
+          </p>
+          <p>
+            Questions about this, or need something else removed, email{" "}
             <a href="mailto:nedochipublications@gmail.com" className="text-brand-teal underline">
               nedochipublications@gmail.com
-            </a>{" "}
-            and we'll remove it.
+            </a>
+            .
           </p>
         </Section>
 
