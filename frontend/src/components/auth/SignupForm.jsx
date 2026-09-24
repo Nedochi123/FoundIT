@@ -7,12 +7,13 @@ const inputClass =
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 const hintClass = "mt-1 text-xs text-slate-400";
 
-export default function SignupForm({ onSwitchToLogin }) {
+export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
   const { signup } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [idNumber, setIdNumber] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -94,10 +95,29 @@ export default function SignupForm({ onSwitchToLogin }) {
           placeholder="At least 8 characters"
         />
       </div>
+      <label className="flex items-start gap-2.5 text-sm text-slate-300">
+        <input
+          type="checkbox"
+          required
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-600 bg-slate-800 accent-brand-teal"
+        />
+        <span>
+          I agree to FoundIT's{" "}
+          <button
+            type="button"
+            onClick={onShowLegal}
+            className="font-semibold text-brand-teal underline hover:no-underline"
+          >
+            Privacy &amp; Terms
+          </button>
+        </span>
+      </label>
       {error && <p className="text-sm text-red-400">{error}</p>}
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || !agreed}
         className="mt-1 w-full rounded-lg bg-brand-gradient py-2.5 font-semibold text-white shadow-lg shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
       >
         {submitting ? "Creating account..." : "Create account"}

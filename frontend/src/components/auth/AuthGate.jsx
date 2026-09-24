@@ -99,7 +99,7 @@ export default function AuthGate({ children }) {
           ) : mode === "forgot" ? (
             <ForgotPasswordForm onSwitchToLogin={() => setMode("login")} />
           ) : (
-            <SignupForm onSwitchToLogin={() => setMode("login")} />
+            <SignupForm onSwitchToLogin={() => setMode("login")} onShowLegal={() => setShowLegal(true)} />
           )}
         </div>
         <button
