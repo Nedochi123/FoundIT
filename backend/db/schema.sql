@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   id_number          TEXT,
   email_verified_at  TEXT,
   tokens             INTEGER NOT NULL DEFAULT 0,
+  suspended_at       TEXT,
   created_at         TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at         TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -187,3 +188,25 @@ CREATE TABLE IF NOT EXISTS token_ledger (
 );
 
 CREATE INDEX IF NOT EXISTS idx_token_ledger_user ON token_ledger(user_id, created_at);
+
+-- ============================================================
+-- MODERATION
+-- ============================================================
+
+-- target_id is a plain TEXT id (no foreign key) because it points into
+-- different tables depending on target_type ('found_item' | 'lost_item'
+-- | 'user') -- a single FK can't span three target tables. Resolving
+-- what it points to is the admin route's job.
+CREATE TABLE IF NOT EXISTS reports (
+  id            TEXT PRIMARY KEY,
+  reporter_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  target_type   TEXT NOT NULL,
+  target_id     TEXT NOT NULL,
+  reason        TEXT NOT NULL,
+  note          TEXT,
+  status        TEXT NOT NULL DEFAULT 'pending',
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  resolved_at   TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status);

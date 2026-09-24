@@ -14,6 +14,7 @@ const conversationsRoutes = require("./routes/conversations.routes");
 const pushRoutes = require("./routes/push.routes");
 const tokensRoutes = require("./routes/tokens.routes");
 const adminRoutes = require("./routes/admin.routes");
+const reportsRoutes = require("./routes/reports.routes");
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use("/api/conversations", conversationsRoutes);
 app.use("/api/push", pushRoutes);
 app.use("/api/tokens", tokensRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/reports", reportsRoutes);
 
 // 404
 app.use((req, res) => {

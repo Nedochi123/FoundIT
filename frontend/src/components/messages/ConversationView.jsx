@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, PartyPopper, Coins } from "lucide-react";
+import { ArrowLeft, Send, PartyPopper, Coins, Flag } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import { usePolling } from "../../hooks/usePolling";
+import ReportDialog from "../shared/ReportDialog";
 
 function formatTime(iso) {
   const d = new Date(iso.replace(" ", "T") + "Z");
@@ -19,6 +20,8 @@ export default function ConversationView({ conversationId, onBack }) {
   const [returnConfirmed, setReturnConfirmed] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [justConfirmed, setJustConfirmed] = useState(false);
+  const [otherUserId, setOtherUserId] = useState(null);
+  const [reporting, setReporting] = useState(false);
   const bottomRef = useRef(null);
 
   usePolling(
@@ -27,6 +30,7 @@ export default function ConversationView({ conversationId, onBack }) {
       setMessages(data.messages);
       setIsSeeker(data.isSeeker);
       setReturnConfirmed(data.returnConfirmed);
+      setOtherUserId(data.otherUserId);
     },
     4000,
     [conversationId]
@@ -71,12 +75,23 @@ export default function ConversationView({ conversationId, onBack }) {
 
   return (
     <div className="flex h-[calc(100vh-6rem)] flex-col">
-      <button
-        onClick={onBack}
-        className="mb-3 flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-slate-50"
-      >
-        <ArrowLeft className="h-4 w-4" /> Back to messages
-      </button>
+      <div className="mb-3 flex items-center justify-between">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-slate-50"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to messages
+        </button>
+        {otherUserId && (
+          <button
+            onClick={() => setReporting(true)}
+            title="Report this user"
+            className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-red-400"
+          >
+            <Flag className="h-3.5 w-3.5" /> Report
+          </button>
+        )}
+      </div>
 
       {justConfirmed ? (
         <div className="mb-3 flex items-center gap-3 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3">
@@ -141,6 +156,10 @@ export default function ConversationView({ conversationId, onBack }) {
           <Send className="h-4 w-4" />
         </button>
       </form>
+
+      {reporting && otherUserId && (
+        <ReportDialog targetType="user" targetId={otherUserId} onClose={() => setReporting(false)} />
+      )}
     </div>
   );
 }

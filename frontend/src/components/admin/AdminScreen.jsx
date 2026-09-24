@@ -2,9 +2,11 @@ import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import AdminCashoutScreen from "./AdminCashoutScreen";
 import AdminStatsScreen from "./AdminStatsScreen";
+import AdminReportsScreen from "./AdminReportsScreen";
 
 const TABS = [
   { key: "cashouts", label: "Cash-outs" },
+  { key: "reports", label: "Reports" },
   { key: "impact", label: "Impact" },
 ];
 
@@ -17,7 +19,7 @@ export default function AdminScreen() {
         <ShieldCheck className="h-5 w-5 text-amber-400" />
         <div>
           <h1 className="text-xl font-bold text-slate-50">Admin</h1>
-          <p className="text-sm text-slate-300">Review cash-outs and see the app's real-world impact.</p>
+          <p className="text-sm text-slate-300">Review cash-outs, reports, and the app's real-world impact.</p>
         </div>
       </div>
 
@@ -37,7 +39,13 @@ export default function AdminScreen() {
         ))}
       </div>
 
-      {tab === "cashouts" ? <AdminCashoutScreen /> : <AdminStatsScreen />}
+      {tab === "cashouts" ? (
+        <AdminCashoutScreen />
+      ) : tab === "reports" ? (
+        <AdminReportsScreen />
+      ) : (
+        <AdminStatsScreen />
+      )}
     </div>
   );
 }

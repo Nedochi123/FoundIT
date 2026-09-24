@@ -110,6 +110,8 @@ router.get("/:id/messages", requireAuth, requireConversationAccess, (req, res) =
     })),
     isSeeker: req.conversation.seeker_id === req.user.id,
     returnConfirmed: !!foundItem?.return_confirmed_at,
+    otherUserId:
+      req.conversation.finder_id === req.user.id ? req.conversation.seeker_id : req.conversation.finder_id,
   });
 });
 

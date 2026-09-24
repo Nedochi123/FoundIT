@@ -176,6 +176,13 @@ export const api = {
   updateAdminCashoutRequest: (id, status) =>
     apiRequest(`/api/admin/cashout-requests/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
   getAdminStats: () => apiRequest("/api/admin/stats"),
+  getAdminReports: (status) => apiRequest(`/api/admin/reports${status ? `?status=${status}` : ""}`),
+  updateAdminReport: (id, action) =>
+    apiRequest(`/api/admin/reports/${id}`, { method: "PATCH", body: JSON.stringify({ action }) }),
+  unsuspendUser: (id) => apiRequest(`/api/admin/users/${id}/unsuspend`, { method: "PATCH" }),
+
+  // Reports
+  createReport: (body) => apiRequest("/api/reports", { method: "POST", body: JSON.stringify(body) }),
 
   // Push
   getVapidPublicKey: () => apiRequest("/api/push/vapid-public-key"),

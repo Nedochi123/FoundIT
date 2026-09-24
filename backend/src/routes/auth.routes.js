@@ -153,6 +153,10 @@ router.post("/login", authLimiter, async (req, res, next) => {
     const valid = await verifyPassword(password, user.password_hash);
     if (!valid) return genericError();
 
+    if (user.suspended_at) {
+      return res.status(403).json({ error: "This account has been suspended." });
+    }
+
     const { accessToken, refreshToken } = issueSession(res, user);
     res.json({ user: publicUser(user), accessToken, refreshToken });
   } catch (err) {
@@ -175,6 +179,12 @@ router.post("/refresh", async (req, res, next) => {
     if (!user) {
       clearAuthCookies(res);
       return res.status(401).json({ error: "Session expired. Please log in again." });
+    }
+
+    if (user.suspended_at) {
+      clearAuthCookies(res);
+      revokeAllRefreshTokensForUser(user.id);
+      return res.status(403).json({ error: "This account has been suspended." });
     }
 
     // Rotate: revoke the used refresh token and issue a brand-new pair

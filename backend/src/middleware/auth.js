@@ -1,3 +1,4 @@
+const db = require("../../db");
 const { verifyAccessToken } = require("../utils/tokens");
 const { isAdminEmail } = require("../utils/admin");
 
@@ -18,6 +19,16 @@ function requireAuth(req, res, next) {
 
   try {
     const payload = verifyAccessToken(token);
+
+    // Checked on every request (not just login) so a suspension takes
+    // effect immediately, even against an access token issued before
+    // the suspension that hasn't expired yet — the DB lookup is a local
+    // SQLite query, not a network round trip, so this is cheap.
+    const row = db.prepare("SELECT suspended_at FROM users WHERE id = ?").get(payload.sub);
+    if (row?.suspended_at) {
+      return res.status(403).json({ error: "This account has been suspended." });
+    }
+
     req.user = { id: payload.sub, email: payload.email, name: payload.name };
     next();
   } catch (err) {
