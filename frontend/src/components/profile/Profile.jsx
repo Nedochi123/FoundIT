@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, Bell, MailCheck } from "lucide-react";
+import { LogOut, Bell, MailCheck, Award, MessageSquareHeart } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { enablePushNotifications, isIosNotStandalone, pushSupported } from "../../lib/push";
 import { api } from "../../lib/api";
@@ -44,11 +44,21 @@ export default function Profile({ onNavigate }) {
   const [notifDetail, setNotifDetail] = useState("");
   const [resendStatus, setResendStatus] = useState("idle");
   const [prefs, setPrefs] = useState(null);
+  const [badges, setBadges] = useState([]);
+  const [notes, setNotes] = useState([]);
 
   useEffect(() => {
     api
       .getPushPreferences()
       .then(setPrefs)
+      .catch(() => {});
+    api
+      .getMyBadges()
+      .then((data) => setBadges(data.badges))
+      .catch(() => {});
+    api
+      .getMyNotes()
+      .then((data) => setNotes(data.notes))
       .catch(() => {});
   }, []);
 
@@ -109,6 +119,45 @@ export default function Profile({ onNavigate }) {
         <h1 className="text-xl font-bold text-slate-50">Profile</h1>
         <p className="mt-1 text-sm text-slate-300">{user?.email}</p>
       </div>
+
+      {(badges.length > 0 || notes.length > 0) && (
+        <div className={cardClass}>
+          {badges.length > 0 && (
+            <div className={notes.length > 0 ? "mb-4" : ""}>
+              <div className="mb-2 flex items-center gap-2 text-slate-100">
+                <Award className="h-4 w-4 text-amber-400" />
+                <p className="text-sm font-semibold">Badges</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {badges.map((b) => (
+                  <span
+                    key={b.id}
+                    className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/30"
+                  >
+                    {b.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {notes.length > 0 && (
+            <div>
+              <div className="mb-2 flex items-center gap-2 text-slate-100">
+                <MessageSquareHeart className="h-4 w-4 text-brand-teal" />
+                <p className="text-sm font-semibold">Notes you've received</p>
+              </div>
+              <div className="flex flex-col gap-2">
+                {notes.map((n, i) => (
+                  <div key={i} className="rounded-lg bg-slate-800/50 px-3 py-2">
+                    <p className="text-sm text-slate-200">"{n.note}"</p>
+                    <p className="mt-0.5 text-xs text-slate-400">— {n.fromName}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {!user?.emailVerified && (
         <div className={cardClass}>

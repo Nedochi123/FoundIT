@@ -5,6 +5,7 @@ const db = require("../../db");
 const { requireAuth, requireOwnedLostItem } = require("../middleware/auth");
 const { broadcastPush } = require("../utils/push");
 const { idNumberSchema } = require("../utils/idNumber");
+const { ITEM_CATEGORIES } = require("../utils/itemCategories");
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ function serialize(row, posterName) {
     posterName,
     description: row.description,
     location: row.location,
+    category: row.category,
     status: row.status,
     createdAt: row.created_at,
   };
@@ -36,6 +38,7 @@ router.get("/", requireAuth, (req, res) => {
 const createSchema = z.object({
   description: z.string().trim().min(1, "Describe what you lost.").max(1000),
   location: z.string().trim().max(200).optional(),
+  category: z.enum(ITEM_CATEGORIES).optional(),
   idNumber: idNumberSchema,
 });
 
@@ -45,7 +48,7 @@ router.post("/", requireAuth, (req, res, next) => {
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.issues[0].message });
     }
-    const { description, location, idNumber } = parsed.data;
+    const { description, location, category: itemCategory, idNumber } = parsed.data;
 
     // Fill id_number once, only if the user hasn't already provided it —
     // same "ask once, never again" rule as the found-item flow.
@@ -55,12 +58,9 @@ router.post("/", requireAuth, (req, res, next) => {
     }
 
     const id = crypto.randomUUID();
-    db.prepare("INSERT INTO lost_items (id, poster_id, description, location) VALUES (?, ?, ?, ?)").run(
-      id,
-      req.user.id,
-      description,
-      location || null
-    );
+    db.prepare(
+      "INSERT INTO lost_items (id, poster_id, description, location, category) VALUES (?, ?, ?, ?, ?)"
+    ).run(id, req.user.id, description, location || null, itemCategory || null);
 
     const item = db.prepare("SELECT * FROM lost_items WHERE id = ?").get(id);
     res.status(201).json({ item: serialize(item, req.user.name) });

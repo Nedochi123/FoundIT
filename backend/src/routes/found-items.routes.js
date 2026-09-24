@@ -8,6 +8,7 @@ const db = require("../../db");
 const { requireAuth, requireOwnedFoundItem } = require("../middleware/auth");
 const { broadcastPush } = require("../utils/push");
 const { idNumberSchema } = require("../utils/idNumber");
+const { ITEM_CATEGORIES } = require("../utils/itemCategories");
 
 const router = express.Router();
 
@@ -39,12 +40,30 @@ function serialize(row, posterName) {
     photoUrl: row.photo_url,
     description: row.description,
     location: row.location,
+    category: row.category,
     status: row.status,
     createdAt: row.created_at,
   };
 }
 
 router.get("/", (req, res) => {
+  // "reunited" is its own branch (not just another status value) since
+  // it orders by return_confirmed_at, not created_at -- the Wall of
+  // Reunions cares about when the return happened, not when the item
+  // was originally posted.
+  if (req.query.status === "reunited") {
+    const rows = db
+      .prepare(
+        `SELECT found_items.*, users.name AS poster_name
+         FROM found_items JOIN users ON users.id = found_items.poster_id
+         WHERE found_items.return_confirmed_at IS NOT NULL
+         ORDER BY found_items.return_confirmed_at DESC
+         LIMIT 12`
+      )
+      .all();
+    return res.json({ items: rows.map((r) => serialize(r, r.poster_name)) });
+  }
+
   const status = req.query.status === "resolved" ? "resolved" : "open";
   const rows = db
     .prepare(
@@ -60,6 +79,7 @@ router.get("/", (req, res) => {
 const createSchema = z.object({
   description: z.string().trim().max(1000).optional(),
   location: z.string().trim().max(200).optional(),
+  category: z.enum(ITEM_CATEGORIES).optional(),
   idNumber: idNumberSchema,
 });
 
@@ -72,7 +92,7 @@ router.post("/", requireAuth, upload.single("photo"), (req, res, next) => {
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.issues[0].message });
     }
-    const { description, location, idNumber } = parsed.data;
+    const { description, location, category: itemCategory, idNumber } = parsed.data;
 
     // Fill id_number once, only if the user hasn't already provided it —
     // never overwrite an existing value or re-ask on every post.
@@ -84,8 +104,8 @@ router.post("/", requireAuth, upload.single("photo"), (req, res, next) => {
     const id = crypto.randomUUID();
     const photoUrl = `/uploads/found-items/${req.file.filename}`;
     db.prepare(
-      "INSERT INTO found_items (id, poster_id, photo_url, description, location) VALUES (?, ?, ?, ?, ?)"
-    ).run(id, req.user.id, photoUrl, description || null, location || null);
+      "INSERT INTO found_items (id, poster_id, photo_url, description, location, category) VALUES (?, ?, ?, ?, ?, ?)"
+    ).run(id, req.user.id, photoUrl, description || null, location || null, itemCategory || null);
 
     const item = db.prepare("SELECT * FROM found_items WHERE id = ?").get(id);
     res.status(201).json({ item: serialize(item, req.user.name) });

@@ -164,13 +164,22 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ body }),
     }),
-  confirmReturn: (conversationId) =>
-    apiRequest(`/api/conversations/${conversationId}/confirm-return`, { method: "POST" }),
+  confirmReturn: (conversationId, note) =>
+    apiRequest(`/api/conversations/${conversationId}/confirm-return`, {
+      method: "POST",
+      body: JSON.stringify({ note: note || undefined }),
+    }),
 
   // Tokens
   getTokenLedger: () => apiRequest("/api/tokens/ledger"),
   getCashoutRequests: () => apiRequest("/api/tokens/cashout-requests"),
   cashoutTokens: (body) => apiRequest("/api/tokens/cashout", { method: "POST", body: JSON.stringify(body) }),
+  getLeaderboard: () => apiRequest("/api/tokens/leaderboard"),
+
+  // Community
+  getMyBadges: () => apiRequest("/api/users/me/badges"),
+  getMyNotes: () => apiRequest("/api/users/me/notes"),
+  getReunitedItems: () => apiRequest("/api/found-items?status=reunited"),
 
   // Admin
   getAdminCashoutRequests: (status) =>

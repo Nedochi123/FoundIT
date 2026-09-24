@@ -3,6 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import CameraCapture from "./CameraCapture";
+import CategoryPicker from "../shared/CategoryPicker";
+import LocationChips from "../shared/LocationChips";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -13,6 +15,7 @@ export default function FoundForm({ onNavigate }) {
   const [photo, setPhoto] = useState(null);
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [category, setCategory] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -36,6 +39,7 @@ export default function FoundForm({ onNavigate }) {
       formData.append("photo", photo, "photo.jpg");
       if (description) formData.append("description", description);
       if (location) formData.append("location", location);
+      if (category) formData.append("category", category);
       if (needsIdNumber && idNumber) formData.append("idNumber", idNumber);
 
       await api.createFoundItem(formData);
@@ -67,6 +71,13 @@ export default function FoundForm({ onNavigate }) {
         <CameraCapture onCapture={setPhoto} />
 
         <div>
+          <label className={labelClass}>
+            What kind of item? <span className="text-slate-400 font-normal">(optional)</span>
+          </label>
+          <CategoryPicker value={category} onChange={setCategory} />
+        </div>
+
+        <div>
           <label htmlFor="found-description" className={labelClass}>
             Description <span className="text-slate-400 font-normal">(optional)</span>
           </label>
@@ -83,6 +94,7 @@ export default function FoundForm({ onNavigate }) {
           <label htmlFor="found-location" className={labelClass}>
             Where did you find it? <span className="text-slate-400 font-normal">(optional)</span>
           </label>
+          <LocationChips onPick={setLocation} />
           <input
             id="found-location"
             type="text"

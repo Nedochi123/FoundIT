@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import { usePolling } from "../../hooks/usePolling";
 import ReportDialog from "../shared/ReportDialog";
+import Confetti from "../shared/Confetti";
 
 function formatTime(iso) {
   const d = new Date(iso.replace(" ", "T") + "Z");
@@ -22,6 +23,8 @@ export default function ConversationView({ conversationId, onBack }) {
   const [justConfirmed, setJustConfirmed] = useState(false);
   const [otherUserId, setOtherUserId] = useState(null);
   const [reporting, setReporting] = useState(false);
+  const [thankYouNote, setThankYouNote] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
   const bottomRef = useRef(null);
 
   usePolling(
@@ -40,9 +43,11 @@ export default function ConversationView({ conversationId, onBack }) {
     setConfirming(true);
     setError("");
     try {
-      await api.confirmReturn(conversationId);
+      await api.confirmReturn(conversationId, thankYouNote.trim());
       setReturnConfirmed(true);
       setJustConfirmed(true);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2000);
     } catch (err) {
       setError(err.message || "Couldn't confirm the return. Try again.");
     } finally {
@@ -93,6 +98,8 @@ export default function ConversationView({ conversationId, onBack }) {
         )}
       </div>
 
+      {showConfetti && <Confetti />}
+
       {justConfirmed ? (
         <div className="mb-3 flex items-center gap-3 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3">
           <PartyPopper className="h-5 w-5 shrink-0 text-amber-400" />
@@ -101,15 +108,23 @@ export default function ConversationView({ conversationId, onBack }) {
           </p>
         </div>
       ) : isSeeker && !returnConfirmed ? (
-        <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-4 py-3">
-          <div className="min-w-0">
+        <div className="mb-3 flex flex-col gap-2.5 rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-4 py-3">
+          <div>
             <p className="text-sm font-semibold text-slate-50">Got your item back?</p>
             <p className="text-xs text-slate-300">Confirming awards the finder 2 tokens.</p>
           </div>
+          <input
+            type="text"
+            value={thankYouNote}
+            onChange={(e) => setThankYouNote(e.target.value)}
+            maxLength={280}
+            placeholder="Leave a thank-you note for them (optional)"
+            className="w-full rounded-lg border border-amber-400/20 bg-slate-900/50 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-amber-400/40"
+          />
           <button
             onClick={handleConfirmReturn}
             disabled={confirming}
-            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-2 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95 disabled:opacity-60"
+            className="flex items-center justify-center gap-1.5 self-end rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-2 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95 disabled:opacity-60"
           >
             <Coins className="h-3.5 w-3.5" />
             {confirming ? "Confirming..." : "Confirm"}

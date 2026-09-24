@@ -2,6 +2,8 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
+import CategoryPicker from "../shared/CategoryPicker";
+import LocationChips from "../shared/LocationChips";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -11,6 +13,7 @@ export default function LostForm({ onNavigate }) {
   const { user } = useAuth();
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [category, setCategory] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -33,6 +36,7 @@ export default function LostForm({ onNavigate }) {
       await api.createLostItem({
         description,
         location: location || undefined,
+        category: category || undefined,
         idNumber: needsIdNumber ? idNumber : undefined,
       });
       // Per spec: after reporting a lost item, the user is taken to the
@@ -86,9 +90,16 @@ export default function LostForm({ onNavigate }) {
           />
         </div>
         <div>
+          <label className={labelClass}>
+            What kind of item? <span className="text-slate-400 font-normal">(optional)</span>
+          </label>
+          <CategoryPicker value={category} onChange={setCategory} />
+        </div>
+        <div>
           <label htmlFor="lost-location" className={labelClass}>
             Where did you last have it? <span className="text-slate-400 font-normal">(optional)</span>
           </label>
+          <LocationChips onPick={setLocation} />
           <input
             id="lost-location"
             type="text"

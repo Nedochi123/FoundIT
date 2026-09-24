@@ -53,11 +53,16 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens (
 -- item gets silently marked resolved (see src/utils/expireItems.js) —
 -- kept distinct from resolved_at so "someone actually resolved this" is
 -- always distinguishable from "this just aged out."
+-- category is a small fixed set (see idNumber-style shared constant in
+-- utils/itemCategories.js) shown as a quick-pick at posting time and an
+-- icon on each card — nullable since it was added after launch and
+-- older rows won't have one.
 CREATE TABLE IF NOT EXISTS lost_items (
   id           TEXT PRIMARY KEY,
   poster_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   description  TEXT NOT NULL,
   location     TEXT,
+  category     TEXT,
   status       TEXT NOT NULL DEFAULT 'open',
   resolved_at  TEXT,
   expired_at   TEXT,
@@ -83,6 +88,7 @@ CREATE TABLE IF NOT EXISTS found_items (
   photo_url             TEXT NOT NULL,
   description           TEXT,
   location              TEXT,
+  category              TEXT,
   status                TEXT NOT NULL DEFAULT 'open',
   resolved_at           TEXT,
   return_confirmed_at   TEXT,
@@ -211,3 +217,22 @@ CREATE TABLE IF NOT EXISTS reports (
 );
 
 CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status);
+
+-- ============================================================
+-- COMMUNITY / RECOGNITION
+-- ============================================================
+
+-- One optional note per confirmed return, written by the seeker right
+-- when they confirm it — shown on the finder's own profile as "notes
+-- you've received" (there's no other-user-profile view to show it on
+-- the finder's page publicly, so it surfaces on their own instead).
+CREATE TABLE IF NOT EXISTS thank_you_notes (
+  id             TEXT PRIMARY KEY,
+  found_item_id  TEXT NOT NULL REFERENCES found_items(id) ON DELETE CASCADE,
+  from_user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  to_user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  note           TEXT NOT NULL,
+  created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_thank_you_notes_to_user ON thank_you_notes(to_user_id, created_at);

@@ -52,4 +52,40 @@ router.patch("/me", requireAuth, (req, res, next) => {
   }
 });
 
+// Badges are computed live from token_ledger's 'find_confirmed' rows
+// (the same count already used everywhere else as "confirmed finds"),
+// not stored anywhere separately -- one source of truth, and a badge
+// can never drift out of sync with the number it's celebrating.
+const BADGE_MILESTONES = [
+  { id: "first_find", threshold: 1, label: "First Find" },
+  { id: "five_reunions", threshold: 5, label: "5 Reunions" },
+  { id: "ten_reunions", threshold: 10, label: "10 Reunions" },
+];
+
+router.get("/me/badges", requireAuth, (req, res) => {
+  const { count } = db
+    .prepare("SELECT COUNT(*) count FROM token_ledger WHERE user_id = ? AND reason = 'find_confirmed'")
+    .get(req.user.id);
+
+  res.json({
+    confirmedFinds: count,
+    badges: BADGE_MILESTONES.filter((b) => count >= b.threshold).map((b) => ({ id: b.id, label: b.label })),
+  });
+});
+
+router.get("/me/notes", requireAuth, (req, res) => {
+  const rows = db
+    .prepare(
+      `SELECT thank_you_notes.note, thank_you_notes.created_at, users.name AS from_name
+       FROM thank_you_notes JOIN users ON users.id = thank_you_notes.from_user_id
+       WHERE thank_you_notes.to_user_id = ?
+       ORDER BY thank_you_notes.created_at DESC`
+    )
+    .all(req.user.id);
+
+  res.json({
+    notes: rows.map((r) => ({ note: r.note, fromName: r.from_name, createdAt: r.created_at })),
+  });
+});
+
 module.exports = router;

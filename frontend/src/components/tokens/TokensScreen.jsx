@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Coins, ArrowUpRight, ArrowDownRight, Sparkles } from "lucide-react";
+import { Coins, ArrowUpRight, ArrowDownRight, Sparkles, Trophy } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import CashoutForm from "./CashoutForm";
+
+const MEDALS = ["🥇", "🥈", "🥉"];
 
 const TIERS = [
   { tokens: 50, naira: 5000 },
@@ -21,18 +23,24 @@ function timeAgo(iso) {
 }
 
 export default function TokensScreen() {
-  const { refreshMe } = useAuth();
+  const { user, refreshMe } = useAuth();
   const [tokens, setTokens] = useState(null);
   const [entries, setEntries] = useState([]);
   const [cashoutRequests, setCashoutRequests] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cashoutTier, setCashoutTier] = useState(null);
 
   async function load() {
-    const [ledger, requests] = await Promise.all([api.getTokenLedger(), api.getCashoutRequests()]);
+    const [ledger, requests, board] = await Promise.all([
+      api.getTokenLedger(),
+      api.getCashoutRequests(),
+      api.getLeaderboard(),
+    ]);
     setTokens(ledger.tokens);
     setEntries(ledger.entries);
     setCashoutRequests(requests.requests);
+    setLeaderboard(board.leaderboard);
   }
 
   useEffect(() => {
@@ -105,6 +113,33 @@ export default function TokensScreen() {
           );
         })}
       </div>
+
+      {leaderboard.length > 0 && (
+        <div>
+          <div className="mb-2 flex items-center gap-1.5">
+            <Trophy className="h-3.5 w-3.5 text-amber-400" />
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Top finders</p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-slate-900/70 divide-y divide-white/5">
+            {leaderboard.map((row, i) => (
+              <div
+                key={`${row.name}-${i}`}
+                className={`flex items-center gap-3 px-4 py-2.5 ${
+                  row.name === user?.name ? "bg-amber-500/[0.06]" : ""
+                }`}
+              >
+                <span className="w-6 shrink-0 text-center text-sm">
+                  {MEDALS[i] || <span className="text-xs font-semibold text-slate-500">{i + 1}</span>}
+                </span>
+                <p className="min-w-0 flex-1 truncate text-sm text-slate-100">{row.name}</p>
+                <p className="shrink-0 text-xs font-semibold text-slate-400">
+                  {row.finds} {row.finds === 1 ? "find" : "finds"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {cashoutTier && (
         <CashoutForm tier={cashoutTier} maxNaira={TIERS.find((t) => t.tokens === cashoutTier).naira} onCancel={() => setCashoutTier(null)} onDone={handleCashoutDone} />

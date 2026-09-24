@@ -154,12 +154,22 @@ router.post("/:id/messages", requireAuth, requireConversationAccess, (req, res, 
 // found_items.return_confirmed_at is set, this item can never pay out
 // a second time, even if called again or from a different conversation
 // on the same item.
+const confirmReturnSchema = z.object({
+  note: z.string().trim().max(280).optional(),
+});
+
 router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req, res, next) => {
   try {
     const convo = req.conversation;
     if (convo.seeker_id !== req.user.id) {
       return res.status(403).json({ error: "Only the person who lost the item can confirm its return." });
     }
+
+    const parsed = confirmReturnSchema.safeParse(req.body || {});
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.issues[0].message });
+    }
+    const { note } = parsed.data;
 
     const foundItem = db.prepare("SELECT * FROM found_items WHERE id = ?").get(convo.found_item_id);
     if (!foundItem) return res.status(404).json({ error: "Found item not found." });
@@ -185,6 +195,13 @@ router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req,
         `INSERT INTO token_ledger (id, user_id, delta, reason, note, found_item_id)
          VALUES (?, ?, ?, 'find_confirmed', ?, ?)`
       ).run(ledgerId, convo.finder_id, TOKENS_PER_FIND, "Confirmed return of a found item", foundItem.id);
+
+      if (note) {
+        db.prepare(
+          `INSERT INTO thank_you_notes (id, found_item_id, from_user_id, to_user_id, note)
+           VALUES (?, ?, ?, ?, ?)`
+        ).run(crypto.randomUUID(), foundItem.id, req.user.id, convo.finder_id, note);
+      }
 
       return db.prepare("SELECT tokens FROM users WHERE id = ?").get(convo.finder_id);
     });

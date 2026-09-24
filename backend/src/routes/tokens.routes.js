@@ -111,4 +111,23 @@ router.post("/cashout", requireAuth, (req, res, next) => {
   }
 });
 
+// Ranked by number of confirmed finds, not current token balance --
+// balance drops when someone cashes out, which would unfairly punish
+// the students who've actually helped the most.
+router.get("/leaderboard", requireAuth, (req, res) => {
+  const rows = db
+    .prepare(
+      `SELECT users.name, COUNT(*) AS finds
+       FROM token_ledger
+       JOIN users ON users.id = token_ledger.user_id
+       WHERE token_ledger.reason = 'find_confirmed' AND users.deleted_at IS NULL
+       GROUP BY token_ledger.user_id
+       ORDER BY finds DESC, MIN(token_ledger.created_at) ASC
+       LIMIT 10`
+    )
+    .all();
+
+  res.json({ leaderboard: rows.map((r) => ({ name: r.name, finds: r.finds })) });
+});
+
 module.exports = router;

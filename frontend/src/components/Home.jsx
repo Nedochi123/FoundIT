@@ -1,9 +1,20 @@
-import { Search, Camera } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, Camera, Sparkles } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { api } from "../lib/api";
+import ReunionCard from "./gallery/ReunionCard";
 
 export default function Home({ onNavigate }) {
   const { user } = useAuth();
   const firstName = user?.name?.split(" ")[0] || "there";
+  const [reunions, setReunions] = useState([]);
+
+  useEffect(() => {
+    api
+      .getReunitedItems()
+      .then((data) => setReunions(data.items))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,6 +50,20 @@ export default function Home({ onNavigate }) {
           <p className="text-sm text-slate-300">Take a photo and help it get back to its owner.</p>
         </div>
       </button>
+
+      {reunions.length > 0 && (
+        <div className="animate-fade-up" style={{ "--delay": "0.24s" }}>
+          <div className="mb-2.5 flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Recently reunited</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {reunions.slice(0, 4).map((item) => (
+              <ReunionCard key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

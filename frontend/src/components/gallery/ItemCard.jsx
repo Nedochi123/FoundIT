@@ -1,21 +1,30 @@
 import { useState } from "react";
 import { MessageCircle, MapPin, CheckCircle2, Flag } from "lucide-react";
 import { resolvePhotoUrl } from "../../lib/api";
+import { getCategoryIcon } from "../../lib/itemCategories";
 import ReportDialog from "../shared/ReportDialog";
 
 export default function ItemCard({ item, currentUserId, onMessage, onResolve, messaging }) {
   const isOwn = item.posterId === currentUserId;
   const [reporting, setReporting] = useState(false);
+  const CategoryIcon = item.category ? getCategoryIcon(item.category) : null;
 
   return (
     <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/85 shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:border-white/20 hover:shadow-xl">
-      <img
-        src={resolvePhotoUrl(item.photoUrl)}
-        alt={item.description || "Found item"}
-        className="h-44 w-full object-cover"
-        loading="lazy"
-        decoding="async"
-      />
+      <div className="relative">
+        <img
+          src={resolvePhotoUrl(item.photoUrl)}
+          alt={item.description || "Found item"}
+          className="h-44 w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+        {CategoryIcon && (
+          <span className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-slate-950/70 text-slate-100 backdrop-blur">
+            <CategoryIcon className="h-3.5 w-3.5" />
+          </span>
+        )}
+      </div>
       <div className="p-3">
         {item.description && <p className="text-sm text-slate-100 line-clamp-2">{item.description}</p>}
         <div className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
