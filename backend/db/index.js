@@ -53,6 +53,18 @@ function runMigrations() {
     // migrations here as the schema evolves after launch.
     ["users", "tokens", "ALTER TABLE users ADD COLUMN tokens INTEGER NOT NULL DEFAULT 0"],
     ["found_items", "return_confirmed_at", "ALTER TABLE found_items ADD COLUMN return_confirmed_at TEXT"],
+    ["found_items", "expired_at", "ALTER TABLE found_items ADD COLUMN expired_at TEXT"],
+    ["lost_items", "expired_at", "ALTER TABLE lost_items ADD COLUMN expired_at TEXT"],
+    [
+      "push_subscriptions",
+      "notify_lost",
+      "ALTER TABLE push_subscriptions ADD COLUMN notify_lost INTEGER NOT NULL DEFAULT 1",
+    ],
+    [
+      "push_subscriptions",
+      "notify_found",
+      "ALTER TABLE push_subscriptions ADD COLUMN notify_found INTEGER NOT NULL DEFAULT 1",
+    ],
   ];
   for (const [table, column, ddl] of migrations) {
     if (!columnExists(table, column)) {

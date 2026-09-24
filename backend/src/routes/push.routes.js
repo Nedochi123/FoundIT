@@ -44,4 +44,32 @@ router.post("/unsubscribe", requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// A user's push preference is really one setting, not one per device —
+// reads from whichever subscription row is most recent, and a write
+// applies to every device they have subscribed so a phone and a laptop
+// don't silently disagree.
+router.get("/preferences", requireAuth, (req, res) => {
+  const row = db
+    .prepare("SELECT notify_lost, notify_found FROM push_subscriptions WHERE user_id = ? ORDER BY created_at DESC LIMIT 1")
+    .get(req.user.id);
+  res.json({
+    hasSubscription: !!row,
+    notifyLost: row ? !!row.notify_lost : true,
+    notifyFound: row ? !!row.notify_found : true,
+  });
+});
+
+router.patch("/preferences", requireAuth, (req, res) => {
+  const { notifyLost, notifyFound } = req.body || {};
+  if (typeof notifyLost !== "boolean" || typeof notifyFound !== "boolean") {
+    return res.status(400).json({ error: "notifyLost and notifyFound must both be booleans." });
+  }
+  db.prepare("UPDATE push_subscriptions SET notify_lost = ?, notify_found = ? WHERE user_id = ?").run(
+    notifyLost ? 1 : 0,
+    notifyFound ? 1 : 0,
+    req.user.id
+  );
+  res.json({ ok: true });
+});
+
 module.exports = router;

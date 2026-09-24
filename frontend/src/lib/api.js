@@ -183,6 +183,9 @@ export const api = {
     apiRequest("/api/push/subscribe", { method: "POST", body: JSON.stringify(subscription) }),
   unsubscribePush: (endpoint) =>
     apiRequest("/api/push/unsubscribe", { method: "POST", body: JSON.stringify({ endpoint }) }),
+  getPushPreferences: () => apiRequest("/api/push/preferences"),
+  updatePushPreferences: (body) =>
+    apiRequest("/api/push/preferences", { method: "PATCH", body: JSON.stringify(body) }),
 };
 
 export function resolvePhotoUrl(url) {

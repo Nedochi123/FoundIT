@@ -47,6 +47,10 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens (
 -- LOST & FOUND ITEMS
 -- ============================================================
 
+-- expired_at is stamped by the daily auto-expiry job when a stale open
+-- item gets silently marked resolved (see src/utils/expireItems.js) —
+-- kept distinct from resolved_at so "someone actually resolved this" is
+-- always distinguishable from "this just aged out."
 CREATE TABLE IF NOT EXISTS lost_items (
   id           TEXT PRIMARY KEY,
   poster_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -54,6 +58,7 @@ CREATE TABLE IF NOT EXISTS lost_items (
   location     TEXT,
   status       TEXT NOT NULL DEFAULT 'open',
   resolved_at  TEXT,
+  expired_at   TEXT,
   created_at   TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -79,6 +84,7 @@ CREATE TABLE IF NOT EXISTS found_items (
   status                TEXT NOT NULL DEFAULT 'open',
   resolved_at           TEXT,
   return_confirmed_at   TEXT,
+  expired_at            TEXT,
   created_at            TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at            TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -128,13 +134,18 @@ CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id
 -- PWA, logged out and back in) — upserting on endpoint avoids either a
 -- duplicate row or a constraint error, and always keeps it pointed at
 -- whichever user most recently subscribed on that device.
+-- notify_lost / notify_found let a student opt out of one broadcast
+-- category without disabling push entirely — default to both on, since
+-- that matches what "Enable notifications" already promises.
 CREATE TABLE IF NOT EXISTS push_subscriptions (
-  id         TEXT PRIMARY KEY,
-  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  endpoint   TEXT NOT NULL UNIQUE,
-  p256dh     TEXT NOT NULL,
-  auth       TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  id           TEXT PRIMARY KEY,
+  user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  endpoint     TEXT NOT NULL UNIQUE,
+  p256dh       TEXT NOT NULL,
+  auth         TEXT NOT NULL,
+  notify_lost  INTEGER NOT NULL DEFAULT 1,
+  notify_found INTEGER NOT NULL DEFAULT 1,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions(user_id);

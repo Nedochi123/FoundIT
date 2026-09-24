@@ -34,17 +34,29 @@ async function sendToSubscriptions(subs, title, body, url) {
 
 // Broadcasts to every subscription except the poster's own (so the
 // person who just posted doesn't get notified about their own action).
-// Degrades to a console log when VAPID keys aren't configured, matching
-// the email.js "optional integration" pattern used elsewhere.
-async function broadcastPush({ title, body, url = "/", excludeUserId }) {
+// `category` ('lost' | 'found') filters out anyone who opted out of
+// that specific alert type via their notification preferences, without
+// touching subscriptions for the other category or disabling push
+// entirely. Degrades to a console log when VAPID keys aren't
+// configured, matching the email.js "optional integration" pattern.
+async function broadcastPush({ title, body, url = "/", excludeUserId, category }) {
   if (!configured) {
     console.log(`[push disabled — no VAPID keys configured] Would broadcast: "${title}" — ${body}`);
     return;
   }
 
-  const subs = excludeUserId
-    ? db.prepare("SELECT * FROM push_subscriptions WHERE user_id != ?").all(excludeUserId)
-    : db.prepare("SELECT * FROM push_subscriptions").all();
+  const categoryColumn = category === "lost" ? "notify_lost" : category === "found" ? "notify_found" : null;
+  const conditions = [];
+  const params = [];
+  if (excludeUserId) {
+    conditions.push("user_id != ?");
+    params.push(excludeUserId);
+  }
+  if (categoryColumn) {
+    conditions.push(`${categoryColumn} = 1`);
+  }
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const subs = db.prepare(`SELECT * FROM push_subscriptions ${where}`).all(...params);
 
   await sendToSubscriptions(subs, title, body, url);
 }

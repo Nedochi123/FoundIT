@@ -1,6 +1,7 @@
 require("./instrument");
 const app = require("./app");
 const { runBackup } = require("./utils/backup");
+const { expireStaleItems } = require("./utils/expireItems");
 
 const PORT = process.env.PORT || 4000;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -21,9 +22,25 @@ function backupOnSchedule() {
   }
 }
 
+function expireItemsOnSchedule() {
+  try {
+    const { lostExpired, foundExpired } = expireStaleItems();
+    if (lostExpired || foundExpired) {
+      console.log(`Auto-expired ${lostExpired} lost item(s), ${foundExpired} found item(s)`);
+    }
+  } catch (err) {
+    console.error("Item auto-expiry failed:", err);
+  }
+}
+
 // Delayed by 2 minutes past boot so a deploy's own startup work isn't
 // competing with a VACUUM, then once every 24h after that.
 setTimeout(() => {
   backupOnSchedule();
   setInterval(backupOnSchedule, DAY_MS);
 }, 2 * 60 * 1000);
+
+setTimeout(() => {
+  expireItemsOnSchedule();
+  setInterval(expireItemsOnSchedule, DAY_MS);
+}, 3 * 60 * 1000);

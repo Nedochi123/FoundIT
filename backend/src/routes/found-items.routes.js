@@ -95,6 +95,7 @@ router.post("/", requireAuth, upload.single("photo"), (req, res, next) => {
       body: `${req.user.name} found something on campus — check the gallery.`,
       url: "/gallery",
       excludeUserId: req.user.id,
+      category: "found",
     }).catch((err) => console.error("Broadcast push failed:", err));
   } catch (err) {
     next(err);

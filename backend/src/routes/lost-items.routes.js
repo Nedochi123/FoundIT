@@ -70,6 +70,7 @@ router.post("/", requireAuth, (req, res, next) => {
       body: `${req.user.name} lost something on campus — can you help?`,
       url: "/gallery",
       excludeUserId: req.user.id,
+      category: "lost",
     }).catch((err) => console.error("Broadcast push failed:", err));
   } catch (err) {
     next(err);
