@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth, requireOwnedLostItem } = require("../middleware/auth");
+const { postItemLimiter } = require("../middleware/rateLimiters");
 const { broadcastPush } = require("../utils/push");
 const { idNumberSchema } = require("../utils/idNumber");
 const { ITEM_CATEGORIES } = require("../utils/itemCategories");
@@ -42,7 +43,7 @@ const createSchema = z.object({
   idNumber: idNumberSchema,
 });
 
-router.post("/", requireAuth, (req, res, next) => {
+router.post("/", requireAuth, postItemLimiter, (req, res, next) => {
   try {
     const parsed = createSchema.safeParse(req.body);
     if (!parsed.success) {

@@ -6,6 +6,7 @@ const multer = require("multer");
 const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth, requireOwnedFoundItem } = require("../middleware/auth");
+const { postItemLimiter } = require("../middleware/rateLimiters");
 const { broadcastPush } = require("../utils/push");
 const { idNumberSchema } = require("../utils/idNumber");
 const { ITEM_CATEGORIES } = require("../utils/itemCategories");
@@ -83,7 +84,7 @@ const createSchema = z.object({
   idNumber: idNumberSchema,
 });
 
-router.post("/", requireAuth, upload.single("photo"), (req, res, next) => {
+router.post("/", requireAuth, postItemLimiter, upload.single("photo"), (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "A photo of the found item is required." });

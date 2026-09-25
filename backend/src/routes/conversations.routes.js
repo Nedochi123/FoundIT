@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
+const { messageLimiter } = require("../middleware/rateLimiters");
 const { notifyUser } = require("../utils/push");
 
 const TOKENS_PER_FIND = 2;
@@ -119,7 +120,7 @@ const messageSchema = z.object({
   body: z.string().trim().min(1, "Message can't be empty.").max(2000),
 });
 
-router.post("/:id/messages", requireAuth, requireConversationAccess, (req, res, next) => {
+router.post("/:id/messages", requireAuth, messageLimiter, requireConversationAccess, (req, res, next) => {
   try {
     const parsed = messageSchema.safeParse(req.body);
     if (!parsed.success) {
