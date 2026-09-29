@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://founditapp.nedochipublications.com/sitemap.xml
