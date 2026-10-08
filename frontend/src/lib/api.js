@@ -164,11 +164,19 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ body }),
     }),
-  confirmReturn: (conversationId, note) =>
+  confirmReturn: (conversationId, note, rewardAmount) =>
     apiRequest(`/api/conversations/${conversationId}/confirm-return`, {
       method: "POST",
-      body: JSON.stringify({ note: note || undefined }),
+      body: JSON.stringify({ note: note || undefined, rewardAmount: rewardAmount || undefined }),
     }),
+
+  // Voluntary thank-you reward (the owner pays the finder directly; FoundIT never handles the money)
+  giveReward: (conversationId, amount) =>
+    apiRequest(`/api/conversations/${conversationId}/reward`, { method: "POST", body: JSON.stringify({ amount }) }),
+  markRewardSent: (conversationId) =>
+    apiRequest(`/api/conversations/${conversationId}/reward/sent`, { method: "POST" }),
+  markRewardReceived: (conversationId) =>
+    apiRequest(`/api/conversations/${conversationId}/reward/received`, { method: "POST" }),
 
   // Tokens
   getTokenLedger: () => apiRequest("/api/tokens/ledger"),

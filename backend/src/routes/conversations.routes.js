@@ -5,6 +5,7 @@ const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
 const { messageLimiter } = require("../middleware/rateLimiters");
 const { notifyUser } = require("../utils/push");
+const { REWARD_AMOUNTS, naira } = require("../utils/rewards");
 
 const TOKENS_PER_FIND = 2;
 
@@ -18,6 +19,49 @@ function requireConversationAccess(req, res, next) {
   }
   req.conversation = convo;
   next();
+}
+
+// ---- the voluntary thank-you reward ----
+// FoundIT never handles this money. The owner chooses an amount, the finder shares their account
+// details privately in this chat, the owner pays them directly and taps "sent", and the finder taps
+// "received". Only the amount and these three steps are stored; no bank or card details.
+function postChatMessage(conversationId, senderId, body) {
+  db.prepare("INSERT INTO messages (id, conversation_id, sender_id, body) VALUES (?, ?, ?, ?)").run(
+    crypto.randomUUID(),
+    conversationId,
+    senderId,
+    body
+  );
+}
+
+function createReward(convo, ownerId, amount) {
+  db.prepare(
+    `INSERT INTO rewards (id, found_item_id, conversation_id, from_user_id, to_user_id, amount)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  ).run(crypto.randomUUID(), convo.found_item_id, convo.id, ownerId, convo.finder_id, amount);
+  postChatMessage(
+    convo.id,
+    ownerId,
+    `🎁 To say thank you, I'd like to give you a ${naira(amount)} reward. Please send me your account details here in this chat (bank and account number, or a phone number for a transfer) and I'll send it.`
+  );
+}
+
+function notifyRewardChosen(finderId, amount) {
+  notifyUser(finderId, {
+    title: "A thank-you reward 🎁",
+    body: `The owner chose a ${naira(amount)} reward for you. Open the chat to share your account details with them.`,
+  }).catch(() => {});
+}
+
+/** What the chat screen needs to show about the reward, or null when there is none. */
+function rewardView(row) {
+  if (!row) return null;
+  return {
+    amount: row.amount,
+    status: row.status,
+    sentAt: row.sent_at,
+    receivedAt: row.received_at,
+  };
 }
 
 // Starting a conversation is idempotent — clicking "Message" again on
@@ -98,10 +142,22 @@ router.get("/:id/messages", requireAuth, requireConversationAccess, (req, res) =
   ).run(req.params.id, req.user.id);
 
   const foundItem = db
-    .prepare("SELECT return_confirmed_at FROM found_items WHERE id = ?")
+    .prepare("SELECT return_confirmed_at, return_confirmed_conversation_id FROM found_items WHERE id = ?")
     .get(req.conversation.found_item_id);
+  const reward = db.prepare("SELECT * FROM rewards WHERE found_item_id = ?").get(req.conversation.found_item_id);
+  // Only the chat where the return was confirmed shows the reward (other students who asked about
+  // the same item don't see it, and the owner there can't add one).
+  const rewardHere = reward && reward.conversation_id === req.conversation.id ? reward : null;
+  const canOfferReward =
+    req.conversation.seeker_id === req.user.id &&
+    !!foundItem?.return_confirmed_at &&
+    foundItem.return_confirmed_conversation_id === req.conversation.id &&
+    !reward;
 
   res.json({
+    reward: rewardView(rewardHere),
+    canOfferReward,
+    rewardOptions: REWARD_AMOUNTS,
     messages: messages.map((m) => ({
       id: m.id,
       senderId: m.sender_id,
@@ -157,6 +213,8 @@ router.post("/:id/messages", requireAuth, messageLimiter, requireConversationAcc
 // on the same item.
 const confirmReturnSchema = z.object({
   note: z.string().trim().max(280).optional(),
+  // optional voluntary reward, one of REWARD_AMOUNTS (checked below)
+  rewardAmount: z.number().int().optional(),
 });
 
 router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req, res, next) => {
@@ -170,7 +228,10 @@ router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req,
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.issues[0].message });
     }
-    const { note } = parsed.data;
+    const { note, rewardAmount } = parsed.data;
+    if (rewardAmount !== undefined && !REWARD_AMOUNTS.includes(rewardAmount)) {
+      return res.status(400).json({ error: "Please choose one of the reward amounts shown." });
+    }
 
     const foundItem = db.prepare("SELECT * FROM found_items WHERE id = ?").get(convo.found_item_id);
     if (!foundItem) return res.status(404).json({ error: "Found item not found." });
@@ -181,10 +242,10 @@ router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req,
     const run = db.transaction(() => {
       db.prepare(
         `UPDATE found_items
-         SET return_confirmed_at = datetime('now'), status = 'resolved',
+         SET return_confirmed_at = datetime('now'), return_confirmed_conversation_id = ?, status = 'resolved',
              resolved_at = COALESCE(resolved_at, datetime('now')), updated_at = datetime('now')
          WHERE id = ?`
-      ).run(foundItem.id);
+      ).run(convo.id, foundItem.id);
 
       db.prepare("UPDATE users SET tokens = tokens + ?, updated_at = datetime('now') WHERE id = ?").run(
         TOKENS_PER_FIND,
@@ -204,6 +265,8 @@ router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req,
         ).run(crypto.randomUUID(), foundItem.id, req.user.id, convo.finder_id, note);
       }
 
+      if (rewardAmount) createReward(convo, req.user.id, rewardAmount);
+
       return db.prepare("SELECT tokens FROM users WHERE id = ?").get(convo.finder_id);
     });
 
@@ -213,8 +276,95 @@ router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req,
       title: "Return confirmed! 🎉",
       body: `+${TOKENS_PER_FIND} tokens — the owner confirmed they got their item back.`,
     }).catch(() => {});
+    if (rewardAmount) notifyRewardChosen(convo.finder_id, rewardAmount);
 
-    res.json({ ok: true, tokens });
+    res.json({ ok: true, tokens, rewardAmount: rewardAmount || null });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Give a reward after confirming the return (if they didn't choose one at the time). Only the owner
+// whose confirmation closed this item, once per item, and only one of the fixed amounts.
+const rewardSchema = z.object({ amount: z.number().int() });
+
+router.post("/:id/reward", requireAuth, messageLimiter, requireConversationAccess, (req, res, next) => {
+  try {
+    const convo = req.conversation;
+    if (convo.seeker_id !== req.user.id) {
+      return res.status(403).json({ error: "Only the person who got their item back can give a reward." });
+    }
+    const parsed = rewardSchema.safeParse(req.body || {});
+    if (!parsed.success || !REWARD_AMOUNTS.includes(parsed.data.amount)) {
+      return res.status(400).json({ error: "Please choose one of the reward amounts shown." });
+    }
+    const foundItem = db.prepare("SELECT * FROM found_items WHERE id = ?").get(convo.found_item_id);
+    if (!foundItem?.return_confirmed_at || foundItem.return_confirmed_conversation_id !== convo.id) {
+      return res.status(400).json({ error: "You can give a reward once you have confirmed the item came back." });
+    }
+    if (db.prepare("SELECT 1 FROM rewards WHERE found_item_id = ?").get(foundItem.id)) {
+      return res.status(400).json({ error: "A reward has already been chosen for this item." });
+    }
+
+    db.transaction(() => createReward(convo, req.user.id, parsed.data.amount))();
+    notifyRewardChosen(convo.finder_id, parsed.data.amount);
+    res.status(201).json({ ok: true, amount: parsed.data.amount });
+  } catch (err) {
+    next(err);
+  }
+});
+
+function ownReward(req, res) {
+  const reward = db.prepare("SELECT * FROM rewards WHERE conversation_id = ?").get(req.conversation.id);
+  if (!reward) {
+    res.status(404).json({ error: "There is no reward in this chat." });
+    return null;
+  }
+  return reward;
+}
+
+// The owner says they have sent the money (paid directly to the finder, outside FoundIT).
+router.post("/:id/reward/sent", requireAuth, messageLimiter, requireConversationAccess, (req, res, next) => {
+  try {
+    const reward = ownReward(req, res);
+    if (!reward) return;
+    if (reward.from_user_id !== req.user.id) {
+      return res.status(403).json({ error: "Only the person giving the reward can mark it as sent." });
+    }
+    if (reward.status === "promised") {
+      db.prepare("UPDATE rewards SET status = 'sent', sent_at = datetime('now') WHERE id = ? AND status = 'promised'").run(reward.id);
+      postChatMessage(req.conversation.id, req.user.id, `✅ I've sent your ${naira(reward.amount)} reward. Please check your account and confirm here when it arrives.`);
+      notifyUser(reward.to_user_id, {
+        title: "Your reward is on its way 🎁",
+        body: `The owner says they sent ${naira(reward.amount)}. Check your account, then tap "I received it".`,
+      }).catch(() => {});
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// The finder says it arrived. It can only be confirmed after the owner has said they sent it.
+router.post("/:id/reward/received", requireAuth, messageLimiter, requireConversationAccess, (req, res, next) => {
+  try {
+    const reward = ownReward(req, res);
+    if (!reward) return;
+    if (reward.to_user_id !== req.user.id) {
+      return res.status(403).json({ error: "Only the finder who is receiving the reward can confirm it arrived." });
+    }
+    if (reward.status === "promised") {
+      return res.status(400).json({ error: "The owner hasn't said they've sent it yet." });
+    }
+    if (reward.status === "sent") {
+      db.prepare("UPDATE rewards SET status = 'received', received_at = datetime('now') WHERE id = ? AND status = 'sent'").run(reward.id);
+      postChatMessage(req.conversation.id, req.user.id, "🙏 Received. Thank you so much!");
+      notifyUser(reward.from_user_id, {
+        title: "Reward received 🎉",
+        body: "The finder confirmed they received your thank-you reward.",
+      }).catch(() => {});
+    }
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

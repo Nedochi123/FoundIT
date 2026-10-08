@@ -27,7 +27,7 @@ export default function LegalScreen({ onBack }) {
 
       <div>
         <h1 className="text-xl font-bold text-slate-50">Privacy &amp; Terms</h1>
-        <p className="mt-1 text-sm text-slate-400">Last updated 24 September 2026</p>
+        <p className="mt-1 text-sm text-slate-400">Last updated 8 October 2026</p>
       </div>
 
       <div className={`flex flex-col gap-5 ${cardClass}`}>
@@ -83,6 +83,24 @@ export default function LegalScreen({ onBack }) {
             by real bank transfer. Submitting a request does not guarantee approval or a payout timeline.
             Misuse of the system (for example, fake found-item posts or colluding to confirm a return that
             didn't happen) can result in a rejected request, forfeited tokens, or account suspension.
+          </p>
+        </Section>
+
+        <Section title="Thank-you rewards">
+          <p>
+            After the person who lost an item confirms it was returned, they may choose to say thank you
+            with a voluntary cash reward (₦3,000 to ₦20,000). It is always optional and entirely between
+            the two students: the owner pays the finder directly, for example by bank transfer, after the
+            finder shares their account details in that private chat.
+          </p>
+          <p>
+            FoundIT does not collect, hold or send this money, does not store bank or card details for
+            rewards, and cannot refund, reverse or settle a dispute about one. We only record the amount
+            chosen and whether it was marked sent and received. Anything you type in a chat, including
+            account details you choose to share, stays in that conversation like any message, so only share
+            them with the person you are paying or being paid by, and never share a PIN, OTP, BVN or card
+            details with anyone. Never pay anyone a reward before you have your item back. Asking for money
+            before returning an item, or pressuring someone for a reward, can lead to a suspended account.
           </p>
         </Section>
 

@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { usePolling } from "../../hooks/usePolling";
 import ReportDialog from "../shared/ReportDialog";
 import Confetti from "../shared/Confetti";
+import RewardCard, { RewardChips, naira } from "./RewardCard";
 
 function formatTime(iso) {
   const d = new Date(iso.replace(" ", "T") + "Z");
@@ -25,29 +26,35 @@ export default function ConversationView({ conversationId, onBack }) {
   const [reporting, setReporting] = useState(false);
   const [thankYouNote, setThankYouNote] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [reward, setReward] = useState(null); // the voluntary thank-you reward, if one was chosen
+  const [canOfferReward, setCanOfferReward] = useState(false);
+  const [rewardOptions, setRewardOptions] = useState([]);
+  const [rewardChoice, setRewardChoice] = useState(null); // chosen while confirming the return (null = no reward)
   const bottomRef = useRef(null);
 
-  usePolling(
-    async () => {
-      const data = await api.getMessages(conversationId);
-      setMessages(data.messages);
-      setIsSeeker(data.isSeeker);
-      setReturnConfirmed(data.returnConfirmed);
-      setOtherUserId(data.otherUserId);
-    },
-    4000,
-    [conversationId]
-  );
+  async function load() {
+    const data = await api.getMessages(conversationId);
+    setMessages(data.messages);
+    setIsSeeker(data.isSeeker);
+    setReturnConfirmed(data.returnConfirmed);
+    setOtherUserId(data.otherUserId);
+    setReward(data.reward || null);
+    setCanOfferReward(!!data.canOfferReward);
+    setRewardOptions(data.rewardOptions || []);
+  }
+
+  usePolling(load, 4000, [conversationId]);
 
   async function handleConfirmReturn() {
     setConfirming(true);
     setError("");
     try {
-      await api.confirmReturn(conversationId, thankYouNote.trim());
+      await api.confirmReturn(conversationId, thankYouNote.trim(), rewardChoice);
       setReturnConfirmed(true);
       setJustConfirmed(true);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 2000);
+      load().catch(() => {}); // show the reward card (and the chat message) straight away
     } catch (err) {
       setError(err.message || "Couldn't confirm the return. Try again.");
     } finally {
@@ -121,16 +128,36 @@ export default function ConversationView({ conversationId, onBack }) {
             placeholder="Leave a thank-you note for them (optional)"
             className="w-full rounded-lg border border-amber-400/20 bg-slate-900/50 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-amber-400/40"
           />
+          {rewardOptions.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <p className="text-xs font-semibold text-slate-100">
+                Say thanks with a reward? <span className="font-normal text-slate-400">(optional)</span>
+              </p>
+              <RewardChips options={rewardOptions} value={rewardChoice} onChange={setRewardChoice} />
+              <p className="text-[11px] text-slate-400">
+                A voluntary thank-you. You would pay the finder yourself, directly; FoundIT never handles the money.
+              </p>
+            </div>
+          )}
           <button
             onClick={handleConfirmReturn}
             disabled={confirming}
             className="flex items-center justify-center gap-1.5 self-end rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-2 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95 disabled:opacity-60"
           >
             <Coins className="h-3.5 w-3.5" />
-            {confirming ? "Confirming..." : "Confirm"}
+            {confirming ? "Confirming..." : rewardChoice ? `Confirm + ${naira(rewardChoice)} reward` : "Confirm"}
           </button>
         </div>
       ) : null}
+
+      <RewardCard
+        conversationId={conversationId}
+        reward={reward}
+        canOffer={canOfferReward && isSeeker}
+        options={rewardOptions}
+        isOwner={isSeeker}
+        onChange={() => load().catch(() => {})}
+      />
 
       <div className="flex-1 space-y-2 overflow-y-auto pb-3">
         {messages.map((m) => {

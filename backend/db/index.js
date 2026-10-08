@@ -69,6 +69,12 @@ function runMigrations() {
     ["users", "deleted_at", "ALTER TABLE users ADD COLUMN deleted_at TEXT"],
     ["lost_items", "category", "ALTER TABLE lost_items ADD COLUMN category TEXT"],
     ["found_items", "category", "ALTER TABLE found_items ADD COLUMN category TEXT"],
+    // Which chat the owner confirmed the return in, so only that owner can add a thank-you reward.
+    [
+      "found_items",
+      "return_confirmed_conversation_id",
+      "ALTER TABLE found_items ADD COLUMN return_confirmed_conversation_id TEXT",
+    ],
   ];
   for (const [table, column, ddl] of migrations) {
     if (!columnExists(table, column)) {

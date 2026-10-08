@@ -236,3 +236,29 @@ CREATE TABLE IF NOT EXISTS thank_you_notes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_thank_you_notes_to_user ON thank_you_notes(to_user_id, created_at);
+
+-- ============================================================
+-- REWARDS (a voluntary thank-you from the owner to the finder)
+-- ============================================================
+
+-- FoundIT never handles this money: the owner pays the finder directly
+-- (bank transfer) after the finder shares their details privately in the
+-- chat. This table only records the amount the owner chose and how far it
+-- got: promised -> sent (owner says they paid) -> received (finder says it
+-- arrived). One reward per found item, and only after the return is
+-- confirmed. No bank or card details are stored here.
+CREATE TABLE IF NOT EXISTS rewards (
+  id              TEXT PRIMARY KEY,
+  found_item_id   TEXT NOT NULL UNIQUE REFERENCES found_items(id) ON DELETE CASCADE,
+  conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  from_user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  to_user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount          INTEGER NOT NULL,
+  status          TEXT NOT NULL DEFAULT 'promised',
+  sent_at         TEXT,
+  received_at     TEXT,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_rewards_conversation ON rewards(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_rewards_to_user ON rewards(to_user_id, created_at);

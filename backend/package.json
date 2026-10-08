@@ -11,7 +11,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "seed": "node db/seed.js",
-    "db:reset": "rm -f dev.db dev.db-journal dev.db-wal dev.db-shm && node -e \"require('./db')\" && npm run seed"
+    "db:reset": "rm -f dev.db dev.db-journal dev.db-wal dev.db-shm && node -e \"require('./db')\" && npm run seed",
+    "test": "node --test"
   },
   "license": "UNLICENSED",
   "dependencies": {
