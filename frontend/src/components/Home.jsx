@@ -4,16 +4,22 @@ import { useAuth } from "../hooks/useAuth";
 import { api } from "../lib/api";
 import ReunionCard from "./gallery/ReunionCard";
 import { RewardsIntroCard } from "./rewards/RewardsGuide";
+import { TagsAlertCard, TagsPromoCard } from "./tags/HomeTagsCards";
 
 export default function Home({ onNavigate }) {
   const { user } = useAuth();
   const firstName = user?.name?.split(" ")[0] || "there";
   const [reunions, setReunions] = useState([]);
+  const [tags, setTags] = useState(null); // the student's QR tags (null until loaded)
 
   useEffect(() => {
     api
       .getReunitedItems()
       .then((data) => setReunions(data.items))
+      .catch(() => {});
+    api
+      .getMyTags()
+      .then((data) => setTags(data.tags))
       .catch(() => {});
   }, []);
 
@@ -23,6 +29,8 @@ export default function Home({ onNavigate }) {
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">Hi, {firstName}</h1>
         <p className="mt-1 text-slate-300">What's going on today?</p>
       </div>
+
+      <TagsAlertCard tags={tags} onOpen={() => onNavigate("tags")} />
 
       <button
         onClick={() => onNavigate("lost")}
@@ -51,6 +59,8 @@ export default function Home({ onNavigate }) {
           <p className="text-sm text-slate-300">Take a photo and help it get back to its owner.</p>
         </div>
       </button>
+
+      <TagsPromoCard tags={tags} onOpen={() => onNavigate("tags")} />
 
       <RewardsIntroCard />
 
