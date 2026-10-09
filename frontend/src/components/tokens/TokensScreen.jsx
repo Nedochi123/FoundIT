@@ -3,6 +3,7 @@ import { Coins, ArrowUpRight, ArrowDownRight, Sparkles, Trophy } from "lucide-re
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import CashoutForm from "./CashoutForm";
+import { RewardsGuideLink } from "../rewards/RewardsGuide";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
@@ -112,6 +113,11 @@ export default function TokensScreen() {
             </div>
           );
         })}
+      </div>
+
+      <div className="flex items-center justify-between rounded-xl border border-amber-400/20 bg-amber-500/[0.06] px-4 py-3">
+        <p className="text-sm text-slate-200">Got your item back? You can say thanks with a reward.</p>
+        <RewardsGuideLink>How it works</RewardsGuideLink>
       </div>
 
       {leaderboard.length > 0 && (

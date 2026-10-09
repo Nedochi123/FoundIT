@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Gift, ShieldAlert } from "lucide-react";
 import { api } from "../../lib/api";
+import { RewardsGuideLink } from "../rewards/RewardsGuide";
 
 export const naira = (n) => `₦${Number(n).toLocaleString()}`;
 
@@ -77,6 +78,7 @@ export default function RewardCard({ conversationId, reward, canOffer, options, 
         <p className="flex items-start gap-1.5 text-[11px] text-slate-400">
           <ShieldAlert className="mt-px h-3.5 w-3.5 shrink-0" /> {SAFETY}
         </p>
+        <RewardsGuideLink>How rewards work</RewardsGuideLink>
       </div>
     );
   }
@@ -122,6 +124,7 @@ export default function RewardCard({ conversationId, reward, canOffer, options, 
           <ShieldAlert className="mt-px h-3.5 w-3.5 shrink-0" /> {SAFETY}
         </p>
       )}
+      <RewardsGuideLink>How rewards work</RewardsGuideLink>
     </div>
   );
 }

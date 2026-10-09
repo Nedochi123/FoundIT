@@ -3,6 +3,7 @@ import { Search, Camera, Sparkles } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../lib/api";
 import ReunionCard from "./gallery/ReunionCard";
+import { RewardsIntroCard } from "./rewards/RewardsGuide";
 
 export default function Home({ onNavigate }) {
   const { user } = useAuth();
@@ -50,6 +51,8 @@ export default function Home({ onNavigate }) {
           <p className="text-sm text-slate-300">Take a photo and help it get back to its owner.</p>
         </div>
       </button>
+
+      <RewardsIntroCard />
 
       {reunions.length > 0 && (
         <div className="animate-fade-up" style={{ "--delay": "0.24s" }}>

@@ -6,6 +6,7 @@ import { usePolling } from "../../hooks/usePolling";
 import ReportDialog from "../shared/ReportDialog";
 import Confetti from "../shared/Confetti";
 import RewardCard, { RewardChips, naira } from "./RewardCard";
+import { RewardsGuideLink } from "../rewards/RewardsGuide";
 
 function formatTime(iso) {
   const d = new Date(iso.replace(" ", "T") + "Z");
@@ -137,6 +138,7 @@ export default function ConversationView({ conversationId, onBack }) {
               <p className="text-[11px] text-slate-400">
                 A voluntary thank-you. You would pay the finder yourself, directly; FoundIT never handles the money.
               </p>
+              <RewardsGuideLink>How rewards work</RewardsGuideLink>
             </div>
           )}
           <button
