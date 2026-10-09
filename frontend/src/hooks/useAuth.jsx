@@ -54,6 +54,11 @@ export function AuthProvider({ children }) {
 
   const signup = useCallback(async (body) => {
     const { user } = await api.signup(body);
+    try {
+      sessionStorage.setItem("foundit_welcome_pending", "1"); // plays the welcome animation once, in their colors
+    } catch {
+      // Private browsing: they just go straight in.
+    }
     setUser(user);
     setStoredUser(user);
     return user;

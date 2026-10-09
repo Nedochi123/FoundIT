@@ -14,20 +14,17 @@ function getInitialTab() {
   try {
     const params = new URLSearchParams(window.location.search);
     const asked = params.get("lost") === "1" || sessionStorage.getItem(TAB_KEY) === "lost";
-    sessionStorage.removeItem(TAB_KEY);
-    if (params.get("lost")) window.history.replaceState({}, "", window.location.pathname);
     return asked ? "lost" : "found";
   } catch {
     return "found";
   }
 }
 
-// True once, right after the student reported something lost (LostForm sets it).
-function takeJustPostedFlag() {
+// True right after the student reported something lost (LostForm sets it). Read here, cleared in an effect below:
+// React may render twice in development, so nothing is deleted while rendering.
+function justPostedLost() {
   try {
-    const set = sessionStorage.getItem(JUST_POSTED_KEY) === "1";
-    sessionStorage.removeItem(JUST_POSTED_KEY);
-    return set;
+    return sessionStorage.getItem(JUST_POSTED_KEY) === "1";
   } catch {
     return false;
   }
@@ -36,7 +33,7 @@ function takeJustPostedFlag() {
 export default function Gallery({ onNavigate, onOpenConversation }) {
   const { user } = useAuth();
   const [tab, setTab] = useState(getInitialTab);
-  const [justPosted, setJustPosted] = useState(takeJustPostedFlag);
+  const [justPosted, setJustPosted] = useState(justPostedLost);
   const [boostEnabled, setBoostEnabled] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +54,17 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
 
   useEffect(() => {
     load();
+  }, []);
+
+  // used up: these one-time hints should not come back next time the gallery opens
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem(TAB_KEY);
+      sessionStorage.removeItem(JUST_POSTED_KEY);
+      if (new URLSearchParams(window.location.search).get("lost")) window.history.replaceState({}, "", window.location.pathname);
+    } catch {
+      // Private browsing: nothing to clear.
+    }
   }, []);
 
   // only nudge toward a boost if boosts can actually be paid for yet

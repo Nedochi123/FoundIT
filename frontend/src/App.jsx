@@ -15,6 +15,7 @@ import NotificationsPrompt from "./components/notifications/NotificationsPrompt"
 import TokensScreen from "./components/tokens/TokensScreen";
 import LegalScreen from "./components/legal/LegalScreen";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
+import WelcomeAfterSignup from "./components/WelcomeAfterSignup";
 import TagScan from "./components/tags/TagScan";
 import TagsScreen from "./components/tags/TagsScreen";
 
@@ -106,9 +107,12 @@ function Screens() {
   const activeTab = view === "conversation" ? "conversations" : view === "tags" ? "profile" : view;
 
   return (
-    <Layout view={activeTab} onNavigate={navigate} unreadCount={unreadCount}>
-      {content}
-    </Layout>
+    <>
+      <WelcomeAfterSignup />
+      <Layout view={activeTab} onNavigate={navigate} unreadCount={unreadCount}>
+        {content}
+      </Layout>
+    </>
   );
 }
 
