@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { getTheme, normalizeLook } from "../../lib/themes";
+import { applyThemedIcons } from "../../lib/themedIcon";
 import DoodleField from "./DoodleField";
 
 const STORAGE_KEY = "foundit_theme";
@@ -47,6 +48,7 @@ export function ThemeProvider({ children }) {
     document.documentElement.setAttribute("data-theme", look.theme);
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", getTheme(look.theme).chrome);
+    applyThemedIcons(look.theme); // the browser-tab icon and the iPhone Home Screen icon
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(look));
     } catch {
