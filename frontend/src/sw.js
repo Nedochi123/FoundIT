@@ -1,5 +1,14 @@
-import { precacheAndRoute } from "workbox-precaching";
+import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
 
+// Take over as soon as a new version has installed. Without this a phone keeps showing the OLD app until every
+// FoundIT window is fully closed (an installed app that is only backgrounded counts as open), so students
+// would not see new features for days. src/main.jsx reloads the page once when the new version takes over.
+self.skipWaiting();
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
 self.addEventListener("push", (event) => {

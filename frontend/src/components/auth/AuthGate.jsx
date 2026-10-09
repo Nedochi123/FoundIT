@@ -5,6 +5,7 @@ import SignupForm from "./SignupForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 import ResetPasswordForm from "./ResetPasswordForm";
 import LegalScreen from "../legal/LegalScreen";
+import Logo from "../theme/Logo";
 
 function getResetTokenFromUrl() {
   return new URLSearchParams(window.location.search).get("resetToken");
@@ -77,11 +78,7 @@ export default function AuthGate({ children }) {
               style={{ background: "radial-gradient(circle, var(--brand-a) 0%, var(--brand-b) 70%, transparent 100%)" }}
               aria-hidden="true"
             />
-            <img
-              src="/brand/foundit-icon.png"
-              alt="FoundIT"
-              className="relative h-16 w-16 rounded-2xl shadow-xl shadow-black/50 ring-1 ring-white/10"
-            />
+            <Logo label="FoundIT" className="relative h-16 w-16 rounded-2xl shadow-xl shadow-black/50 ring-1 ring-white/10" />
           </div>
           <div className="flex flex-col items-center gap-1.5">
             <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">

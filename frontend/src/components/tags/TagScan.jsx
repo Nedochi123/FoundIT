@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PackageCheck, CircleCheck, TriangleAlert, Loader2, MessagesSquare } from "lucide-react";
 import { api } from "../../lib/api";
 import TagChat from "./TagChat";
+import Logo from "../theme/Logo";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -34,7 +35,7 @@ function Shell({ children }) {
       <div className="bg-glow" aria-hidden="true" />
       <div className="mx-auto w-full max-w-md">
         <div className="mb-6 flex items-center gap-2">
-          <img src="/brand/foundit-icon.png" alt="" className="h-8 w-8 rounded-[9px] shadow-md shadow-black/40" />
+          <Logo className="h-8 w-8 rounded-[9px] shadow-md shadow-black/40" />
           <span className="text-lg font-extrabold tracking-tight text-slate-50">
             Found<span className="text-brand-teal">IT</span>
           </span>

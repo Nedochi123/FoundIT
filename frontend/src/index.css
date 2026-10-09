@@ -163,3 +163,14 @@ h1, h2, h3 {
 :root[data-still] .doodle {
   animation: none !important;
 }
+
+/* The FoundIT icon: the original image on the Default look, a redrawn one in the student's colors on every other look. */
+.logo-themed {
+  display: none;
+}
+:root[data-theme]:not([data-theme="classic"]) .logo-classic {
+  display: none;
+}
+:root[data-theme]:not([data-theme="classic"]) .logo-themed {
+  display: inline-block;
+}

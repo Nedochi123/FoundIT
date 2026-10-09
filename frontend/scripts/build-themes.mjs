@@ -102,6 +102,7 @@ const light = t.neutral?.tone === "light";
   };
   lines.push(`--bar-top: ${bar.top};`);
   lines.push(`--bar-bottom: ${bar.bottom};`);
+  lines.push(`--logo-check: ${t.logoCheck || "#3fe08b"};`); // the check mark inside the icon
   lines.push(`--bg-top: ${t.bg.top};`);
   lines.push(`--bg-mid: ${t.bg.mid};`);
   lines.push(`--bg-bottom: ${t.bg.bottom};`);

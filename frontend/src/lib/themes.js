@@ -59,6 +59,7 @@ export const THEMES = [
     id: "camo",
     chrome: "#10140a", // the browser/phone status-bar color
     label: "Camo",
+    logoCheck: "#ecfccb", // paler than the usual mint, so it shows on the olive icon
     suggestedDoodle: "dogs",
     neutral: { hue: 82, sat: 0.5 },
     brand: { a: "#4d7c0f", b: "#92400e", text: "#bef264", shadow: "#4d7c0f" },
@@ -74,6 +75,7 @@ export const THEMES = [
     id: "black",
     chrome: "#09090b", // the browser/phone status-bar color
     label: "Black",
+    logoCheck: "#d1fae5",
     suggestedDoodle: "aliens",
     neutral: { hue: 240, sat: 0.07 },
     brand: { a: "#047857", b: "#0f766e", text: "#4ade80", shadow: "#10b981" },
@@ -128,6 +130,7 @@ export const THEMES = [
     chrome: "#031c15", // the browser/phone status-bar color
     label: "Green",
     textColors: { red: "252 165 165" },
+    logoCheck: "#d1fae5",
     suggestedDoodle: "money",
     neutral: { hue: 152, sat: 0.8 },
     brand: { a: "#15803d", b: "#0f766e", text: "#86efac", shadow: "#16a34a" },
