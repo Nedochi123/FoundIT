@@ -103,6 +103,14 @@ const light = t.neutral?.tone === "light";
   lines.push(`--bar-top: ${bar.top};`);
   lines.push(`--bar-bottom: ${bar.bottom};`);
   lines.push(`--logo-check: ${t.logoCheck || "#3fe08b"};`); // the check mark inside the icon
+  // the welcome animation (src/components/IntroAnimation.css)
+  lines.push(`--intro-top: ${t.intro.top};`);
+  lines.push(`--intro-mid: ${t.intro.mid};`);
+  lines.push(`--intro-bottom: ${t.intro.bottom};`);
+  lines.push(`--intro-glow-one: ${t.intro.glowOne};`);
+  lines.push(`--intro-glow-two: ${t.intro.glowTwo};`);
+  lines.push(`--intro-shadow-one: ${t.intro.shadowOne};`);
+  lines.push(`--intro-shadow-two: ${t.intro.shadowTwo};`);
   lines.push(`--bg-top: ${t.bg.top};`);
   lines.push(`--bg-mid: ${t.bg.mid};`);
   lines.push(`--bg-bottom: ${t.bg.bottom};`);

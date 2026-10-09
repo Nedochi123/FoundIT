@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { Palette } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Palette, Play } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { normalizeLook } from "../../lib/themes";
 import { useTheme } from "./ThemeProvider";
 import ThemePicker from "./ThemePicker";
+import IntroAnimation from "../IntroAnimation";
 
 /** Profile: change the app's color and floating doodles after sign-up. The app previews each choice live. */
 export default function LookCard() {
@@ -13,6 +15,8 @@ export default function LookCard() {
   const [look, setLook] = useState(saved);
   const [status, setStatus] = useState("idle"); // idle | saving | saved | error
   const [error, setError] = useState("");
+  const [playingIntro, setPlayingIntro] = useState(false);
+  const stopIntro = useCallback(() => setPlayingIntro(false), []);
   const dirty = look.theme !== saved.theme || look.doodle !== saved.doodle;
 
   // walking away without saving puts the saved look back
@@ -57,6 +61,15 @@ export default function LookCard() {
         </button>
         {status === "saved" && !dirty && <p role="status" className="text-sm text-emerald-300">Saved. It will follow you to any device.</p>}
       </div>
+      <button
+        type="button"
+        onClick={() => setPlayingIntro(true)}
+        className="mt-3 flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand-teal underline-offset-2 hover:underline"
+      >
+        <Play className="h-4 w-4" /> Watch the welcome animation in these colors
+      </button>
+      {/* drawn at the top of the page: a card with a blur would otherwise trap a full-screen overlay */}
+      {playingIntro && createPortal(<IntroAnimation onDone={stopIntro} />, document.body)}
     </div>
   );
 }

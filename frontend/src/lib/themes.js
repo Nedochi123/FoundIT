@@ -12,6 +12,7 @@
 //    glow color under buttons.
 //  - bg: the page background (top, middle, bottom of the gradient); glow/blobs: soft colored light on it.
 //  - doodle: the color of the floating doodles.
+//  - intro: the colors of the one-time welcome animation (a dark stage, a glow behind it, and a glow around the logo).
 
 export const DEFAULT_THEME = "classic";
 export const DEFAULT_DOODLE = "none";
@@ -30,6 +31,7 @@ export const THEMES = [
     id: "classic",
     chrome: "#0a0e1a", // the browser/phone status-bar color
     label: "Default",
+    intro: { top: "#1c2b52", mid: "#0d1326", bottom: "#05070d", glowOne: "#2f4bb3", glowTwo: "#4c3a8f", shadowOne: "29 78 216", shadowTwo: "59 96 230" },
     suggestedDoodle: "none",
     neutral: null,
     brand: { a: "#17b8ae", b: "#2467e6", text: "#119aa0", shadow: "#2467e6", solid: "#119aa0" },
@@ -46,6 +48,7 @@ export const THEMES = [
     chrome: "#1c0c18", // the browser/phone status-bar color
     label: "Pink",
     textColors: { red: "252 165 165" }, // a lighter error red: this theme's page is a little lighter than most
+    intro: { top: "#5a1744", mid: "#2a0b22", bottom: "#12050f", glowOne: "#c0267a", glowTwo: "#7a2fb0", shadowOne: "219 39 119", shadowTwo: "236 72 153" },
     suggestedDoodle: "kittens",
     neutral: { hue: 322, sat: 0.9 },
     brand: { a: "#db2777", b: "#9333ea", text: "#f9a8d4", shadow: "#db2777" },
@@ -60,6 +63,7 @@ export const THEMES = [
     chrome: "#10140a", // the browser/phone status-bar color
     label: "Camo",
     logoCheck: "#ecfccb", // paler than the usual mint, so it shows on the olive icon
+    intro: { top: "#2f3a1a", mid: "#151a0b", bottom: "#080a05", glowOne: "#5a7f1a", glowTwo: "#8a4a14", shadowOne: "77 124 15", shadowTwo: "146 64 14" },
     suggestedDoodle: "dogs",
     neutral: { hue: 82, sat: 0.5 },
     brand: { a: "#4d7c0f", b: "#92400e", text: "#bef264", shadow: "#4d7c0f" },
@@ -76,6 +80,7 @@ export const THEMES = [
     chrome: "#09090b", // the browser/phone status-bar color
     label: "Black",
     logoCheck: "#d1fae5",
+    intro: { top: "#17171c", mid: "#09090b", bottom: "#000000", glowOne: "#0f6b45", glowTwo: "#0c5a6e", shadowOne: "4 120 87", shadowTwo: "16 185 129" },
     suggestedDoodle: "aliens",
     neutral: { hue: 240, sat: 0.07 },
     brand: { a: "#047857", b: "#0f766e", text: "#4ade80", shadow: "#10b981" },
@@ -90,6 +95,7 @@ export const THEMES = [
     chrome: "#06263b", // the browser/phone status-bar color
     label: "Blue",
     textColors: { red: "252 165 165" },
+    intro: { top: "#0f4c78", mid: "#08304f", bottom: "#04192a", glowOne: "#1e6fd0", glowTwo: "#3b3fb8", shadowOne: "3 105 161", shadowTwo: "56 189 248" },
     suggestedDoodle: "science",
     neutral: { hue: 203, sat: 1.15 },
     brand: { a: "#0369a1", b: "#4338ca", text: "#7dd3fc", shadow: "#0284c7" },
@@ -103,6 +109,7 @@ export const THEMES = [
     id: "red",
     chrome: "#1d0709", // the browser/phone status-bar color
     label: "Red",
+    intro: { top: "#5a1420", mid: "#2a0a10", bottom: "#130406", glowOne: "#c0262d", glowTwo: "#c25a14", shadowOne: "220 38 38", shadowTwo: "249 115 22" },
     suggestedDoodle: "money",
     neutral: { hue: 352, sat: 0.95 },
     brand: { a: "#dc2626", b: "#9f1239", text: "#fda4af", shadow: "#dc2626" },
@@ -116,6 +123,7 @@ export const THEMES = [
     id: "purple",
     chrome: "#120830", // the browser/phone status-bar color
     label: "Purple",
+    intro: { top: "#3a1a78", mid: "#1a0c3d", bottom: "#0a0520", glowOne: "#6a3bd6", glowTwo: "#b13a9a", shadowOne: "124 58 237", shadowTwo: "167 139 250" },
     suggestedDoodle: "aliens",
     neutral: { hue: 268, sat: 0.85 },
     brand: { a: "#7c3aed", b: "#4f46e5", text: "#c4b5fd", shadow: "#7c3aed" },
@@ -131,6 +139,7 @@ export const THEMES = [
     label: "Green",
     textColors: { red: "252 165 165" },
     logoCheck: "#d1fae5",
+    intro: { top: "#07503c", mid: "#04281e", bottom: "#02120d", glowOne: "#14804a", glowTwo: "#2a8a2e", shadowOne: "21 128 61", shadowTwo: "52 211 153" },
     suggestedDoodle: "money",
     neutral: { hue: 152, sat: 0.8 },
     brand: { a: "#15803d", b: "#0f766e", text: "#86efac", shadow: "#16a34a" },
@@ -144,6 +153,7 @@ export const THEMES = [
     id: "lightpink",
     chrome: "#fde2ef",
     label: "Light pink",
+    intro: { top: "#6b1d52", mid: "#34102c", bottom: "#1b0716", glowOne: "#db2777", glowTwo: "#9333ea", shadowOne: "219 39 119", shadowTwo: "244 114 182" },
     suggestedDoodle: "kittens",
     neutral: { hue: 330, sat: 1, tone: "light" },
     brand: { a: "#db2777", b: "#9333ea", text: "#9d174d", shadow: "#db2777" },
@@ -157,6 +167,7 @@ export const THEMES = [
     id: "lightpurple",
     chrome: "#ece2fd",
     label: "Light purple",
+    intro: { top: "#3d2380", mid: "#1c0f45", bottom: "#0c0624", glowOne: "#7c3aed", glowTwo: "#4f46e5", shadowOne: "124 58 237", shadowTwo: "167 139 250" },
     suggestedDoodle: "science",
     neutral: { hue: 262, sat: 1, tone: "light" },
     brand: { a: "#7c3aed", b: "#4f46e5", text: "#5b21b6", shadow: "#7c3aed" },

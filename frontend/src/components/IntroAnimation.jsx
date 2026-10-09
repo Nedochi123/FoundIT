@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./IntroAnimation.css";
+import Logo from "./theme/Logo";
 
 // Total time the overlay stays mounted: matches the CSS's fade-out delay
 // (2.2s of action) + fade-out duration (0.5s), plus a small buffer.
@@ -24,7 +25,7 @@ export default function IntroAnimation({ onDone }) {
     <div className={`intro-overlay ${reducedMotion ? "intro-reduced" : ""}`}>
       <div className="intro-stage">
         <div className="intro-logo">
-          <img src="/brand/foundit-icon.png" alt="" className="intro-logo-img" />
+          <Logo className="intro-logo-img" />
         </div>
 
         <svg className="intro-character" viewBox="0 0 120 160" aria-hidden="true">
