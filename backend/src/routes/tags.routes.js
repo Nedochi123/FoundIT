@@ -3,19 +3,21 @@ const crypto = require("crypto");
 const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth, requireAdmin } = require("../middleware/auth");
-const { tagFoundLimiter, tagClaimLimiter } = require("../middleware/rateLimiters");
+const { tagFoundLimiter, tagChatLimiter, tagClaimLimiter, messageLimiter } = require("../middleware/rateLimiters");
 const { notifyUser } = require("../utils/push");
 const { sendEmail, tagFoundEmail } = require("../utils/email");
 const { newTagCode, normalizeCode } = require("../utils/tags");
 
 // "Return me" QR tags. A student sticks one on a laptop, bag or keys; anyone who finds it scans it and
-// leaves a phone number and a message (no account needed); the owner is notified. The finder never sees
-// the owner's name, number or email.
+// starts a private chat with the owner (no account needed). Neither side sees the other's name or number
+// unless they choose to share it in the chat. The finder never sees anything about the owner otherwise.
 const router = express.Router();
 
 const MAX_TAGS_PER_USER = 10;
-const MAX_MESSAGES_PER_TAG_PER_HOUR = 5;
-const MAX_MESSAGES_PER_TAG_PER_DAY = 15;
+const MAX_NEW_CHATS_PER_TAG_PER_HOUR = 5;
+const MAX_NEW_CHATS_PER_TAG_PER_DAY = 15;
+const MAX_FINDER_MESSAGES_PER_CHAT_PER_HOUR = 30;
+const MAX_MESSAGES_PER_CHAT = 300;
 
 const tagWithOwner = (code) =>
   db
@@ -33,6 +35,49 @@ function publicStatus(tag) {
   return tag.status === "paused" ? "paused" : "active";
 }
 
+const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
+const digitsOf = (s) => String(s).replace(/\D/g, "");
+
+const messageView = (m) => ({
+  id: m.id,
+  sender: m.sender,
+  kind: m.kind,
+  body: m.body,
+  contactName: m.contact_name,
+  contactPhone: m.contact_phone,
+  createdAt: m.created_at,
+});
+
+const messagesOf = (threadId) =>
+  db.prepare("SELECT * FROM tag_messages WHERE thread_id = ? ORDER BY created_at, rowid").all(threadId).map(messageView);
+
+function addMessage(threadId, sender, { kind = "text", body = null, contactName = null, contactPhone = null }) {
+  db.prepare(
+    "INSERT INTO tag_messages (id, thread_id, sender, kind, body, contact_name, contact_phone) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).run(crypto.randomUUID(), threadId, sender, kind, body, contactName, contactPhone);
+}
+
+const textSchema = z.object({ message: z.string().trim().min(1, "Please write a message.").max(500, "That message is too long.") });
+
+const contactSchema = z.object({
+  name: z.string().trim().max(60, "That name is too long.").optional(),
+  phone: z.string().trim().max(30, "That phone number is too long.").optional(),
+});
+
+/** Sharing a name and/or a number on purpose. Returns { error } or { name, phone }. */
+function parseContact(body) {
+  const parsed = contactSchema.safeParse(body || {});
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const name = parsed.data.name || null;
+  const phone = parsed.data.phone || null;
+  if (!name && !phone) return { error: "Enter a name, a phone number, or both." };
+  if (phone) {
+    const n = digitsOf(phone).length;
+    if (n < 7 || n > 15) return { error: "That doesn't look like a valid phone number." };
+  }
+  return { name, phone };
+}
+
 // ---------- public (no sign-in): the page a finder lands on ----------
 
 router.get("/public/:code", (req, res) => {
@@ -43,27 +88,19 @@ router.get("/public/:code", (req, res) => {
   res.json({ status, label: status === "active" ? tag.label || null : null });
 });
 
-const foundSchema = z.object({
-  name: z.string().trim().max(60).optional(),
-  phone: z.string().trim().min(1, "Please enter a phone number so the owner can reach you.").max(30),
-  message: z.string().trim().max(300).optional(),
+const startSchema = textSchema.extend({
   website: z.string().optional(), // hidden field: only bots fill it in
 });
 
-const digitsOf = (s) => String(s).replace(/\D/g, "");
-
-router.post("/public/:code/found", tagFoundLimiter, (req, res, next) => {
+// The finder's first message opens a chat and hands back a secret token; their browser keeps it and sends
+// it as X-Chat-Token on every later request. Only a hash of it is stored.
+router.post("/public/:code/chat", tagFoundLimiter, (req, res, next) => {
   try {
-    const parsed = foundSchema.safeParse(req.body || {});
+    const parsed = startSchema.safeParse(req.body || {});
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
-    const { name, phone, message, website } = parsed.data;
+    const { message, website } = parsed.data;
 
     if (website) return res.status(201).json({ ok: true }); // a bot: say "done", save and tell nobody
-
-    const n = digitsOf(phone).length;
-    if (n < 7 || n > 15) {
-      return res.status(400).json({ error: "Please enter a valid phone number so the owner can reach you." });
-    }
 
     const tag = tagWithOwner(req.params.code);
     if (!tag) return res.status(404).json({ error: "We don't recognise this tag." });
@@ -76,27 +113,25 @@ router.post("/public/:code/found", tagFoundLimiter, (req, res, next) => {
         `SELECT
            SUM(created_at >= datetime('now', '-1 hour')) AS last_hour,
            COUNT(*) AS last_day
-         FROM tag_messages WHERE tag_id = ? AND created_at >= datetime('now', '-1 day')`
+         FROM tag_threads WHERE tag_id = ? AND created_at >= datetime('now', '-1 day')`
       )
       .get(tag.id);
-    if ((recent.last_hour || 0) >= MAX_MESSAGES_PER_TAG_PER_HOUR || recent.last_day >= MAX_MESSAGES_PER_TAG_PER_DAY) {
-      return res.status(429).json({ error: "The owner has already been sent several messages. Please try again later." });
+    if ((recent.last_hour || 0) >= MAX_NEW_CHATS_PER_TAG_PER_HOUR || recent.last_day >= MAX_NEW_CHATS_PER_TAG_PER_DAY) {
+      return res.status(429).json({ error: "The owner has already been contacted several times. Please try again later." });
     }
 
-    db.prepare("INSERT INTO tag_messages (id, tag_id, finder_name, finder_phone, message) VALUES (?, ?, ?, ?, ?)").run(
-      crypto.randomUUID(),
-      tag.id,
-      name || null,
-      phone,
-      message || null
-    );
+    const token = crypto.randomBytes(24).toString("base64url");
+    const threadId = crypto.randomUUID();
+    db.transaction(() => {
+      db.prepare("INSERT INTO tag_threads (id, tag_id, finder_token_hash) VALUES (?, ?, ?)").run(threadId, tag.id, hashToken(token));
+      addMessage(threadId, "finder", { body: message });
+    })();
 
-    // Tell the owner. The push says nothing about the finder (lock screens are public); the email, which
-    // only the owner receives, carries the details.
+    // Tell the owner. The push is short (lock screens are public); the email carries what they wrote.
     const what = tag.label || "FoundIT tag";
     notifyUser(tag.owner_id, {
       title: "Someone found your item 🎉",
-      body: `Your ${what} was just scanned. Open FoundIT to see their message and contact them.`,
+      body: `Your ${what} was just scanned. Open FoundIT to chat with the person who found it.`,
       url: "/?tags=1",
     }).catch(() => {});
     const owner = db.prepare("SELECT email FROM users WHERE id = ?").get(tag.owner_id);
@@ -104,12 +139,97 @@ router.post("/public/:code/found", tagFoundLimiter, (req, res, next) => {
       sendEmail({
         to: owner.email,
         subject: `Someone found your ${what}`,
-        html: tagFoundEmail({ label: what, finderName: name, finderPhone: phone, message }),
+        html: tagFoundEmail({ label: what, message }),
         devLogLabel: `Tag found: ${what}`,
       }).catch(() => {});
     }
 
-    res.status(201).json({ ok: true });
+    res.status(201).json({ token, open: true, label: tag.label || null, messages: messagesOf(threadId) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** The finder's chat, found from the tag code in the URL plus their secret token. */
+function loadFinderChat(req, res, next) {
+  try {
+    const tag = tagWithOwner(req.params.code);
+    if (!tag) return res.status(404).json({ error: "We don't recognise this tag." });
+    const token = String(req.get("x-chat-token") || "");
+    if (token.length < 16 || token.length > 128) return res.status(404).json({ error: "Chat not found." });
+    const thread = db.prepare("SELECT * FROM tag_threads WHERE tag_id = ? AND finder_token_hash = ?").get(tag.id, hashToken(token));
+    if (!thread) return res.status(404).json({ error: "Chat not found." });
+    req.tag = tag;
+    req.thread = thread;
+    req.chatOpen = publicStatus(tag) === "active";
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+router.get("/public/:code/chat", loadFinderChat, (req, res) => {
+  res.json({ open: req.chatOpen, label: req.chatOpen ? req.tag.label || null : null, messages: messagesOf(req.thread.id) });
+});
+
+/** Keeps a chat from being flooded; replies with 409/429 and returns false when a finder may not send. */
+function finderMaySend(req, res) {
+  if (!req.chatOpen) {
+    res.status(409).json({ error: "The owner has paused this tag, so new messages can't be sent right now." });
+    return false;
+  }
+  const counts = db
+    .prepare(
+      `SELECT SUM(created_at >= datetime('now', '-1 hour') AND sender = 'finder') AS finder_last_hour, COUNT(*) AS total
+       FROM tag_messages WHERE thread_id = ?`
+    )
+    .get(req.thread.id);
+  if ((counts.finder_last_hour || 0) >= MAX_FINDER_MESSAGES_PER_CHAT_PER_HOUR || counts.total >= MAX_MESSAGES_PER_CHAT) {
+    res.status(429).json({ error: "You're sending messages too quickly. Please wait a little and try again." });
+    return false;
+  }
+  return true;
+}
+
+router.post("/public/:code/chat/messages", tagChatLimiter, loadFinderChat, (req, res, next) => {
+  try {
+    const parsed = textSchema.safeParse(req.body || {});
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
+    if (!finderMaySend(req, res)) return;
+
+    // buzz the owner's phone for a new message, but not for every line of a quick back-and-forth
+    const burst = db
+      .prepare(
+        "SELECT COUNT(*) n FROM tag_messages WHERE thread_id = ? AND sender = 'finder' AND created_at >= datetime('now', '-2 minutes')"
+      )
+      .get(req.thread.id).n;
+    addMessage(req.thread.id, "finder", { body: parsed.data.message });
+    if (!burst) {
+      notifyUser(req.tag.owner_id, {
+        title: "New message about your item",
+        body: `Someone replied about your ${req.tag.label || "FoundIT tag"}. Open FoundIT to read it.`,
+        url: "/?tags=1",
+      }).catch(() => {});
+    }
+    res.status(201).json({ open: true, messages: messagesOf(req.thread.id) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// The finder decides to share their name and/or number with the owner.
+router.post("/public/:code/chat/contact", tagChatLimiter, loadFinderChat, (req, res, next) => {
+  try {
+    const contact = parseContact(req.body);
+    if (contact.error) return res.status(400).json({ error: contact.error });
+    if (!finderMaySend(req, res)) return;
+    addMessage(req.thread.id, "finder", { kind: "contact", contactName: contact.name, contactPhone: contact.phone });
+    notifyUser(req.tag.owner_id, {
+      title: "The finder shared their contact",
+      body: `Open FoundIT to see how to reach the person who found your ${req.tag.label || "FoundIT tag"}.`,
+      url: "/?tags=1",
+    }).catch(() => {});
+    res.status(201).json({ open: true, messages: messagesOf(req.thread.id) });
   } catch (err) {
     next(err);
   }
@@ -125,7 +245,7 @@ const view = (row) => ({
   label: row.label,
   status: row.status,
   claimedAt: row.claimed_at,
-  messageCount: row.message_count ?? 0,
+  chatCount: row.chat_count ?? 0,
   unreadCount: row.unread_count ?? 0,
 });
 
@@ -133,8 +253,9 @@ router.get("/", requireAuth, (req, res) => {
   const rows = db
     .prepare(
       `SELECT tags.*,
-         (SELECT COUNT(*) FROM tag_messages WHERE tag_id = tags.id) AS message_count,
-         (SELECT COUNT(*) FROM tag_messages WHERE tag_id = tags.id AND read_at IS NULL) AS unread_count
+         (SELECT COUNT(*) FROM tag_threads WHERE tag_id = tags.id) AS chat_count,
+         (SELECT COUNT(*) FROM tag_messages m JOIN tag_threads t ON t.id = m.thread_id
+            WHERE t.tag_id = tags.id AND m.sender = 'finder' AND m.read_at IS NULL) AS unread_count
        FROM tags WHERE owner_id = ? ORDER BY claimed_at DESC, created_at DESC`
     )
     .all(req.user.id);
@@ -195,13 +316,14 @@ router.patch("/:id", requireAuth, (req, res, next) => {
   }
 });
 
-// Give the tag up (sold the laptop, lost interest). Its messages hold finders' phone numbers, so they go too.
+// Give the tag up (sold the laptop, lost interest). Its chats can hold numbers finders chose to share, so they go too.
 router.post("/:id/release", requireAuth, (req, res, next) => {
   try {
     const tag = mine(req, req.params.id);
     if (!tag) return res.status(404).json({ error: "Tag not found." });
     db.transaction(() => {
-      db.prepare("DELETE FROM tag_messages WHERE tag_id = ?").run(tag.id);
+      db.prepare("DELETE FROM tag_messages WHERE thread_id IN (SELECT id FROM tag_threads WHERE tag_id = ?)").run(tag.id);
+      db.prepare("DELETE FROM tag_threads WHERE tag_id = ?").run(tag.id);
       db.prepare("UPDATE tags SET owner_id = NULL, label = NULL, status = 'unclaimed', claimed_at = NULL WHERE id = ?").run(tag.id);
     })();
     res.json({ ok: true });
@@ -210,22 +332,108 @@ router.post("/:id/release", requireAuth, (req, res, next) => {
   }
 });
 
-router.get("/:id/messages", requireAuth, (req, res, next) => {
+/** One of the owner's chats, or null if it isn't theirs. */
+function ownedChat(req) {
+  const tag = mine(req, req.params.id);
+  if (!tag) return null;
+  const thread = db.prepare("SELECT * FROM tag_threads WHERE id = ? AND tag_id = ?").get(req.params.threadId, tag.id);
+  return thread ? { tag, thread } : null;
+}
+
+router.get("/:id/threads", requireAuth, (req, res, next) => {
   try {
     const tag = mine(req, req.params.id);
     if (!tag) return res.status(404).json({ error: "Tag not found." });
-    const rows = db.prepare("SELECT * FROM tag_messages WHERE tag_id = ? ORDER BY created_at DESC").all(tag.id);
-    db.prepare("UPDATE tag_messages SET read_at = datetime('now') WHERE tag_id = ? AND read_at IS NULL").run(tag.id);
+    const rows = db
+      .prepare(
+        `SELECT t.id, t.created_at,
+           (SELECT MAX(created_at) FROM tag_messages WHERE thread_id = t.id) AS last_at,
+           (SELECT COUNT(*) FROM tag_messages WHERE thread_id = t.id AND sender = 'finder' AND read_at IS NULL) AS unread_count,
+           (SELECT contact_name FROM tag_messages WHERE thread_id = t.id AND sender = 'finder' AND kind = 'contact' AND contact_name IS NOT NULL
+              ORDER BY created_at DESC, rowid DESC LIMIT 1) AS finder_name,
+           (SELECT body FROM tag_messages WHERE thread_id = t.id AND kind = 'text' ORDER BY created_at DESC, rowid DESC LIMIT 1) AS preview
+         FROM tag_threads t WHERE t.tag_id = ? ORDER BY last_at DESC, t.rowid DESC`
+      )
+      .all(tag.id);
     res.json({
-      messages: rows.map((m) => ({
-        id: m.id,
-        finderName: m.finder_name,
-        finderPhone: m.finder_phone,
-        message: m.message,
-        createdAt: m.created_at,
-        unread: !m.read_at,
+      threads: rows.map((r) => ({
+        id: r.id,
+        createdAt: r.created_at,
+        lastMessageAt: r.last_at,
+        unreadCount: r.unread_count,
+        finderName: r.finder_name,
+        preview: r.preview,
       })),
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/:id/threads/:threadId", requireAuth, (req, res, next) => {
+  try {
+    const chat = ownedChat(req);
+    if (!chat) return res.status(404).json({ error: "Chat not found." });
+    const messages = messagesOf(chat.thread.id);
+    db.prepare("UPDATE tag_messages SET read_at = datetime('now') WHERE thread_id = ? AND sender = 'finder' AND read_at IS NULL").run(chat.thread.id);
+    res.json({ open: publicStatus(tagWithOwner(chat.tag.code)) === "active", label: chat.tag.label, messages });
+  } catch (err) {
+    next(err);
+  }
+});
+
+function ownerMaySend(res, chat) {
+  if (chat.tag.status !== "active") {
+    res.status(409).json({ error: "This tag is paused. Resume it to keep chatting." });
+    return false;
+  }
+  const total = db.prepare("SELECT COUNT(*) n FROM tag_messages WHERE thread_id = ?").get(chat.thread.id).n;
+  if (total >= MAX_MESSAGES_PER_CHAT) {
+    res.status(429).json({ error: "This chat has reached its message limit." });
+    return false;
+  }
+  return true;
+}
+
+router.post("/:id/threads/:threadId/messages", requireAuth, messageLimiter, (req, res, next) => {
+  try {
+    const chat = ownedChat(req);
+    if (!chat) return res.status(404).json({ error: "Chat not found." });
+    const parsed = textSchema.safeParse(req.body || {});
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
+    if (!ownerMaySend(res, chat)) return;
+    addMessage(chat.thread.id, "owner", { body: parsed.data.message });
+    res.status(201).json({ messages: messagesOf(chat.thread.id) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// The owner decides to share their name and/or number with the finder.
+router.post("/:id/threads/:threadId/contact", requireAuth, messageLimiter, (req, res, next) => {
+  try {
+    const chat = ownedChat(req);
+    if (!chat) return res.status(404).json({ error: "Chat not found." });
+    const contact = parseContact(req.body);
+    if (contact.error) return res.status(400).json({ error: contact.error });
+    if (!ownerMaySend(res, chat)) return;
+    addMessage(chat.thread.id, "owner", { kind: "contact", contactName: contact.name, contactPhone: contact.phone });
+    res.status(201).json({ messages: messagesOf(chat.thread.id) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Delete a chat (and any numbers shared in it). The finder's link to it stops working.
+router.delete("/:id/threads/:threadId", requireAuth, (req, res, next) => {
+  try {
+    const chat = ownedChat(req);
+    if (!chat) return res.status(404).json({ error: "Chat not found." });
+    db.transaction(() => {
+      db.prepare("DELETE FROM tag_messages WHERE thread_id = ?").run(chat.thread.id);
+      db.prepare("DELETE FROM tag_threads WHERE id = ?").run(chat.thread.id);
+    })();
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

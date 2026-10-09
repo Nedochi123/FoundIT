@@ -178,16 +178,37 @@ export const api = {
   markRewardReceived: (conversationId) =>
     apiRequest(`/api/conversations/${conversationId}/reward/received`, { method: "POST" }),
 
-  // QR "Return me" tags (the first two need no sign-in: that is the finder's page)
+  // QR "Return me" tags. The finder's calls (public, no sign-in) identify their chat by a secret token
+  // sent in the X-Chat-Token header; the owner's calls use the normal sign-in.
   getPublicTag: (code) => apiRequest(`/api/tags/public/${encodeURIComponent(code)}`),
-  sendTagMessage: (code, body) =>
-    apiRequest(`/api/tags/public/${encodeURIComponent(code)}/found`, { method: "POST", body: JSON.stringify(body) }),
+  startTagChat: (code, body) =>
+    apiRequest(`/api/tags/public/${encodeURIComponent(code)}/chat`, { method: "POST", body: JSON.stringify(body) }),
+  getTagChat: (code, token) =>
+    apiRequest(`/api/tags/public/${encodeURIComponent(code)}/chat`, { headers: { "X-Chat-Token": token } }),
+  sendTagChatMessage: (code, token, message) =>
+    apiRequest(`/api/tags/public/${encodeURIComponent(code)}/chat/messages`, {
+      method: "POST",
+      headers: { "X-Chat-Token": token },
+      body: JSON.stringify({ message }),
+    }),
+  shareTagChatContact: (code, token, contact) =>
+    apiRequest(`/api/tags/public/${encodeURIComponent(code)}/chat/contact`, {
+      method: "POST",
+      headers: { "X-Chat-Token": token },
+      body: JSON.stringify(contact),
+    }),
   getMyTags: () => apiRequest("/api/tags"),
   claimTag: (code, label) =>
     apiRequest("/api/tags/claim", { method: "POST", body: JSON.stringify({ code, label: label || undefined }) }),
   updateTag: (id, body) => apiRequest(`/api/tags/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   releaseTag: (id) => apiRequest(`/api/tags/${id}/release`, { method: "POST" }),
-  getTagMessages: (id) => apiRequest(`/api/tags/${id}/messages`),
+  getTagThreads: (id) => apiRequest(`/api/tags/${id}/threads`),
+  getTagThread: (id, threadId) => apiRequest(`/api/tags/${id}/threads/${threadId}`),
+  sendTagThreadMessage: (id, threadId, message) =>
+    apiRequest(`/api/tags/${id}/threads/${threadId}/messages`, { method: "POST", body: JSON.stringify({ message }) }),
+  shareTagThreadContact: (id, threadId, contact) =>
+    apiRequest(`/api/tags/${id}/threads/${threadId}/contact`, { method: "POST", body: JSON.stringify(contact) }),
+  deleteTagThread: (id, threadId) => apiRequest(`/api/tags/${id}/threads/${threadId}`, { method: "DELETE" }),
   adminGenerateTags: (count) =>
     apiRequest("/api/tags/admin/generate", { method: "POST", body: JSON.stringify({ count }) }),
   adminTagSummary: () => apiRequest("/api/tags/admin/summary"),

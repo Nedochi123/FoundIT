@@ -268,9 +268,10 @@ CREATE INDEX IF NOT EXISTS idx_rewards_to_user ON rewards(to_user_id, created_at
 -- ============================================================
 
 -- A sticker is printed with a QR code pointing at /t/<code>. Until a student activates it, owner_id is
--- NULL (status 'unclaimed'). Whoever finds the tagged item scans it and leaves a name/phone/message
--- without an account; the owner sees it in the app. The owner's own contact details are never shown to
--- the finder. Releasing a tag deletes its messages (they hold finders' phone numbers).
+-- NULL (status 'unclaimed'). Whoever finds the tagged item scans it and starts a private chat with the
+-- owner without an account: the finder is identified only by a secret token kept in their browser (only
+-- its hash is stored). Neither side sees the other's name or number unless they choose to share it in
+-- the chat (a 'contact' message). Releasing a tag deletes its chats.
 CREATE TABLE IF NOT EXISTS tags (
   id         TEXT PRIMARY KEY,
   code       TEXT NOT NULL UNIQUE,
@@ -283,14 +284,28 @@ CREATE TABLE IF NOT EXISTS tags (
 
 CREATE INDEX IF NOT EXISTS idx_tags_owner ON tags(owner_id);
 
-CREATE TABLE IF NOT EXISTS tag_messages (
-  id           TEXT PRIMARY KEY,
-  tag_id       TEXT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
-  finder_name  TEXT,
-  finder_phone TEXT NOT NULL,
-  message      TEXT,
-  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
-  read_at      TEXT
+-- One chat per scanning person (a different finder, or the same one after clearing their browser, starts
+-- a new one).
+CREATE TABLE IF NOT EXISTS tag_threads (
+  id                TEXT PRIMARY KEY,
+  tag_id            TEXT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  finder_token_hash TEXT NOT NULL UNIQUE,
+  created_at        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_tag_messages_tag ON tag_messages(tag_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_tag_threads_tag ON tag_threads(tag_id, created_at);
+
+-- kind 'text' is an ordinary message; kind 'contact' is "here is my name and/or number", sent on purpose.
+CREATE TABLE IF NOT EXISTS tag_messages (
+  id            TEXT PRIMARY KEY,
+  thread_id     TEXT NOT NULL REFERENCES tag_threads(id) ON DELETE CASCADE,
+  sender        TEXT NOT NULL CHECK (sender IN ('finder', 'owner')),
+  kind          TEXT NOT NULL DEFAULT 'text' CHECK (kind IN ('text', 'contact')),
+  body          TEXT,
+  contact_name  TEXT,
+  contact_phone TEXT,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  read_at       TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_tag_messages_thread ON tag_messages(thread_id, created_at);

@@ -1,5 +1,5 @@
-// "Return me" QR tags: the admin makes them, a student activates one, a finder (no account) leaves a
-// message, and only the owner sees it. The finder never learns anything about the owner.
+// "Return me" QR tags: the admin makes them, a student activates one, a finder (no account) starts a
+// private chat with the owner, and either side may choose to share a name or number. Nothing else leaks.
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const os = require("os");
@@ -108,77 +108,190 @@ test("a person can only hold 10 tags", async () => {
   assert.equal((await call(owner, "POST", "/api/tags/claim", { code: await freshCode() })).status, 400);
 });
 
-test("a finder with no account can leave a message; the public page shows only the label", async () => {
-  const owner = makeUser("Owner Two", "owner-two@example.com");
+
+// ---------- the private chat between a finder (no account) and the owner ----------
+
+const finderCall = async (code, method, suffix, token, body) => {
+  const res = await fetch(`${base}/api/tags/public/${code}${suffix}`, {
+    method,
+    headers: { "Content-Type": "application/json", ...(token ? { "X-Chat-Token": token } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  return { status: res.status, body: await res.json().catch(() => ({})) };
+};
+
+/** A claimed tag with an owner; returns what the chat tests need. */
+async function activeTag(ownerName, label = "Black laptop bag") {
+  const owner = makeUser(ownerName, `${ownerName.toLowerCase().replace(/\W/g, "")}@example.com`);
   const code = await freshCode();
-  await call(owner, "POST", "/api/tags/claim", { code, label: "Black laptop bag" });
+  const claimed = await call(owner, "POST", "/api/tags/claim", { code, label });
+  return { owner, code, id: claimed.body.tag.id };
+}
+
+test("a finder with no account starts a chat; the page shows only the item, never the owner", async () => {
+  const { owner, code } = await activeTag("Owner Two");
 
   const info = await call(null, "GET", `/api/tags/public/${code}`);
   assert.deepEqual(info.body, { status: "active", label: "Black laptop bag" });
-  assert.ok(!JSON.stringify(info.body).includes(owner.name) && !JSON.stringify(info.body).includes("owner-two"), "nothing about the owner");
 
-  const sent = await call(null, "POST", `/api/tags/public/${code}/found`, { name: "Musa", phone: "0803 123 4567", message: "At the library desk" });
-  assert.equal(sent.status, 201);
-  assert.deepEqual(sent.body, { ok: true }, "the finder is told nothing more");
+  const started = await finderCall(code, "POST", "/chat", null, { message: "I found your bag at the library" });
+  assert.equal(started.status, 201);
+  assert.ok(started.body.token.length >= 20, "the finder gets a secret token");
+  assert.equal(started.body.messages.length, 1);
+  assert.equal(started.body.messages[0].sender, "finder");
+  assert.equal(started.body.messages[0].body, "I found your bag at the library");
+  const everything = JSON.stringify(started.body) + JSON.stringify(info.body);
+  assert.ok(!everything.includes("Owner Two") && !everything.includes("ownertwo@example.com"), "nothing about the owner");
+
+  const stored = db.prepare("SELECT finder_token_hash FROM tag_threads").all();
+  assert.ok(stored.every((t) => t.finder_token_hash !== started.body.token), "only a hash of the token is kept");
 
   const list = await call(owner, "GET", "/api/tags");
+  assert.equal(list.body.tags[0].chatCount, 1);
   assert.equal(list.body.tags[0].unreadCount, 1);
-  const msgs = await call(owner, "GET", `/api/tags/${list.body.tags[0].id}/messages`);
-  assert.equal(msgs.body.messages[0].finderPhone, "0803 123 4567");
-  assert.equal(msgs.body.messages[0].finderName, "Musa");
-  assert.equal(msgs.body.messages[0].message, "At the library desk");
-  assert.equal(msgs.body.messages[0].unread, true);
-  assert.equal((await call(owner, "GET", "/api/tags")).body.tags[0].unreadCount, 0, "reading marks them read");
 });
 
-test("a bad or missing phone number, a bot, or an unusable tag is refused", async () => {
-  const owner = makeUser("Owner Three");
+test("the owner and finder chat; reading marks messages read; contact is shared only when someone chooses to", async () => {
+  const { owner, code, id } = await activeTag("Owner Three");
+  const { body: started } = await finderCall(code, "POST", "/chat", null, { message: "Found your keys" });
+  const token = started.token;
+
+  const threads = await call(owner, "GET", `/api/tags/${id}/threads`);
+  assert.equal(threads.body.threads.length, 1);
+  assert.equal(threads.body.threads[0].unreadCount, 1);
+  assert.equal(threads.body.threads[0].preview, "Found your keys");
+  assert.equal(threads.body.threads[0].finderName, null, "no name until the finder shares one");
+  const threadId = threads.body.threads[0].id;
+
+  const opened = await call(owner, "GET", `/api/tags/${id}/threads/${threadId}`);
+  assert.equal(opened.body.messages.length, 1);
+  assert.equal(opened.body.open, true);
+  assert.equal((await call(owner, "GET", "/api/tags")).body.tags[0].unreadCount, 0, "opening the chat marks it read");
+
+  // owner replies; the finder sees it
+  const reply = await call(owner, "POST", `/api/tags/${id}/threads/${threadId}/messages`, { message: "Thank you! Where are you?" });
+  assert.equal(reply.status, 201);
+  const finderView = await finderCall(code, "GET", "/chat", token);
+  assert.deepEqual(finderView.body.messages.map((m) => [m.sender, m.body]), [["finder", "Found your keys"], ["owner", "Thank you! Where are you?"]]);
+  assert.ok(!JSON.stringify(finderView.body).includes("ownerthree"), "still nothing about the owner");
+
+  // the finder decides to share a name and number; the owner sees them as a contact card
+  assert.equal((await finderCall(code, "POST", "/chat/contact", token, {})).status, 400, "name or number needed");
+  assert.equal((await finderCall(code, "POST", "/chat/contact", token, { phone: "12" })).status, 400, "bad number");
+  const shared = await finderCall(code, "POST", "/chat/contact", token, { name: "Musa", phone: "0803 123 4567" });
+  assert.equal(shared.status, 201);
+  const list = await call(owner, "GET", `/api/tags/${id}/threads`);
+  assert.equal(list.body.threads[0].finderName, "Musa");
+  assert.equal(list.body.threads[0].unreadCount, 1);
+  const afterShare = await call(owner, "GET", `/api/tags/${id}/threads/${threadId}`);
+  const card = afterShare.body.messages.at(-1);
+  assert.deepEqual([card.sender, card.kind, card.contactName, card.contactPhone], ["finder", "contact", "Musa", "0803 123 4567"]);
+
+  // the owner shares back, name only is fine
+  assert.equal((await call(owner, "POST", `/api/tags/${id}/threads/${threadId}/contact`, {})).status, 400);
+  const back = await call(owner, "POST", `/api/tags/${id}/threads/${threadId}/contact`, { name: "Ada" });
+  assert.equal(back.status, 201);
+  const finderAfter = await finderCall(code, "GET", "/chat", token);
+  const last = finderAfter.body.messages.at(-1);
+  assert.deepEqual([last.sender, last.kind, last.contactName, last.contactPhone], ["owner", "contact", "Ada", null]);
+});
+
+test("a chat can only be read or written with its own secret token", async () => {
+  const a = await activeTag("Owner Four");
+  const b = await activeTag("Owner Five");
+  const fa = (await finderCall(a.code, "POST", "/chat", null, { message: "Hello from A" })).body.token;
+  const fb = (await finderCall(b.code, "POST", "/chat", null, { message: "Hello from B" })).body.token;
+
+  assert.equal((await finderCall(a.code, "GET", "/chat", null)).status, 404, "no token");
+  assert.equal((await finderCall(a.code, "GET", "/chat", "x".repeat(32))).status, 404, "made-up token");
+  assert.equal((await finderCall(a.code, "GET", "/chat", fb)).status, 404, "another tag's token");
+  assert.equal((await finderCall(b.code, "POST", "/chat/messages", fa, { message: "sneaky" })).status, 404);
+  assert.equal((await finderCall(a.code, "GET", "/chat", fa)).status, 200);
+
+  // a second finder on the same tag gets a separate chat
+  const second = await finderCall(a.code, "POST", "/chat", null, { message: "I'm another finder" });
+  const secondView = await finderCall(a.code, "GET", "/chat", second.body.token);
+  assert.equal(secondView.body.messages.length, 1);
+
+  // an owner can't see or write into someone else's chat
+  const aThreads = (await call(a.owner, "GET", `/api/tags/${a.id}/threads`)).body.threads;
+  assert.equal(aThreads.length, 2);
+  const bThread = (await call(b.owner, "GET", `/api/tags/${b.id}/threads`)).body.threads[0].id;
+  assert.equal((await call(a.owner, "GET", `/api/tags/${a.id}/threads/${bThread}`)).status, 404);
+  assert.equal((await call(a.owner, "GET", `/api/tags/${b.id}/threads`)).status, 404);
+  assert.equal((await call(a.owner, "POST", `/api/tags/${a.id}/threads/${bThread}/messages`, { message: "hi" })).status, 404);
+  assert.equal((await call(a.owner, "DELETE", `/api/tags/${a.id}/threads/${bThread}`)).status, 404);
+  assert.equal((await call(null, "GET", `/api/tags/${a.id}/threads`)).status, 401);
+});
+
+test("messages are checked: empty, too long, a bot, an unclaimed or paused tag", async () => {
+  const owner = makeUser("Owner Six");
   const code = await freshCode();
-  const url = (c) => `/api/tags/public/${c}/found`;
+  assert.equal((await finderCall(code, "POST", "/chat", null, { message: "Hi" })).status, 409, "an unclaimed tag takes no chats");
+  const claimed = await call(owner, "POST", "/api/tags/claim", { code, label: "Keys" });
+  const id = claimed.body.tag.id;
 
-  assert.equal((await call(null, "POST", url(code), { phone: "0803 123 4567" })).status, 409, "an unclaimed tag takes no messages");
-  await call(owner, "POST", "/api/tags/claim", { code, label: "Keys" });
-
-  assert.equal((await call(null, "POST", url(code), {})).status, 400, "phone is required");
-  for (const phone of ["12", "abcdefghij", "1".repeat(16)]) {
-    assert.equal((await call(null, "POST", url(code), { phone })).status, 400, `phone ${phone}`);
+  for (const message of [undefined, "", "   ", "x".repeat(501)]) {
+    assert.equal((await finderCall(code, "POST", "/chat", null, { message })).status, 400, `message ${String(message).slice(0, 5)}`);
   }
-  assert.equal((await call(null, "POST", url(code), { phone: "08031234567", message: "x".repeat(301) })).status, 400);
-  assert.equal((await call(null, "POST", url("ZZZZZZZZ"), { phone: "08031234567" })).status, 404);
+  assert.equal((await finderCall("ZZZZZZZZ", "POST", "/chat", null, { message: "Hi" })).status, 404);
 
   const before = db.prepare("SELECT COUNT(*) n FROM tag_messages").get().n;
-  const bot = await call(null, "POST", url(code), { phone: "08031234567", website: "http://spam.example" });
+  const bot = await finderCall(code, "POST", "/chat", null, { message: "buy now", website: "http://spam.example" });
   assert.equal(bot.status, 201, "a bot is told it worked");
   assert.equal(db.prepare("SELECT COUNT(*) n FROM tag_messages").get().n, before, "but nothing is saved");
 
-  const id = tagRow(code).id;
+  const started = await finderCall(code, "POST", "/chat", null, { message: "Real message" });
+  const token = started.body.token;
+  const threadId = (await call(owner, "GET", `/api/tags/${id}/threads`)).body.threads[0].id;
+  assert.equal((await finderCall(code, "POST", "/chat/messages", token, { message: "" })).status, 400);
+  assert.equal((await call(owner, "POST", `/api/tags/${id}/threads/${threadId}/messages`, { message: "x".repeat(501) })).status, 400);
+
+  // text is stored exactly as typed (the app shows it as plain text, never as markup)
+  const odd = await finderCall(code, "POST", "/chat/messages", token, { message: "<img src=x onerror=alert(1)>" });
+  assert.equal(odd.body.messages.at(-1).body, "<img src=x onerror=alert(1)>");
+
+  // pausing the tag: the finder can still read, but nobody can send
   await call(owner, "PATCH", `/api/tags/${id}`, { status: "paused" });
   assert.equal((await call(null, "GET", `/api/tags/public/${code}`)).body.status, "paused");
-  assert.equal((await call(null, "POST", url(code), { phone: "08031234567" })).status, 409, "a paused tag takes no messages");
+  const paused = await finderCall(code, "GET", "/chat", token);
+  assert.equal(paused.status, 200);
+  assert.equal(paused.body.open, false);
+  assert.equal((await finderCall(code, "POST", "/chat/messages", token, { message: "Still there?" })).status, 409);
+  assert.equal((await finderCall(code, "POST", "/chat/contact", token, { name: "Musa" })).status, 409);
+  assert.equal((await finderCall(code, "POST", "/chat", null, { message: "New person" })).status, 409);
+  assert.equal((await call(owner, "POST", `/api/tags/${id}/threads/${threadId}/messages`, { message: "hi" })).status, 409, "owner resumes first");
+  await call(owner, "PATCH", `/api/tags/${id}`, { status: "active" });
+  assert.equal((await finderCall(code, "POST", "/chat/messages", token, { message: "Back" })).status, 201);
 });
 
-test("a tag can't be flooded with messages", async () => {
-  const owner = makeUser("Owner Four");
-  const code = await freshCode();
-  await call(owner, "POST", "/api/tags/claim", { code });
-  for (let i = 0; i < 5; i++) assert.equal((await call(null, "POST", `/api/tags/public/${code}/found`, { phone: "08031234567" })).status, 201);
-  const sixth = await call(null, "POST", `/api/tags/public/${code}/found`, { phone: "08031234567" });
+test("a tag and a chat can't be flooded", async () => {
+  const { code, id } = await activeTag("Owner Seven");
+  for (let i = 0; i < 5; i++) assert.equal((await finderCall(code, "POST", "/chat", null, { message: `finder ${i}` })).status, 201);
+  const sixth = await finderCall(code, "POST", "/chat", null, { message: "one too many" });
   assert.equal(sixth.status, 429);
-  assert.equal(db.prepare("SELECT COUNT(*) n FROM tag_messages WHERE tag_id = ?").get(tagRow(code).id).n, 5);
+  assert.equal(db.prepare("SELECT COUNT(*) n FROM tag_threads WHERE tag_id = ?").get(id).n, 5);
+
+  const { body } = await finderCall(code, "GET", "/chat", null); // no token: nothing leaks about the other chats
+  assert.equal(body.messages, undefined);
+
+  const other = await activeTag("Owner Eight");
+  const token = (await finderCall(other.code, "POST", "/chat", null, { message: "m1" })).body.token;
+  for (let i = 2; i <= 30; i++) assert.equal((await finderCall(other.code, "POST", "/chat/messages", token, { message: `m${i}` })).status, 201);
+  assert.equal((await finderCall(other.code, "POST", "/chat/messages", token, { message: "m31" })).status, 429, "30 messages an hour from one finder");
+  // the owner is not throttled by the finder's flood and can still answer
+  const threadId = (await call(other.owner, "GET", `/api/tags/${other.id}/threads`)).body.threads[0].id;
+  assert.equal((await call(other.owner, "POST", `/api/tags/${other.id}/threads/${threadId}/messages`, { message: "Please stop" })).status, 201);
 });
 
-test("only the owner can read messages, rename, pause or release; releasing deletes the finders' numbers", async () => {
-  const owner = makeUser("Owner Five");
+test("only the owner can rename, pause, release or delete; releasing and deleting erase the chats", async () => {
+  const { owner, code, id } = await activeTag("Owner Nine", "Laptop");
   const stranger = makeUser("Stranger");
-  const code = await freshCode();
-  const claimed = await call(owner, "POST", "/api/tags/claim", { code, label: "Laptop" });
-  const id = claimed.body.tag.id;
-  await call(null, "POST", `/api/tags/public/${code}/found`, { phone: "08031234567", message: "Found it" });
+  const token = (await finderCall(code, "POST", "/chat", null, { message: "Found it" })).body.token;
+  await finderCall(code, "POST", "/chat/contact", token, { name: "Musa", phone: "08031234567" });
 
-  assert.equal((await call(stranger, "GET", `/api/tags/${id}/messages`)).status, 404);
   assert.equal((await call(stranger, "PATCH", `/api/tags/${id}`, { label: "Mine now" })).status, 404);
   assert.equal((await call(stranger, "POST", `/api/tags/${id}/release`)).status, 404);
-  assert.equal((await call(null, "GET", `/api/tags/${id}/messages`)).status, 401);
   assert.equal(tagRow(code).label, "Laptop");
 
   const renamed = await call(owner, "PATCH", `/api/tags/${id}`, { label: "Dell laptop", status: "paused" });
@@ -187,18 +300,40 @@ test("only the owner can read messages, rename, pause or release; releasing dele
   assert.equal((await call(owner, "PATCH", `/api/tags/${id}`, { status: "weird" })).status, 400);
   assert.equal((await call(owner, "PATCH", `/api/tags/${id}`, { status: "active" })).body.tag.status, "active");
 
+  // deleting one chat erases it and its shared number, and the finder's link stops working
+  const threadId = (await call(owner, "GET", `/api/tags/${id}/threads`)).body.threads[0].id;
+  assert.equal((await call(owner, "DELETE", `/api/tags/${id}/threads/${threadId}`)).status, 200);
+  assert.equal(db.prepare("SELECT COUNT(*) n FROM tag_messages WHERE thread_id = ?").get(threadId).n, 0);
+  assert.equal((await finderCall(code, "GET", "/chat", token)).status, 404);
+
+  // releasing the tag erases whatever chats are left and makes it free again
+  await finderCall(code, "POST", "/chat", null, { message: "Another finder" });
   assert.equal((await call(owner, "POST", `/api/tags/${id}/release`)).status, 200);
   assert.equal(tagRow(code).owner_id, null);
   assert.equal(tagRow(code).status, "unclaimed");
-  assert.equal(db.prepare("SELECT COUNT(*) n FROM tag_messages WHERE tag_id = ?").get(id).n, 0, "the finders' numbers are deleted");
+  assert.equal(db.prepare("SELECT COUNT(*) n FROM tag_threads WHERE tag_id = ?").get(id).n, 0);
   assert.equal((await call(null, "GET", `/api/tags/public/${code}`)).body.status, "unclaimed");
 });
 
-test("a tag whose owner deleted their account stops taking messages", async () => {
-  const owner = makeUser("Leaver");
-  const code = await freshCode();
-  await call(owner, "POST", "/api/tags/claim", { code });
+test("a tag whose owner deleted their account stops taking chats", async () => {
+  const { owner, code } = await activeTag("Leaver");
   db.prepare("UPDATE users SET deleted_at = datetime('now') WHERE id = ?").run(owner.id);
   assert.equal((await call(null, "GET", `/api/tags/public/${code}`)).body.status, "inactive");
-  assert.equal((await call(null, "POST", `/api/tags/public/${code}/found`, { phone: "08031234567" })).status, 409);
+  assert.equal((await finderCall(code, "POST", "/chat", null, { message: "Hi" })).status, 409);
+});
+
+test("deleting an account erases the chats on its tags and retires them", async () => {
+  const { owner, code, id } = await activeTag("Quitter");
+  const token = (await finderCall(code, "POST", "/chat", null, { message: "Found it" })).body.token;
+  await finderCall(code, "POST", "/chat/contact", token, { name: "Musa", phone: "08031234567" });
+  const threadId = (await call(owner, "GET", `/api/tags/${id}/threads`)).body.threads[0].id;
+  const { retireTagsOf } = require("../src/utils/tags");
+  retireTagsOf(db, owner.id);
+
+  assert.equal(db.prepare("SELECT COUNT(*) n FROM tag_threads WHERE tag_id = ?").get(id).n, 0);
+  assert.equal(db.prepare("SELECT COUNT(*) n FROM tag_messages WHERE thread_id = ?").get(threadId).n, 0);
+  assert.equal(tagRow(code).owner_id, null);
+  assert.equal((await call(null, "GET", `/api/tags/public/${code}`)).body.status, "inactive", "a scan says to hand it in");
+  assert.equal((await finderCall(code, "POST", "/chat", null, { message: "Hi" })).status, 409);
+  assert.equal((await call(admin, "POST", "/api/tags/claim", { code })).status, 409, "and nobody can claim it again");
 });

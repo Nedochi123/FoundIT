@@ -31,6 +31,16 @@ const tagFoundLimiter = rateLimit({
   message: { error: "Too many messages from this device. Please try again later." },
 });
 
+// Public: everything a finder types after the first message (chat messages, sharing a contact).
+const tagChatLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 120,
+  skip: () => process.env.NODE_ENV === "test",
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "You're sending messages too quickly. Please wait a little and try again." },
+});
+
 // Activating a tag by its code: slows anyone trying codes.
 const tagClaimLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -41,4 +51,4 @@ const tagClaimLimiter = rateLimit({
   message: { error: "Too many attempts. Please try again later." },
 });
 
-module.exports = { postItemLimiter, messageLimiter, tagFoundLimiter, tagClaimLimiter };
+module.exports = { postItemLimiter, messageLimiter, tagFoundLimiter, tagChatLimiter, tagClaimLimiter };

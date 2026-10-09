@@ -16,4 +16,18 @@ function normalizeCode(raw) {
     .replace(/[^A-Z0-9]/g, "");
 }
 
-module.exports = { newTagCode, normalizeCode };
+/**
+ * When a student deletes their account: erase every chat on their tags (finders may have shared numbers)
+ * and retire the tags, so a scan says "hand it to campus security" rather than reaching nobody.
+ */
+function retireTagsOf(db, userId) {
+  db.transaction(() => {
+    db.prepare(
+      "DELETE FROM tag_messages WHERE thread_id IN (SELECT id FROM tag_threads WHERE tag_id IN (SELECT id FROM tags WHERE owner_id = ?))"
+    ).run(userId);
+    db.prepare("DELETE FROM tag_threads WHERE tag_id IN (SELECT id FROM tags WHERE owner_id = ?)").run(userId);
+    db.prepare("UPDATE tags SET owner_id = NULL, label = NULL, status = 'retired' WHERE owner_id = ?").run(userId);
+  })();
+}
+
+module.exports = { newTagCode, normalizeCode, retireTagsOf };

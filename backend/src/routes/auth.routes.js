@@ -16,6 +16,7 @@ const { sendEmail, welcomeEmail, passwordResetEmail, verifyEmailStandaloneEmail 
 const { requireAuth } = require("../middleware/auth");
 const { idNumberSchema } = require("../utils/idNumber");
 const { isAdminEmail } = require("../utils/admin");
+const { retireTagsOf } = require("../utils/tags");
 
 const router = express.Router();
 
@@ -335,6 +336,7 @@ router.post("/delete-account", authLimiter, requireAuth, async (req, res, next) 
        WHERE id = ?`
     ).run(anonymizedEmail, unusablePasswordHash, user.id);
 
+    retireTagsOf(db, user.id);
     revokeAllRefreshTokensForUser(user.id);
     clearAuthCookies(res);
 
