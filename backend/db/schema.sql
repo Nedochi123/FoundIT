@@ -262,3 +262,35 @@ CREATE TABLE IF NOT EXISTS rewards (
 
 CREATE INDEX IF NOT EXISTS idx_rewards_conversation ON rewards(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_rewards_to_user ON rewards(to_user_id, created_at);
+
+-- ============================================================
+-- QR TAGS ("Return me" stickers)
+-- ============================================================
+
+-- A sticker is printed with a QR code pointing at /t/<code>. Until a student activates it, owner_id is
+-- NULL (status 'unclaimed'). Whoever finds the tagged item scans it and leaves a name/phone/message
+-- without an account; the owner sees it in the app. The owner's own contact details are never shown to
+-- the finder. Releasing a tag deletes its messages (they hold finders' phone numbers).
+CREATE TABLE IF NOT EXISTS tags (
+  id         TEXT PRIMARY KEY,
+  code       TEXT NOT NULL UNIQUE,
+  owner_id   TEXT REFERENCES users(id) ON DELETE SET NULL,
+  label      TEXT,
+  status     TEXT NOT NULL DEFAULT 'unclaimed',
+  claimed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_tags_owner ON tags(owner_id);
+
+CREATE TABLE IF NOT EXISTS tag_messages (
+  id           TEXT PRIMARY KEY,
+  tag_id       TEXT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  finder_name  TEXT,
+  finder_phone TEXT NOT NULL,
+  message      TEXT,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  read_at      TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_tag_messages_tag ON tag_messages(tag_id, created_at);

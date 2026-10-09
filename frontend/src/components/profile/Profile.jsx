@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, Bell, MailCheck, Award, MessageSquareHeart } from "lucide-react";
+import { LogOut, Bell, MailCheck, Award, MessageSquareHeart, QrCode, ChevronRight } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { enablePushNotifications, isIosNotStandalone, pushSupported } from "../../lib/push";
 import { api } from "../../lib/api";
@@ -119,6 +119,21 @@ export default function Profile({ onNavigate }) {
         <h1 className="text-xl font-bold text-slate-50">Profile</h1>
         <p className="mt-1 text-sm text-slate-300">{user?.email}</p>
       </div>
+
+      <button
+        type="button"
+        onClick={() => onNavigate?.("tags")}
+        className="flex items-center gap-3 rounded-xl border border-brand-teal/25 bg-brand-teal/[0.07] p-4 text-left transition hover:bg-brand-teal/10 active:scale-[0.99]"
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-teal/15 ring-1 ring-inset ring-brand-teal/30">
+          <QrCode className="h-5 w-5 text-brand-teal" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-slate-50">My QR tags</p>
+          <p className="text-xs text-slate-300">Put a tag on your laptop or bag so finders can reach you.</p>
+        </div>
+        <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+      </button>
 
       {(badges.length > 0 || notes.length > 0) && (
         <div className={cardClass}>

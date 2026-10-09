@@ -68,4 +68,30 @@ function verifyEmailStandaloneEmail(verifyUrl) {
   `;
 }
 
-module.exports = { sendEmail, passwordResetEmail, welcomeEmail, verifyEmailStandaloneEmail };
+const escapeHtml = (s) =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+// Sent to the owner of a QR tag when someone scans it and leaves a message. Everything the finder typed is
+// escaped. Only the owner receives this, which is why it can carry the finder's number.
+function tagFoundEmail({ label, finderName, finderPhone, message }) {
+  return `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+      <h2 style="color: #1F3A5F;">Someone found your ${escapeHtml(label)}</h2>
+      <p>Your FoundIT tag was just scanned. Here is what they left:</p>
+      <table style="border-collapse: collapse;">
+        <tr><td style="padding: 4px 12px 4px 0; color: #6b6459;">Name</td><td><strong>${escapeHtml(finderName || "Not given")}</strong></td></tr>
+        <tr><td style="padding: 4px 12px 4px 0; color: #6b6459;">Phone</td><td><strong>${escapeHtml(finderPhone)}</strong></td></tr>
+        ${message ? `<tr><td style="padding: 4px 12px 4px 0; color: #6b6459; vertical-align: top;">Message</td><td>${escapeHtml(message)}</td></tr>` : ""}
+      </table>
+      <p>Please contact them to arrange getting your item back. Never pay anyone before you have your item.</p>
+      <p style="color: #6b6459; font-size: 13px;">You can also see this in the FoundIT app under Profile, then My tags.</p>
+    </div>
+  `;
+}
+
+module.exports = { sendEmail, passwordResetEmail, welcomeEmail, verifyEmailStandaloneEmail, tagFoundEmail };

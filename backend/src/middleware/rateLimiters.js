@@ -21,4 +21,24 @@ const messageLimiter = rateLimit({
   message: { error: "Too many messages sent. Please slow down and try again shortly." },
 });
 
-module.exports = { postItemLimiter, messageLimiter };
+// Public: anyone who scans a tag can leave a message without an account, so cap it per device.
+const tagFoundLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 8,
+  skip: () => process.env.NODE_ENV === "test",
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many messages from this device. Please try again later." },
+});
+
+// Activating a tag by its code: slows anyone trying codes.
+const tagClaimLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 15,
+  skip: () => process.env.NODE_ENV === "test",
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts. Please try again later." },
+});
+
+module.exports = { postItemLimiter, messageLimiter, tagFoundLimiter, tagClaimLimiter };

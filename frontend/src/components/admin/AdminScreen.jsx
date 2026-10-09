@@ -3,11 +3,13 @@ import { ShieldCheck } from "lucide-react";
 import AdminCashoutScreen from "./AdminCashoutScreen";
 import AdminStatsScreen from "./AdminStatsScreen";
 import AdminReportsScreen from "./AdminReportsScreen";
+import AdminTagsScreen from "./AdminTagsScreen";
 
 const TABS = [
   { key: "cashouts", label: "Cash-outs" },
   { key: "reports", label: "Reports" },
   { key: "impact", label: "Impact" },
+  { key: "tags", label: "Tags" },
 ];
 
 export default function AdminScreen() {
@@ -43,6 +45,8 @@ export default function AdminScreen() {
         <AdminCashoutScreen />
       ) : tab === "reports" ? (
         <AdminReportsScreen />
+      ) : tab === "tags" ? (
+        <AdminTagsScreen />
       ) : (
         <AdminStatsScreen />
       )}

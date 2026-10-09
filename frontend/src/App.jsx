@@ -14,6 +14,8 @@ import Profile from "./components/profile/Profile";
 import NotificationsPrompt from "./components/notifications/NotificationsPrompt";
 import TokensScreen from "./components/tokens/TokensScreen";
 import LegalScreen from "./components/legal/LegalScreen";
+import TagScan from "./components/tags/TagScan";
+import TagsScreen from "./components/tags/TagsScreen";
 
 // Split out of the main bundle — the admin screen is only ever loaded by
 // one account, so every other visitor's initial load shouldn't pay to
@@ -25,7 +27,21 @@ const AdminScreen = lazy(() => import("./components/admin/AdminScreen"));
 // survives the login flow (no page navigation happens, just React state).
 function getInitialView() {
   const params = new URLSearchParams(window.location.search);
-  return params.get("admin") === "1" ? "admin" : "home";
+  if (params.get("admin") === "1") return "admin";
+  // a tag's "Activate this tag" link (?claim=CODE) or a "someone found your item" notification (?tags=1)
+  if (params.get("claim") || params.get("tags") === "1") return "tags";
+  return "home";
+}
+
+function getClaimCode() {
+  return new URLSearchParams(window.location.search).get("claim") || "";
+}
+
+// A scanned QR tag opens /t/<code>: a public page for whoever found the item, outside the login.
+function getTagCodeFromPath() {
+  const parts = window.location.pathname.split("/").filter(Boolean);
+  const ok = parts.length === 2 && parts[0] === "t" && /^[A-Za-z0-9-]{4,24}$/.test(parts[1]);
+  return ok ? parts[1] : null;
 }
 
 function Screens() {
@@ -63,6 +79,8 @@ function Screens() {
     content = <LegalScreen onBack={() => navigate("profile")} />;
   } else if (view === "tokens") {
     content = <TokensScreen />;
+  } else if (view === "tags") {
+    content = <TagsScreen onBack={() => navigate("profile")} initialCode={getClaimCode()} />;
   } else if (view === "admin") {
     content = user?.isAdmin ? (
       <Suspense fallback={<p className="text-sm text-slate-300">Loading...</p>}>
@@ -82,7 +100,7 @@ function Screens() {
 
   // The bottom nav highlights "conversations" while viewing a single
   // thread too, since that's still the Messages tab conceptually.
-  const activeTab = view === "conversation" ? "conversations" : view;
+  const activeTab = view === "conversation" ? "conversations" : view === "tags" ? "profile" : view;
 
   return (
     <Layout view={activeTab} onNavigate={navigate} unreadCount={unreadCount}>
@@ -105,6 +123,12 @@ function getInitialShowIntro() {
 }
 
 export default function App() {
+  const tagCode = getTagCodeFromPath();
+  if (tagCode) return <TagScan code={tagCode} />;
+  return <MainApp />;
+}
+
+function MainApp() {
   const [showIntro, setShowIntro] = useState(getInitialShowIntro);
 
   function handleIntroDone() {

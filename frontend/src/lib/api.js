@@ -178,6 +178,20 @@ export const api = {
   markRewardReceived: (conversationId) =>
     apiRequest(`/api/conversations/${conversationId}/reward/received`, { method: "POST" }),
 
+  // QR "Return me" tags (the first two need no sign-in: that is the finder's page)
+  getPublicTag: (code) => apiRequest(`/api/tags/public/${encodeURIComponent(code)}`),
+  sendTagMessage: (code, body) =>
+    apiRequest(`/api/tags/public/${encodeURIComponent(code)}/found`, { method: "POST", body: JSON.stringify(body) }),
+  getMyTags: () => apiRequest("/api/tags"),
+  claimTag: (code, label) =>
+    apiRequest("/api/tags/claim", { method: "POST", body: JSON.stringify({ code, label: label || undefined }) }),
+  updateTag: (id, body) => apiRequest(`/api/tags/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  releaseTag: (id) => apiRequest(`/api/tags/${id}/release`, { method: "POST" }),
+  getTagMessages: (id) => apiRequest(`/api/tags/${id}/messages`),
+  adminGenerateTags: (count) =>
+    apiRequest("/api/tags/admin/generate", { method: "POST", body: JSON.stringify({ count }) }),
+  adminTagSummary: () => apiRequest("/api/tags/admin/summary"),
+
   // Tokens
   getTokenLedger: () => apiRequest("/api/tokens/ledger"),
   getCashoutRequests: () => apiRequest("/api/tokens/cashout-requests"),
