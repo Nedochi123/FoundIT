@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Tests
+        run: npm test
+      - name: No known serious security problems in what the server depends on
+        run: npm audit --omit=dev --audit-level=high
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Regenerate the theme CSS
+        run: npm run themes
+      - name: The committed theme files are up to date
+        run: git diff --exit-code -- src/themes.css public/themes
+      - name: Every color theme keeps text readable
+        run: npm run themes:check
+      - name: Tests
+        run: npm test
+      - name: The website builds
+        run: npm run build
+      - name: No known serious security problems in what the website depends on
+        run: npm audit --omit=dev --audit-level=high
