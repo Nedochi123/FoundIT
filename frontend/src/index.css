@@ -24,7 +24,7 @@ body {
     var(--bg-pattern);
   background-size: auto, auto, auto, var(--bg-pattern-size);
   background-attachment: fixed;
-  color: #e5e7eb;
+  color: rgb(var(--body-text));
   min-height: 100vh;
 }
 

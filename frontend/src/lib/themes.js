@@ -2,9 +2,12 @@
 // The ids must match backend/src/utils/themes.js. The CSS for each color is GENERATED from this file:
 // run `npm run themes` (it also runs before every build) to rewrite src/themes.css and public/themes/camo.svg.
 //
-// All themes are dark so the app's text stays readable. A theme recolors the whole app through CSS variables:
-//  - neutral: { hue, sat } tints the grey "slate" scale used by cards, borders and text (sat 1 ~ the default
-//    navy; near 0 = plain grey). null keeps Tailwind's own slate exactly (the default look).
+// Most themes are dark (light text on dark cards); a theme with neutral.tone "light" is a real light mode: the
+// grey "slate" scale is flipped (headings become dark ink, cards become pale), white borders turn to ink, and
+// the red/amber/green text colors switch to darker shades so everything stays readable. A theme recolors the
+// whole app through CSS variables:
+//  - neutral: { hue, sat, tone? } tints the grey "slate" scale used by cards, borders and text (sat 1 ~ the
+//    default navy; near 0 = plain grey). null keeps Tailwind's own slate exactly (the default look).
 //  - brand: the gradient on buttons (a -> b, kept dark enough for white text), the accent text color, and the
 //    glow color under buttons.
 //  - bg: the page background (top, middle, bottom of the gradient); glow/blobs: soft colored light on it.
@@ -42,6 +45,7 @@ export const THEMES = [
     id: "pink",
     chrome: "#1c0c18", // the browser/phone status-bar color
     label: "Pink",
+    textColors: { red: "252 165 165" }, // a lighter error red: this theme's page is a little lighter than most
     suggestedDoodle: "kittens",
     neutral: { hue: 322, sat: 0.9 },
     brand: { a: "#db2777", b: "#9333ea", text: "#f9a8d4", shadow: "#db2777" },
@@ -83,6 +87,7 @@ export const THEMES = [
     id: "blue",
     chrome: "#06263b", // the browser/phone status-bar color
     label: "Blue",
+    textColors: { red: "252 165 165" },
     suggestedDoodle: "science",
     neutral: { hue: 203, sat: 1.15 },
     brand: { a: "#0369a1", b: "#4338ca", text: "#7dd3fc", shadow: "#0284c7" },
@@ -122,6 +127,7 @@ export const THEMES = [
     id: "green",
     chrome: "#031c15", // the browser/phone status-bar color
     label: "Green",
+    textColors: { red: "252 165 165" },
     suggestedDoodle: "money",
     neutral: { hue: 152, sat: 0.8 },
     brand: { a: "#15803d", b: "#0f766e", text: "#86efac", shadow: "#16a34a" },
@@ -130,6 +136,32 @@ export const THEMES = [
     blobs: { one: "#10b981", two: "#84cc16" },
     doodle: "#bbf7d0",
     swatchBg: "linear-gradient(135deg, #07604a, #02120d)",
+  },
+  {
+    id: "lightpink",
+    chrome: "#fde2ef",
+    label: "Light pink",
+    suggestedDoodle: "kittens",
+    neutral: { hue: 330, sat: 1, tone: "light" },
+    brand: { a: "#db2777", b: "#9333ea", text: "#9d174d", shadow: "#db2777" },
+    bg: { top: "#fff3f9", mid: "#fddcec", bottom: "#f8c8de" },
+    glow: { one: "rgba(236, 72, 153, 0.18)", two: "rgba(217, 70, 239, 0.12)" },
+    blobs: { one: "#f472b6", two: "#c084fc" },
+    doodle: "#db2777",
+    swatchBg: "linear-gradient(135deg, #fff3f9, #f8c8de)",
+  },
+  {
+    id: "lightpurple",
+    chrome: "#ece2fd",
+    label: "Light purple",
+    suggestedDoodle: "science",
+    neutral: { hue: 262, sat: 1, tone: "light" },
+    brand: { a: "#7c3aed", b: "#4f46e5", text: "#5b21b6", shadow: "#7c3aed" },
+    bg: { top: "#f8f3ff", mid: "#e8dcfc", bottom: "#d8c8f7" },
+    glow: { one: "rgba(139, 92, 246, 0.18)", two: "rgba(236, 72, 153, 0.10)" },
+    blobs: { one: "#a78bfa", two: "#f0abfc" },
+    doodle: "#7c3aed",
+    swatchBg: "linear-gradient(135deg, #f8f3ff, #d8c8f7)",
   },
 ];
 

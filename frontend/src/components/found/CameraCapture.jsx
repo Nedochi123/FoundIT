@@ -45,7 +45,7 @@ export default function CameraCapture({ onCapture }) {
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-xs font-semibold text-slate-700 shadow"
+            className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-[#ffffffF2] px-3 py-2 text-xs font-semibold text-[#334155] shadow"
           >
             <RotateCcw className="h-3.5 w-3.5" /> Retake
           </button>

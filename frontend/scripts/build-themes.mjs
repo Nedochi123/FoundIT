@@ -51,12 +51,39 @@ const SLATE_DEFAULT = {
   950: "2 6 23",
 };
 
+// A LIGHT theme flips the scale so the classes the app already uses keep working: text-slate-50 (headings) is
+// now dark ink, bg-slate-900/70 (cards) is now a pale surface, border-slate-700 a soft line, and so on.
+const SLATE_LIGHT_HSL = [
+  [50, 13, 45],
+  [100, 16, 45],
+  [200, 20, 42],
+  [300, 25, 38],
+  [400, 34, 32],
+  [500, 46, 28],
+  [600, 66, 30],
+  [700, 80, 42],
+  [800, 91, 55],
+  [900, 97, 70],
+  [950, 99, 80],
+];
+
 function slateScale(neutral) {
   if (!neutral) return SLATE_DEFAULT;
+  const table = neutral.tone === "light" ? SLATE_LIGHT_HSL : SLATE_HSL;
   return Object.fromEntries(
-    SLATE_HSL.map(([step, l, s]) => [step, hslToRgb(neutral.hue, Math.min(100, s * neutral.sat), l).join(" ")])
+    table.map(([step, l, s]) => [step, hslToRgb(neutral.hue, Math.min(100, s * neutral.sat), l).join(" ")])
   );
 }
+
+// On a light theme, the pale shades of red/amber/green/etc. the app uses for TEXT (made for dark backgrounds)
+// switch to these dark ones; tailwind.config.js reads them for text only, so buttons and tints are untouched.
+const LIGHT_TEXT_COLORS = {
+  red: "153 27 27",
+  amber: "146 64 14",
+  emerald: "6 95 70",
+  cyan: "21 94 117",
+  blue: "30 64 175",
+};
 
 function themeVars(t) {
   const lines = [];
@@ -68,9 +95,10 @@ function themeVars(t) {
   lines.push(`--brand-blue: ${triplet(t.brand.shadow)};`);
   // a solid fill that white sits on (switch tracks): the accent text color is too pale for that on most themes
   lines.push(`--brand-solid: ${triplet(t.brand.solid || t.brand.a)};`);
+const light = t.neutral?.tone === "light";
   const bar = t.bar || {
-    top: hslToRgb(t.neutral.hue, Math.min(100, 44 * t.neutral.sat), 4).join(" "),
-    bottom: hslToRgb(t.neutral.hue, Math.min(100, 44 * t.neutral.sat), 7.5).join(" "),
+    top: hslToRgb(t.neutral.hue, Math.min(100, (light ? 70 : 44) * t.neutral.sat), light ? 98 : 4).join(" "),
+    bottom: hslToRgb(t.neutral.hue, Math.min(100, (light ? 70 : 44) * t.neutral.sat), light ? 96 : 7.5).join(" "),
   };
   lines.push(`--bar-top: ${bar.top};`);
   lines.push(`--bar-bottom: ${bar.bottom};`);
@@ -82,6 +110,20 @@ function themeVars(t) {
   lines.push(`--blob-one: ${t.blobs.one};`);
   lines.push(`--blob-two: ${t.blobs.two};`);
   lines.push(`--doodle: ${t.doodle};`);
+  // the page's default text color (what text with no color class of its own gets)
+  lines.push(`--body-text: ${light ? slate[100] : "229 231 235"};`);
+  if (light) {
+    lines.push("color-scheme: light;");
+    // white borders/tints (made for dark backgrounds) become ink-colored ones
+    lines.push(`--overlay: ${slate[50]};`);
+    // the big gold gradient number on the Tokens screen, deep amber so it reads on a pale page
+    lines.push("--tokens-from: 180 83 9;");
+    lines.push("--tokens-to: 146 64 14;");
+    for (const [family, rgb] of Object.entries(LIGHT_TEXT_COLORS)) lines.push(`--t-${family}: ${rgb};`);
+  } else {
+    // a dark theme can lighten a status text color where its backgrounds need it (see textColors in themes.js)
+    for (const [family, rgb] of Object.entries(t.textColors || {})) lines.push(`--t-${family}: ${rgb};`);
+  }
   lines.push(`--bg-pattern: ${t.pattern ? `url(${t.pattern.file})` : "none"};`);
   lines.push(`--bg-pattern-size: ${t.pattern ? t.pattern.size : "auto"};`);
   return lines.map((l) => `  ${l}`).join("\n");

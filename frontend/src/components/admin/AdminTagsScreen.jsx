@@ -138,7 +138,7 @@ export default function AdminTagsScreen() {
           >
             <Printer className="h-4 w-4" /> Print {codes.length} stickers
           </button>
-          <div id="tag-sheet" className="flex flex-wrap gap-[2mm] overflow-x-auto bg-slate-200 p-2">
+          <div id="tag-sheet" className="flex flex-wrap gap-[2mm] overflow-x-auto bg-[#e2e8f0] p-2">
             {codes.map((c) => (
               <Sticker key={c} code={c} qr={qrs[c]} />
             ))}

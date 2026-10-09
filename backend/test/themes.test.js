@@ -49,6 +49,7 @@ const signup = (extra = {}) =>
 
 test("the choices are the ones the app offers", () => {
   assert.ok(THEMES.includes("classic") && THEMES.includes("pink") && THEMES.includes("camo"));
+  assert.ok(THEMES.includes("lightpink") && THEMES.includes("lightpurple"), "the two light colors");
   assert.ok(DOODLES.includes("none") && DOODLES.includes("kittens") && DOODLES.includes("aliens"));
   assert.equal(new Set(THEMES).size, THEMES.length);
   assert.equal(new Set(DOODLES).size, DOODLES.length);
@@ -59,6 +60,14 @@ test("signing up without choosing keeps the default look", async () => {
   assert.equal(res.status, 201);
   assert.equal(res.body.user.theme, "classic");
   assert.equal(res.body.user.doodle, "none");
+});
+
+test("the light colors can be chosen at sign-up and saved", async () => {
+  for (const theme of ["lightpink", "lightpurple"]) {
+    const res = await signup({ theme, doodle: "kittens" });
+    assert.equal(res.status, 201, theme);
+    assert.equal(res.body.user.theme, theme);
+  }
 });
 
 test("a chosen color and doodle style are saved and come back on login and /me", async () => {

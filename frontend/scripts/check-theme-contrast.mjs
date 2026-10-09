@@ -1,5 +1,6 @@
 // Checks that every color theme keeps text readable (WCAG contrast). Run with `npm run themes:check`.
 // It exits with an error if a theme is worse than it should be, so a bad new theme is caught before it ships.
+// Each text color is measured against the card color AND the darkest/lightest parts of the page gradient.
 import { THEMES } from "../src/lib/themes.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -17,7 +18,7 @@ const ratio = (a, b) => {
   const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
 };
-// a translucent color (rgba) laid over a solid one
+// a color (hex, rgba or transparent) laid over a solid one
 const over = (color, solid) => {
   if (color.startsWith("#")) return hex(color);
   if (color === "transparent") return solid;
@@ -33,31 +34,40 @@ function varsOf(id) {
   return out;
 }
 const triplet = (s) => s.split(" ").map(Number);
+const worst = (fg, surfaces) => Math.min(...surfaces.map((s) => ratio(fg, s)));
+
+// semantic text colors the app uses on cards: [name, dark-theme color (Tailwind -400/-300), CSS variable on light themes]
+const SEMANTIC = [
+  ["error red", [248, 113, 113], "t-red"],
+  ["warning amber", [252, 211, 77], "t-amber"],
+  ["success green", [52, 211, 153], "t-emerald"],
+];
 
 let failed = false;
-console.log("theme    | button text on a / b | accent text on card / page top | secondary text (slate-300) | hint text (slate-400)");
+console.log("theme        | button text a/b | accent text | heading | secondary | hint | error/warning/success text");
 for (const t of THEMES) {
   const v = varsOf(t.id);
+  const light = t.neutral?.tone === "light";
   const white = [255, 255, 255];
-  const card = triplet(v["slate-900"]);
-  const darkBase = triplet(v["slate-950"]);
-  const pageTop = over(t.bg.top, over(t.bg.mid, darkBase));
-  const accent = triplet(v["brand-teal"]);
+  const base = triplet(v["slate-950"]);
+  const mid = over(t.bg.mid, base);
+  const surfaces = [triplet(v["slate-900"]), over(t.bg.top, mid), mid, over(t.bg.bottom, mid)];
   const rows = {
     btnA: ratio(white, hex(v["brand-a"])),
     btnB: ratio(white, hex(v["brand-b"])),
-    accentCard: ratio(accent, card),
-    accentTop: ratio(accent, pageTop),
-    secondary: Math.min(ratio(triplet(v["slate-300"]), card), ratio(triplet(v["slate-300"]), pageTop)),
-    hint: Math.min(ratio(triplet(v["slate-400"]), card), ratio(triplet(v["slate-400"]), pageTop)),
+    accent: worst(triplet(v["brand-teal"]), surfaces),
+    heading: worst(triplet(v["slate-50"]), surfaces),
+    secondary: worst(triplet(v["slate-300"]), surfaces),
+    hint: worst(triplet(v["slate-400"]), surfaces),
   };
-  // Default is the baseline (it already shipped); every other theme must at least reach WCAG AA for text
-  const need = { btnA: 4.5, btnB: 4.5, accentCard: 4.5, accentTop: 4.5, secondary: 4.5, hint: 4.5 };
-  const bad = Object.entries(rows).filter(([k, val]) => val < need[k]);
+  const semantic = SEMANTIC.map(([name, darkRgb, variable]) => [name, worst(v[variable] ? triplet(v[variable]) : darkRgb, surfaces)]);
+  const need = 4.5;
+  const bad = [...Object.entries(rows), ...semantic].filter(([, val]) => val < need).map(([k]) => k);
   const fmt = (n) => n.toFixed(1).padStart(4);
   console.log(
-    `${t.id.padEnd(8)} | ${fmt(rows.btnA)} / ${fmt(rows.btnB)}          | ${fmt(rows.accentCard)} / ${fmt(rows.accentTop)}                | ${fmt(rows.secondary)}                       | ${fmt(rows.hint)}${bad.length ? `   <-- below 4.5: ${bad.map(([k]) => k).join(", ")}` : ""}`
+    `${t.id.padEnd(12)} | ${fmt(rows.btnA)} / ${fmt(rows.btnB)}   | ${fmt(rows.accent)}        | ${fmt(rows.heading)}    | ${fmt(rows.secondary)}      | ${fmt(rows.hint)} | ${semantic.map(([, n]) => fmt(n)).join(" ")}${bad.length ? `   <-- below ${need}: ${bad.join(", ")}` : ""}`
   );
+  // Default is the baseline (it already shipped); every other theme must reach WCAG AA for text
   if (bad.length && t.id !== "classic") failed = true;
 }
 if (failed) {

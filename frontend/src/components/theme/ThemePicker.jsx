@@ -30,7 +30,7 @@ export default function ThemePicker({ value, onChange, autoSuggest = true }) {
     <div className="flex flex-col gap-4">
       <div>
         <p id="look-color-label" className="mb-2 text-sm font-medium text-slate-300">App color</p>
-        <div role="radiogroup" aria-labelledby="look-color-label" className="grid grid-cols-4 gap-x-2 gap-y-3">
+        <div role="radiogroup" aria-labelledby="look-color-label" className="grid grid-cols-5 gap-x-1 gap-y-3">
           {THEMES.map((t) => {
             const selected = value.theme === t.id;
             return (
@@ -49,16 +49,13 @@ export default function ThemePicker({ value, onChange, autoSuggest = true }) {
                   style={{ background: t.swatchBg }}
                 >
                   <span
-                    className="h-6 w-6 rounded-full shadow-md shadow-black/40"
+                    className="flex h-7 w-7 items-center justify-center rounded-full shadow-md shadow-black/30"
                     style={{ background: `linear-gradient(135deg, ${t.brand.a}, ${t.brand.b})` }}
-                  />
-                  {selected && (
-                    <span className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <Check className="h-5 w-5 text-white" strokeWidth={3} />
-                    </span>
-                  )}
+                  >
+                    {selected && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
+                  </span>
                 </span>
-                <span className={`text-[11px] font-semibold ${selected ? "text-slate-50" : "text-slate-400"}`}>{t.label}</span>
+                <span className={`px-0.5 text-center text-[11px] font-semibold leading-tight ${selected ? "text-slate-50" : "text-slate-400"}`}>{t.label}</span>
               </button>
             );
           })}

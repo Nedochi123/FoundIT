@@ -34,7 +34,7 @@ export default function DeleteAccountForm() {
       <button
         type="button"
         onClick={() => setExpanded(true)}
-        className="text-center text-xs text-red-400/70 underline hover:text-red-400"
+        className="text-center text-xs text-red-400 opacity-80 underline hover:opacity-100"
       >
         Delete my account
       </button>

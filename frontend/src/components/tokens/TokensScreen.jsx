@@ -77,10 +77,10 @@ export default function TokensScreen() {
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-yellow-600 shadow-lg shadow-amber-900/50 ring-2 ring-amber-200/40">
             <Coins className="h-7 w-7 text-amber-950" strokeWidth={2.2} />
           </div>
-          <p className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-amber-200 to-yellow-500">
+          <p className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br [--tw-gradient-from:rgb(var(--tokens-from,253_230_138))] [--tw-gradient-to:rgb(var(--tokens-to,234_179_8))] [--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)]">
             {tokens}
           </p>
-          <p className="text-xs font-semibold uppercase tracking-wider text-amber-200/70">tokens earned</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-amber-200 opacity-80">tokens earned</p>
         </div>
       </div>
 
