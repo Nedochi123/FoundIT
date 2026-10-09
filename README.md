@@ -42,3 +42,16 @@ A student can **boost** their own open lost post (24 hours ₦300, 3 days ₦700
 - **Admin → Boosts tab:** the admin types in the bank account students pay into (stored in `app_settings`, key `boost_payment`; **boosts stay switched off until this is set**), sees revenue (this month / all time / count), and approves or rejects each payment after checking their bank. Admins also get a push when someone says they've paid. Approving needs the post to still be open, and notifies the student.
 - **Limits:** one boost at a time per post, at most 3 unpaid/unchecked boosts per student, and only the owner can see their boost's reference and the bank details.
 - **Code:** `backend/src/routes/boosts.routes.js` (`/api/boosts`), `backend/src/utils/boosts.js`, tables `boosts` and `app_settings` in `schema.sql`, `lost-items.routes.js` (boosted first, `boostedUntil`, the owner's own `boost`); frontend `components/boost/` (`BoostSheet`, `HomeBoostedCards`), `components/gallery/` (`LostBoard`, `LostCard`), `components/admin/AdminBoostsScreen.jsx`. Tests: `backend/test/boosts.test.js`.
+
+## Checks and tests
+
+```bash
+cd backend  && npm test          # the server, end to end, on throwaway databases
+cd frontend && npm test          # the website's helpers, plus a check that its lists match the server's
+cd frontend && npm run themes:check   # every color theme keeps text readable (WCAG contrast)
+cd frontend && npm run build     # the website compiles
+```
+
+- `frontend/test/consistency.test.mjs` fails if the website's and the server's copies of the color themes, doodle styles, reward amounts or item types drift apart.
+- GitHub Actions (`.github/workflows/ci.yml`) runs all of this, regenerates the theme CSS to make sure the committed copy is current, and audits dependencies on every push. Pushing to GitHub **does** deploy the website (Vercel is linked to `master`), so a red check means do not merge.
+- **Known, accepted warnings:** `npm audit` reports 3 *moderate* findings in the frontend (`uuid` ← `xcode` ← `@capacitor/cli`). That chain is the Android build tool and never runs in the browser or on the server; the only "fix" npm offers is downgrading Capacitor, which is worse. CI fails only on *high* or *critical* findings.
