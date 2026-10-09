@@ -13,7 +13,8 @@ export function timeLeft(iso) {
   const hours = Math.floor((mins % 1440) / 60);
   if (days > 0) return `${days} ${days === 1 ? "day" : "days"}${hours ? ` ${hours} ${hours === 1 ? "hour" : "hours"}` : ""} left`;
   if (hours > 0) return `${hours} ${hours === 1 ? "hour" : "hours"} left`;
-  return `${Math.max(1, mins)} ${mins === 1 ? "minute" : "minutes"} left`;
+  const left = Math.max(1, mins);
+  return `${left} ${left === 1 ? "minute" : "minutes"} left`;
 }
 
 /** "Tue, 3:20 pm" */
