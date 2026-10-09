@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Gift, X, ShieldCheck, CircleHelp, Sparkles } from "lucide-react";
 import { REWARD_AMOUNTS, formatNaira } from "../../lib/rewards";
+import NotificationsStep from "../notifications/NotificationsStep";
 
 // Plain, short steps for each side of a return. Update with any change to how rewards work.
 const TABS = [
@@ -93,6 +94,8 @@ export default function RewardsGuide({ open, onClose, startTab = "lost" }) {
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        <NotificationsStep />
 
         <div className="mt-4 grid grid-cols-2 gap-1.5 rounded-xl bg-slate-800/70 p-1" role="tablist" aria-label="Choose your situation">
           {TABS.map((t) => (
