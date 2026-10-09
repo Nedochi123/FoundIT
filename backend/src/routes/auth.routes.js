@@ -17,6 +17,8 @@ const { requireAuth } = require("../middleware/auth");
 const { idNumberSchema } = require("../utils/idNumber");
 const { isAdminEmail } = require("../utils/admin");
 const { retireTagsOf } = require("../utils/tags");
+const { publicUser } = require("../utils/publicUser");
+const { THEMES, DOODLES, DEFAULT_THEME, DEFAULT_DOODLE } = require("../utils/themes");
 
 const router = express.Router();
 
@@ -55,18 +57,6 @@ function clearAuthCookies(res) {
   res.clearCookie("refresh_token", { path: "/" });
 }
 
-function publicUser(row) {
-  return {
-    id: row.id,
-    name: row.name,
-    email: row.email,
-    idNumber: row.id_number,
-    emailVerified: !!row.email_verified_at,
-    tokens: row.tokens,
-    isAdmin: isAdminEmail(row.email),
-  };
-}
-
 function issueSession(res, user) {
   const accessToken = signAccessToken(user);
   const refreshToken = issueRefreshToken(user.id);
@@ -87,6 +77,9 @@ const signupSchema = z.object({
     ),
   password: z.string().min(8, "Password must be at least 8 characters."),
   idNumber: idNumberSchema,
+  // the look they chose on the sign-up form; leaving it out keeps the default
+  theme: z.enum(THEMES, { message: "Pick one of the available colors." }).optional(),
+  doodle: z.enum(DOODLES, { message: "Pick one of the available doodle styles." }).optional(),
 });
 
 router.post("/signup", authLimiter, async (req, res, next) => {
@@ -95,7 +88,7 @@ router.post("/signup", authLimiter, async (req, res, next) => {
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.issues[0].message });
     }
-    const { name, email, password, idNumber } = parsed.data;
+    const { name, email, password, idNumber, theme, doodle } = parsed.data;
 
     const existing = db.prepare("SELECT id FROM users WHERE email = ?").get(email);
     if (existing) {
@@ -105,8 +98,8 @@ router.post("/signup", authLimiter, async (req, res, next) => {
     const passwordHash = await hashPassword(password);
     const userId = crypto.randomUUID();
     db.prepare(
-      "INSERT INTO users (id, name, email, password_hash, id_number) VALUES (?, ?, ?, ?, ?)"
-    ).run(userId, name, email, passwordHash, idNumber || null);
+      "INSERT INTO users (id, name, email, password_hash, id_number, theme, doodle) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    ).run(userId, name, email, passwordHash, idNumber || null, theme || DEFAULT_THEME, doodle || DEFAULT_DOODLE);
 
     const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
 

@@ -14,6 +14,7 @@ import Profile from "./components/profile/Profile";
 import NotificationsPrompt from "./components/notifications/NotificationsPrompt";
 import TokensScreen from "./components/tokens/TokensScreen";
 import LegalScreen from "./components/legal/LegalScreen";
+import { ThemeProvider } from "./components/theme/ThemeProvider";
 import TagScan from "./components/tags/TagScan";
 import TagsScreen from "./components/tags/TagsScreen";
 
@@ -143,11 +144,13 @@ function MainApp() {
 
   return (
     <AuthProvider>
-      {showIntro && <IntroAnimation onDone={handleIntroDone} />}
-      <EmailVerifyHandler />
-      <AuthGate>
-        <Screens />
-      </AuthGate>
+      <ThemeProvider>
+        {showIntro && <IntroAnimation onDone={handleIntroDone} />}
+        <EmailVerifyHandler />
+        <AuthGate>
+          <Screens />
+        </AuthGate>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

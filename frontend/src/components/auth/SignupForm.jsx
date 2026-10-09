@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useTheme } from "../theme/ThemeProvider";
+import ThemePicker from "../theme/ThemePicker";
 import PasswordInput from "./PasswordInput";
 
 const inputClass =
@@ -9,6 +11,8 @@ const hintClass = "mt-1 text-xs text-slate-400";
 
 export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
   const { signup } = useAuth();
+  const { theme, doodle, preview } = useTheme();
+  const [look, setLook] = useState({ theme, doodle });
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,12 +21,18 @@ export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // the whole app re-colors as they choose, so they see exactly what they are getting
+  function handleLook(next) {
+    setLook(next);
+    preview(next);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSubmitting(true);
     try {
-      await signup({ name, email, password, idNumber: idNumber || undefined });
+      await signup({ name, email, password, idNumber: idNumber || undefined, theme: look.theme, doodle: look.doodle });
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -94,6 +104,13 @@ export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="At least 8 characters"
         />
+      </div>
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5">
+        <p className="text-sm font-bold text-slate-50">Make FoundIT yours</p>
+        <p className="mb-3.5 mt-0.5 text-xs text-slate-400">
+          Choose the color and the little doodles that float around your app. You can change them any time in Profile.
+        </p>
+        <ThemePicker value={look} onChange={handleLook} />
       </div>
       <label className="flex items-start gap-2.5 text-sm text-slate-300">
         <input

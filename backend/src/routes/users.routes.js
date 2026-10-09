@@ -3,12 +3,16 @@ const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
 const { idNumberSchema } = require("../utils/idNumber");
+const { publicUser } = require("../utils/publicUser");
+const { THEMES, DOODLES } = require("../utils/themes");
 
 const router = express.Router();
 
 const updateSchema = z.object({
   name: z.string().trim().min(1).optional(),
   idNumber: idNumberSchema,
+  theme: z.enum(THEMES, { message: "Pick one of the available colors." }).optional(),
+  doodle: z.enum(DOODLES, { message: "Pick one of the available doodle styles." }).optional(),
 });
 
 router.patch("/me", requireAuth, (req, res, next) => {
@@ -17,8 +21,8 @@ router.patch("/me", requireAuth, (req, res, next) => {
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.issues[0].message });
     }
-    const { name, idNumber } = parsed.data;
-    if (name === undefined && idNumber === undefined) {
+    const { name, idNumber, theme, doodle } = parsed.data;
+    if (name === undefined && idNumber === undefined && theme === undefined && doodle === undefined) {
       return res.status(400).json({ error: "Nothing to update." });
     }
 
@@ -32,21 +36,21 @@ router.patch("/me", requireAuth, (req, res, next) => {
       updates.push("id_number = ?");
       values.push(idNumber);
     }
+    if (theme !== undefined) {
+      updates.push("theme = ?");
+      values.push(theme);
+    }
+    if (doodle !== undefined) {
+      updates.push("doodle = ?");
+      values.push(doodle);
+    }
     updates.push("updated_at = datetime('now')");
     values.push(req.user.id);
 
     db.prepare(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`).run(...values);
 
     const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
-    res.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        idNumber: user.id_number,
-        emailVerified: !!user.email_verified_at,
-      },
-    });
+    res.json({ user: publicUser(user) });
   } catch (err) {
     next(err);
   }

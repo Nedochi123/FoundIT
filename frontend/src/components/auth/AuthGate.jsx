@@ -74,7 +74,7 @@ export default function AuthGate({ children }) {
           <div className="relative flex items-center justify-center">
             <div
               className="absolute h-20 w-20 rounded-full opacity-50 blur-2xl"
-              style={{ background: "radial-gradient(circle, #17b8ae 0%, #2467e6 70%, transparent 100%)" }}
+              style={{ background: "radial-gradient(circle, var(--brand-a) 0%, var(--brand-b) 70%, transparent 100%)" }}
               aria-hidden="true"
             />
             <img

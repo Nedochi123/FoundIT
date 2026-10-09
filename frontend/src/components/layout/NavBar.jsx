@@ -17,7 +17,7 @@ export default function NavBar({ view, onNavigate, unreadCount = 0 }) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-[#0a0e1acc] backdrop-blur-md"
+      className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-bar-bottom/80 backdrop-blur-md"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       <div className="mx-auto flex max-w-md gap-1 px-2 py-2">
@@ -35,7 +35,7 @@ export default function NavBar({ view, onNavigate, unreadCount = 0 }) {
               <span className="relative">
                 <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} />
                 {key === "conversations" && unreadCount > 0 && (
-                  <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] animate-pulse items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-[#0a0e1a]">
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] animate-pulse items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-bar-bottom">
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}

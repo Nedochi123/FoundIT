@@ -33,6 +33,15 @@
       }
     </script>
 
+    <!-- Apply the student's chosen app color before the first paint, so there is no flash of the default look. -->
+    <script>
+      try {
+        var look = JSON.parse(localStorage.getItem("foundit_theme") || "{}");
+        if (look && /^[a-z]+$/.test(look.theme || "")) document.documentElement.setAttribute("data-theme", look.theme);
+        if (localStorage.getItem("foundit_doodles_still") === "1") document.documentElement.setAttribute("data-still", "");
+      } catch (e) {}
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

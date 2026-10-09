@@ -3,6 +3,7 @@ import { LogOut, Bell, MailCheck, Award, MessageSquareHeart, QrCode, ChevronRigh
 import { useAuth } from "../../hooks/useAuth";
 import { enablePushNotifications, isIosNotStandalone, pushSupported } from "../../lib/push";
 import { api } from "../../lib/api";
+import LookCard from "../theme/LookCard";
 import ChangePasswordForm from "./ChangePasswordForm";
 import DeleteAccountForm from "./DeleteAccountForm";
 
@@ -16,7 +17,7 @@ function PreferenceToggle({ label, checked, onChange }) {
       <span className="text-sm text-slate-200">{label}</span>
       <span
         className={`relative h-6 w-11 shrink-0 rounded-full transition ${
-          checked ? "bg-brand-teal" : "bg-slate-700"
+          checked ? "bg-brand-solid" : "bg-slate-700"
         }`}
       >
         <span
@@ -134,6 +135,8 @@ export default function Profile({ onNavigate }) {
         </div>
         <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
       </button>
+
+      <LookCard />
 
       {(badges.length > 0 || notes.length > 0) && (
         <div className={cardClass}>

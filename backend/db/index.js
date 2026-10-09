@@ -69,6 +69,9 @@ function runMigrations() {
     ["users", "deleted_at", "ALTER TABLE users ADD COLUMN deleted_at TEXT"],
     ["lost_items", "category", "ALTER TABLE lost_items ADD COLUMN category TEXT"],
     ["found_items", "category", "ALTER TABLE found_items ADD COLUMN category TEXT"],
+    // The look the student picked at sign-up: a color theme and a style of floating doodles.
+    ["users", "theme", "ALTER TABLE users ADD COLUMN theme TEXT NOT NULL DEFAULT 'classic'"],
+    ["users", "doodle", "ALTER TABLE users ADD COLUMN doodle TEXT NOT NULL DEFAULT 'none'"],
     // Which chat the owner confirmed the return in, so only that owner can add a thank-you reward.
     [
       "found_items",

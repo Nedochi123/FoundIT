@@ -1,3 +1,6 @@
+/* The color themes a student can pick (generated: see scripts/build-themes.mjs). Default values live here. */
+@import "./themes.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,9 +14,16 @@ body {
      blobs are a one-time "hero" moment and would be visual noise on
      every other screen, but a hint of the brand color keeps the app
      from reading as generic dark-mode grey. */
-  background: radial-gradient(circle at 50% -10%, #182544 0%, #0a0e1a 45%, #05070d 100%) fixed,
-    radial-gradient(ellipse 900px 500px at 15% 115%, rgba(17, 154, 160, 0.16) 0%, transparent 60%) fixed,
-    radial-gradient(ellipse 900px 500px at 100% 0%, rgba(36, 103, 230, 0.14) 0%, transparent 55%) fixed;
+  /* Every color below comes from the student's chosen look (src/themes.css). Layers, top to bottom: two
+     soft colored lights, the page gradient, and an optional pattern (the camo theme's camouflage). The
+     Default look has no lights and no pattern, so it is just the gradient, as it always was. */
+  background-color: rgb(var(--slate-950));
+  background-image: radial-gradient(ellipse 900px 500px at 100% 0%, var(--glow-two) 0%, transparent 55%),
+    radial-gradient(ellipse 900px 500px at 15% 115%, var(--glow-one) 0%, transparent 60%),
+    radial-gradient(circle at 50% -10%, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bottom) 100%),
+    var(--bg-pattern);
+  background-size: auto, auto, auto, var(--bg-pattern-size);
+  background-attachment: fixed;
   color: #e5e7eb;
   min-height: 100vh;
 }
@@ -48,14 +58,14 @@ h1, h2, h3 {
 .bg-glow::before {
   width: 380px;
   height: 380px;
-  background: #17b8ae;
+  background: var(--blob-one);
   top: -6%;
   right: -10%;
 }
 .bg-glow::after {
   width: 420px;
   height: 420px;
-  background: #2467e6;
+  background: var(--blob-two);
   bottom: -10%;
   left: -12%;
 }
@@ -79,4 +89,77 @@ h1, h2, h3 {
   .animate-fade-up {
     animation: none !important;
   }
+}
+
+/* Floating doodles behind the app (chosen at sign-up). Faint, tap-proof, and only transforms are animated. */
+.doodle-field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.doodle {
+  position: absolute;
+  color: var(--doodle);
+  opacity: 0.18;
+  transform: rotate(var(--rot, 0deg));
+  will-change: transform;
+  animation-duration: var(--dur, 10s);
+  animation-delay: var(--delay, 0s);
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+.doodle-bob {
+  animation-name: doodle-bob;
+}
+.doodle-drift {
+  animation-name: doodle-drift;
+}
+.doodle-orbit {
+  animation-name: doodle-orbit;
+}
+@keyframes doodle-bob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translate3d(0, -26px, 0) rotate(calc(var(--rot, 0deg) + 10deg));
+  }
+}
+@keyframes doodle-drift {
+  0%,
+  100% {
+    transform: translate3d(-16px, 0, 0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translate3d(16px, -12px, 0) rotate(calc(var(--rot, 0deg) - 9deg));
+  }
+}
+@keyframes doodle-orbit {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--rot, 0deg));
+  }
+  25% {
+    transform: translate3d(14px, -14px, 0) rotate(calc(var(--rot, 0deg) + 6deg));
+  }
+  50% {
+    transform: translate3d(0, -26px, 0) rotate(calc(var(--rot, 0deg) + 12deg));
+  }
+  75% {
+    transform: translate3d(-14px, -12px, 0) rotate(calc(var(--rot, 0deg) + 4deg));
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--rot, 0deg));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .doodle {
+    animation: none !important;
+  }
+}
+/* "Keep doodles still" (Profile and sign-up): the doodles stay, they just stop floating. */
+:root[data-still] .doodle {
+  animation: none !important;
 }
