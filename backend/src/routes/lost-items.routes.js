@@ -10,6 +10,10 @@ const { ITEM_CATEGORIES } = require("../utils/itemCategories");
 
 const router = express.Router();
 
+// When a paid boost on this post ends (null if it has none running): see boosts.routes.js
+const BOOSTED_UNTIL_SQL = `(SELECT MAX(expires_at) FROM boosts WHERE boosts.lost_item_id = lost_items.id
+  AND boosts.status = 'active' AND boosts.expires_at > datetime('now'))`;
+
 function serialize(row, posterName) {
   return {
     id: row.id,
@@ -20,20 +24,49 @@ function serialize(row, posterName) {
     category: row.category,
     status: row.status,
     createdAt: row.created_at,
+    boostedUntil: row.boosted_until || null,
   };
 }
 
 router.get("/", requireAuth, (req, res) => {
   const status = req.query.status === "resolved" ? "resolved" : "open";
+  // boosted posts first, then newest
   const rows = db
     .prepare(
-      `SELECT lost_items.*, users.name AS poster_name
+      `SELECT lost_items.*, users.name AS poster_name, ${BOOSTED_UNTIL_SQL} AS boosted_until
        FROM lost_items JOIN users ON users.id = lost_items.poster_id
        WHERE lost_items.status = ?
-       ORDER BY lost_items.created_at DESC`
+       ORDER BY (boosted_until IS NOT NULL) DESC, lost_items.created_at DESC`
     )
     .all(status);
-  res.json({ items: rows.map((r) => serialize(r, r.poster_name)) });
+
+  // each student also sees where their own posts stand with a boost (waiting to be paid, being checked, live)
+  const mine = db
+    .prepare(
+      `SELECT id, lost_item_id, plan, amount, reference, status, expires_at FROM boosts
+       WHERE user_id = ? AND (status IN ('awaiting_payment', 'payment_claimed')
+         OR (status = 'active' AND expires_at > datetime('now')))`
+    )
+    .all(req.user.id);
+  const boostByItem = new Map(mine.map((b) => [b.lost_item_id, b]));
+
+  res.json({
+    items: rows.map((r) => {
+      const item = serialize(r, r.poster_name);
+      const b = r.poster_id === req.user.id ? boostByItem.get(r.id) : null;
+      if (b) {
+        item.boost = {
+          id: b.id,
+          state: b.status === "active" ? "live" : b.status,
+          plan: b.plan,
+          amount: b.amount,
+          reference: b.reference,
+          expiresAt: b.expires_at,
+        };
+      }
+      return item;
+    }),
+  });
 });
 
 const createSchema = z.object({

@@ -104,6 +104,24 @@ export default function LegalScreen({ onBack }) {
           </p>
         </Section>
 
+        <Section title="Paid boosts">
+          <p>
+            If you reported something lost, you may choose to boost your post for a fee shown before you pay.
+            A boosted post is pinned to the top of the Lost board and shown on the Home screen for the time you
+            chose, and everyone on campus gets one alert when it goes live. Boosts are always optional, and
+            reporting and finding items stay free.
+          </p>
+          <p>
+            You pay by bank transfer to the account shown in the app, with the reference we give you in the
+            transfer description. A FoundIT admin checks each payment by hand, so a boost goes live once the
+            payment is confirmed, not instantly. If we can&apos;t match a payment we will reject the boost and say
+            why, and you can try again. A boost ends at the stated time, or as soon as you mark your item found.
+            Once a boost is live it cannot be refunded. We store the amount, the reference and the optional
+            name you give us on the transfer. We never ask for, and never see, your card details, PIN or OTP.
+            Posts or boosts that mislead people or break these terms can be removed without a refund.
+          </p>
+        </Section>
+
         <Section title="Other services we use">
           <p>
             Emails (verification, password reset) are sent via Resend. Push notifications are delivered

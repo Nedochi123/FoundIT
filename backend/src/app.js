@@ -16,6 +16,7 @@ const tokensRoutes = require("./routes/tokens.routes");
 const adminRoutes = require("./routes/admin.routes");
 const reportsRoutes = require("./routes/reports.routes");
 const tagsRoutes = require("./routes/tags.routes");
+const boostsRoutes = require("./routes/boosts.routes");
 
 const app = express();
 
@@ -70,6 +71,7 @@ app.use("/api/tokens", tokensRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/tags", tagsRoutes);
+app.use("/api/boosts", boostsRoutes);
 
 // 404
 app.use((req, res) => {

@@ -29,6 +29,8 @@ const AdminScreen = lazy(() => import("./components/admin/AdminScreen"));
 function getInitialView() {
   const params = new URLSearchParams(window.location.search);
   if (params.get("admin") === "1") return "admin";
+  // an alert about a boosted lost post (?lost=1): the gallery reads the same flag to open on the Lost board
+  if (params.get("lost") === "1") return "gallery";
   // a tag's "Activate this tag" link (?claim=CODE) or a "someone found your item" notification (?tags=1)
   if (params.get("claim") || params.get("tags") === "1") return "tags";
   return "home";

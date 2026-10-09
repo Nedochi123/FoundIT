@@ -5,12 +5,14 @@ import { api } from "../lib/api";
 import ReunionCard from "./gallery/ReunionCard";
 import { RewardsIntroCard } from "./rewards/RewardsGuide";
 import { TagsAlertCard, TagsPromoCard } from "./tags/HomeTagsCards";
+import HomeBoostedCards from "./boost/HomeBoostedCards";
 
 export default function Home({ onNavigate }) {
   const { user } = useAuth();
   const firstName = user?.name?.split(" ")[0] || "there";
   const [reunions, setReunions] = useState([]);
   const [tags, setTags] = useState(null); // the student's QR tags (null until loaded)
+  const [boostedLost, setBoostedLost] = useState([]); // other people's boosted lost posts
 
   useEffect(() => {
     api
@@ -20,6 +22,10 @@ export default function Home({ onNavigate }) {
     api
       .getMyTags()
       .then((data) => setTags(data.tags))
+      .catch(() => {});
+    api
+      .listLostItems("open")
+      .then((data) => setBoostedLost(data.items.filter((i) => i.boostedUntil && i.posterId !== user?.id).slice(0, 2)))
       .catch(() => {});
   }, []);
 
@@ -59,6 +65,19 @@ export default function Home({ onNavigate }) {
           <p className="text-sm text-slate-300">Take a photo and help it get back to its owner.</p>
         </div>
       </button>
+
+      <HomeBoostedCards
+        items={boostedLost}
+        onFound={() => onNavigate("found")}
+        onSeeAll={() => {
+          try {
+            sessionStorage.setItem("foundit_gallery_tab", "lost");
+          } catch {
+            // Private browsing: it opens on the Found side instead.
+          }
+          onNavigate("gallery");
+        }}
+      />
 
       <TagsPromoCard tags={tags} onOpen={() => onNavigate("tags")} />
 

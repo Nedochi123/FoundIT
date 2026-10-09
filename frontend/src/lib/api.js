@@ -213,6 +213,17 @@ export const api = {
     apiRequest("/api/tags/admin/generate", { method: "POST", body: JSON.stringify({ count }) }),
   adminTagSummary: () => apiRequest("/api/tags/admin/summary"),
 
+  // Paid boosts for lost posts (the student pays by bank transfer; the admin approves)
+  getBoostPlans: () => apiRequest("/api/boosts/plans"),
+  createBoost: (lostItemId, plan) => apiRequest("/api/boosts", { method: "POST", body: JSON.stringify({ lostItemId, plan }) }),
+  getBoost: (id) => apiRequest(`/api/boosts/${id}`),
+  claimBoostPaid: (id, note) => apiRequest(`/api/boosts/${id}/paid`, { method: "POST", body: JSON.stringify({ note: note || undefined }) }),
+  cancelBoost: (id) => apiRequest(`/api/boosts/${id}/cancel`, { method: "POST" }),
+  getAdminBoosts: () => apiRequest("/api/boosts/admin"),
+  saveBoostPaymentDetails: (body) => apiRequest("/api/boosts/admin/settings", { method: "PUT", body: JSON.stringify(body) }),
+  approveBoost: (id) => apiRequest(`/api/boosts/admin/${id}/approve`, { method: "POST" }),
+  rejectBoost: (id, reason) => apiRequest(`/api/boosts/admin/${id}/reject`, { method: "POST", body: JSON.stringify({ reason: reason || undefined }) }),
+
   // Tokens
   getTokenLedger: () => apiRequest("/api/tokens/ledger"),
   getCashoutRequests: () => apiRequest("/api/tokens/cashout-requests"),

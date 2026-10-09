@@ -41,6 +41,16 @@ const tagChatLimiter = rateLimit({
   message: { error: "You're sending messages too quickly. Please wait a little and try again." },
 });
 
+// Starting a paid boost: each one creates a payment reference, so keep it sensible.
+const boostLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 12,
+  skip: () => process.env.NODE_ENV === "test",
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many boost requests. Please try again later." },
+});
+
 // Activating a tag by its code: slows anyone trying codes.
 const tagClaimLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -51,4 +61,4 @@ const tagClaimLimiter = rateLimit({
   message: { error: "Too many attempts. Please try again later." },
 });
 
-module.exports = { postItemLimiter, messageLimiter, tagFoundLimiter, tagChatLimiter, tagClaimLimiter };
+module.exports = { postItemLimiter, messageLimiter, tagFoundLimiter, tagChatLimiter, tagClaimLimiter, boostLimiter };

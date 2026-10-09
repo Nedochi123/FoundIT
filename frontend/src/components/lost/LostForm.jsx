@@ -42,6 +42,11 @@ export default function LostForm({ onNavigate }) {
       // Per spec: after reporting a lost item, the user is taken to the
       // gallery of found items to browse and message anyone whose find
       // might be theirs.
+      try {
+        sessionStorage.setItem("foundit_just_posted_lost", "1"); // lets the gallery offer a boost, once
+      } catch {
+        // Private browsing: the offer is just skipped.
+      }
       onNavigate("gallery");
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");

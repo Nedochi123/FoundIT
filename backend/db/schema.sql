@@ -309,3 +309,44 @@ CREATE TABLE IF NOT EXISTS tag_messages (
 );
 
 CREATE INDEX IF NOT EXISTS idx_tag_messages_thread ON tag_messages(thread_id, created_at);
+
+-- ============================================================
+-- BOOSTS (paid, so a lost post gets seen)
+-- ============================================================
+
+-- Small key/value settings an admin can change without a deploy. 'boost_payment' holds the bank account
+-- students pay boosts into (typed in by the admin; never set from code).
+CREATE TABLE IF NOT EXISTS app_settings (
+  key        TEXT PRIMARY KEY,
+  value      TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- A student pays to pin their lost post to the top of the Lost board and to Home for a while, plus one alert to
+-- everyone. Payment is a bank transfer the admin checks by hand (same idea as cash-outs):
+--   awaiting_payment -> payment_claimed (student taps "I've paid") -> active (admin approves) | rejected
+-- or cancelled (student backs out, or it sat unpaid for 2 days). 'active' with an expires_at in the past simply
+-- means the boost has ended. reference is what the student writes in the transfer so the admin can match it.
+CREATE TABLE IF NOT EXISTS boosts (
+  id              TEXT PRIMARY KEY,
+  lost_item_id    TEXT NOT NULL REFERENCES lost_items(id) ON DELETE CASCADE,
+  user_id         TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  plan            TEXT NOT NULL,
+  hours           INTEGER NOT NULL,
+  amount          INTEGER NOT NULL,
+  reference       TEXT NOT NULL UNIQUE,
+  status          TEXT NOT NULL DEFAULT 'awaiting_payment',
+  payer_note      TEXT,
+  paid_claimed_at TEXT,
+  approved_at     TEXT,
+  starts_at       TEXT,
+  expires_at      TEXT,
+  decided_by      TEXT,
+  reject_reason   TEXT,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_boosts_item ON boosts(lost_item_id, status);
+CREATE INDEX IF NOT EXISTS idx_boosts_user ON boosts(user_id, status);
+CREATE INDEX IF NOT EXISTS idx_boosts_status ON boosts(status, created_at);
