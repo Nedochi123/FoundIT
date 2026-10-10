@@ -14,6 +14,11 @@ function requireMonitor(req, res, next) {
   next();
 }
 router.use(requireAuth, requireMonitor);
+// what is shown here is private: never let a browser or proxy keep a copy
+router.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 
 const clampLimit = (value, fallback = 50) => Math.min(Math.max(parseInt(value, 10) || fallback, 1), 200);
 const like = (q) => `%${String(q).replace(/[\\%_]/g, (c) => "\\" + c)}%`;
