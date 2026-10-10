@@ -129,18 +129,8 @@ async function apiRequest(path, options = {}, _isRetry = false) {
 }
 
 export const api = {
-  // Security: the app tells the server it was opened (the location goes in the X-Geo header); owner-only views below
+  // Security: the app tells the server it was opened (the location goes in the X-Geo header)
   checkin: () => apiRequest("/api/activity/checkin", { method: "POST" }),
-  monitorActivity: ({ user, q, before, limit = 40 } = {}) => {
-    const p = new URLSearchParams({ limit });
-    if (user) p.set("user", user);
-    if (q) p.set("q", q);
-    if (before) p.set("before", before);
-    return apiRequest(`/api/monitor/activity?${p}`);
-  },
-  monitorPeople: (q) => apiRequest(`/api/monitor/people${q ? `?q=${encodeURIComponent(q)}` : ""}`),
-  monitorChats: (q) => apiRequest(`/api/monitor/chats${q ? `?q=${encodeURIComponent(q)}` : ""}`),
-  monitorChat: (kind, id) => apiRequest(`/api/monitor/chats/${kind}/${id}`),
 
   // Auth
   signup: (body) => apiRequest("/api/auth/signup", { method: "POST", body: JSON.stringify(body) }),
