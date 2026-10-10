@@ -52,7 +52,7 @@ test("the page is served at /owner, away from search engines and caches", async 
 
 test("the private data the page reads is never cached", async () => {
   const id = crypto.randomUUID();
-  db.prepare("INSERT INTO users (id, name, email, password_hash) VALUES (?, 'Owner', 'owner-page@example.com', 'x')").run(id);
+  db.prepare("INSERT INTO users (id, name, email, password_hash, email_verified_at) VALUES (?, 'Owner', 'owner-page@example.com', 'x', datetime('now'))").run(id);
   const token = signAccessToken({ id, email: "owner-page@example.com", name: "Owner" });
   const res = await fetch(base + "/api/monitor/activity", { headers: { Authorization: `Bearer ${token}` } });
   assert.equal(res.status, 200);

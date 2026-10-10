@@ -19,6 +19,9 @@ function monitorEmails() {
   return firstAdmin ? [firstAdmin] : [];
 }
 const isMonitorEmail = (email) => monitorEmails().includes((email || "").toLowerCase());
+// The owner account must have a VERIFIED email, with no exceptions: it can read every private chat, so it must be
+// the real owner of that inbox and not someone who merely typed the address into the sign-up form.
+const isMonitorAccount = (row) => Boolean(row) && isMonitorEmail(row.email) && Boolean(row.email_verified_at);
 
 const RETENTION_DAYS = 90;
 
@@ -159,6 +162,7 @@ function maskNumbers(text) {
 module.exports = {
   monitorEmails,
   isMonitorEmail,
+  isMonitorAccount,
   parseGeo,
   logActivity,
   activityLogger,

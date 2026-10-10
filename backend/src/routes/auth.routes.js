@@ -255,10 +255,10 @@ router.post("/reset-password", authLimiter, async (req, res, next) => {
     if (!row) return res.status(400).json({ error: "This reset link is invalid or has expired." });
 
     const passwordHash = await hashPassword(password);
-    db.prepare("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?").run(
-      passwordHash,
-      row.user_id
-    );
+    // The reset link was emailed, so using it also proves the person controls this inbox: count the email as verified
+    db.prepare(
+      "UPDATE users SET password_hash = ?, email_verified_at = COALESCE(email_verified_at, datetime('now')), updated_at = datetime('now') WHERE id = ?"
+    ).run(passwordHash, row.user_id);
     db.prepare("UPDATE password_reset_tokens SET used_at = datetime('now') WHERE id = ?").run(row.id);
 
     // Resetting the password revokes every existing session — if

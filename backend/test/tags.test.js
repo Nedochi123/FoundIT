@@ -36,6 +36,7 @@ function makeUser(name, email) {
   return { id, name, email, token: signAccessToken({ id, email, name }) };
 }
 const admin = makeUser("Admin", "admin-tags@example.com");
+db.prepare("UPDATE users SET email_verified_at = datetime('now') WHERE id = ?").run(admin.id); // admins need a verified email
 const call = async (user, method, url, body) => {
   const res = await fetch(base + url, {
     method,
