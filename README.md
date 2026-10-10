@@ -63,6 +63,7 @@ cd frontend && npm run themes:check   # every color theme keeps text readable (W
 cd frontend && npm run build     # the website compiles
 ```
 
+- **Clean shutdown.** Railway stops the running server (SIGTERM) on every deploy and settings change. The server now handles that (`src/utils/shutdown.js`: stop taking requests, finish the current ones, close the database, exit 0), so a redeploy is no longer reported as a crash (before this, `npm start` printed "command failed, signal SIGTERM" and Railway emailed "crashed" each time). Tests: `backend/test/shutdown.test.js`.
 - `frontend/test/consistency.test.mjs` fails if the website's and the server's copies of the color themes, doodle styles, reward amounts or item types drift apart.
 - GitHub Actions (`.github/workflows/ci.yml`) runs all of this, regenerates the theme CSS to make sure the committed copy is current, and audits dependencies on every push. Pushing to GitHub **does** deploy the website (Vercel is linked to `master`), so a red check means do not merge.
 - **Known, accepted warnings:** `npm audit` reports 3 *moderate* findings in the frontend (`uuid` ← `xcode` ← `@capacitor/cli`). That chain is the Android build tool and never runs in the browser or on the server; the only "fix" npm offers is downgrading Capacitor, which is worse. CI fails only on *high* or *critical* findings.
