@@ -57,6 +57,7 @@ const LABELS = {
   "POST /api/auth/change-password": "Changed their password",
   "PATCH /api/users/me": "Changed their profile",
   "POST /api/activity/checkin": "Opened the app",
+  "POST /api/support": "Sent a message to the admin",
   "POST /api/lost-items": "Posted a lost item",
   "POST /api/lost-items/urgent": "Posted an URGENT lost item",
   "PATCH /api/lost-items/:id/resolve": "Marked a lost item as found",
@@ -90,6 +91,7 @@ const SKIP = new Set([
   "POST /api/push/subscribe",
   "POST /api/push/unsubscribe",
   "PATCH /api/push/preferences",
+  "POST /api/monitor/support/:id/reply", // the owner answering a student is not student activity
 ]);
 
 // A little context for a few actions: never a password or a message, only what was posted publicly.

@@ -388,3 +388,30 @@ CREATE TABLE IF NOT EXISTS monitor_access_log (
   target_id  TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- ============================================================
+-- SUPPORT: messages from students to the admin (complaints, problems), answered from the owner page
+-- ============================================================
+
+-- One thread per student: everything they have written to the admin and the admin replied.
+CREATE TABLE IF NOT EXISTS support_threads (
+  id              TEXT PRIMARY KEY,
+  user_id         TEXT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  last_message_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_support_threads_last ON support_threads(last_message_at);
+
+-- read_at is when the OTHER side opened it: for a student message, when the admin read it; for an admin reply,
+-- when the student read it.
+CREATE TABLE IF NOT EXISTS support_messages (
+  id         TEXT PRIMARY KEY,
+  thread_id  TEXT NOT NULL REFERENCES support_threads(id) ON DELETE CASCADE,
+  sender     TEXT NOT NULL CHECK (sender IN ('student', 'admin')),
+  body       TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  read_at    TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_support_messages_thread ON support_messages(thread_id, created_at);

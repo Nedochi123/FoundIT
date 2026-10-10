@@ -129,6 +129,11 @@ async function apiRequest(path, options = {}, _isRetry = false) {
 }
 
 export const api = {
+  // Messages to the admin (complaints and problems); the admin answers from the owner page
+  getSupportMessages: () => apiRequest("/api/support"),
+  getSupportUnread: () => apiRequest("/api/support/unread"),
+  sendSupportMessage: (body) => apiRequest("/api/support", { method: "POST", body: JSON.stringify({ body }) }),
+
   // Security: the app tells the server it was opened (the location goes in the X-Geo header)
   checkin: () => apiRequest("/api/activity/checkin", { method: "POST" }),
 

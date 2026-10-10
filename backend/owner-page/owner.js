@@ -105,6 +105,16 @@ async function api(path) {
   return r.data;
 }
 
+/** A write (the owner's reply to a student): same sign-in handling as api(). */
+async function sendJson(path, body) {
+  if (!session) throw new SignedOut();
+  let r = await send(path, { method: "POST", body, token: session.accessToken });
+  if (r.status === 401 && (await refreshSession())) r = await send(path, { method: "POST", body, token: session.accessToken });
+  if (r.status === 401) throw new SignedOut();
+  if (!r.ok) throw new Error(r.data?.error || `The server answered ${r.status}.`);
+  return r.data;
+}
+
 async function signOut(message) {
   const refreshToken = session?.refreshToken;
   session = null;
@@ -173,20 +183,39 @@ function showMain() {
   clear(root);
   const content = el("div", { id: "content" });
   const tabBar = el("div", { className: "tabs", role: "tablist", "aria-label": "Views" });
-  const views = { activity: activityView, chats: chatsView, people: peopleView };
-  let current = "activity";
+  const views = { messages: messagesView, activity: activityView, chats: chatsView, people: peopleView };
+  let current = "messages";
   let personFilter = null; // { id, name }
+  let timers = []; // refresh timers of the view on screen; stopped when another view opens
 
+  function every(ms, fn) {
+    timers.push(setInterval(fn, ms));
+  }
   function open(name) {
     current = name;
+    for (const t of timers) clearInterval(t);
+    timers = [];
     for (const b of tabBar.children) b.setAttribute("aria-selected", String(b.dataset.view === name));
     clear(content);
     views[name](content);
+  }
+
+  // the number of unread messages from students, shown on the Messages tab and in the browser tab's title
+  const messagesTab = el("button", { type: "button", role: "tab", "data-view": "messages", text: "Messages", onclick: () => open("messages") });
+  async function refreshUnread() {
+    try {
+      const { unreadTotal } = await api("/api/monitor/support");
+      messagesTab.textContent = unreadTotal > 0 ? `Messages (${unreadTotal})` : "Messages";
+      document.title = unreadTotal > 0 ? `(${unreadTotal}) FoundIT owner view` : "FoundIT owner view";
+    } catch (err) {
+      if (err instanceof SignedOut) signOut("Your session ended. Please sign in again.");
+    }
   }
   function showPerson(id, name) {
     personFilter = { id, name };
     open("activity");
   }
+  tabBar.append(messagesTab);
   for (const [name, label] of [["activity", "Activity"], ["chats", "Chats"], ["people", "People"]]) {
     tabBar.append(el("button", { type: "button", role: "tab", "data-view": name, text: label, onclick: () => open(name) }));
   }
@@ -205,7 +234,7 @@ function showMain() {
     ),
     el("p", {
       className: "notice",
-      text: "Private to your account. Read only: nothing here changes a chat or marks a message as read. Every chat you open is recorded. Records are deleted after 90 days. Long numbers in chats are hidden down to their last 4 digits.",
+      text: "Private to your account. Messages is where students write to you and where you reply; everything else here is read only and never marks a chat as read. Every chat you open is recorded. Records are deleted after 90 days. Long numbers in chats are hidden down to their last 4 digits.",
     }),
     tabBar,
     content
@@ -422,7 +451,113 @@ function showMain() {
     }
   }
 
-  open("activity");
+  // ---- messages (complaints and problems students send to the admin, answered here)
+  function messagesView(host) {
+    const fail = errorLine(host);
+    const list = el("ul", { className: "list" });
+    const empty = el("p", { className: "empty", text: "No messages yet. When a student writes to the admin it appears here.", hidden: true });
+    host.append(list, empty);
+
+    async function loadList() {
+      try {
+        const data = await api("/api/monitor/support");
+        clear(list);
+        empty.hidden = data.threads.length > 0;
+        for (const t of data.threads) {
+          list.append(
+            el(
+              "li",
+              { className: "row" },
+              el(
+                "div",
+                { className: "head" },
+                el("button", { type: "button", className: "linkbtn", text: t.name, onclick: () => openThread(t.id) }),
+                el("span", { className: "when", text: ago(t.lastAt) })
+              ),
+              el("div", { className: "muted", text: `${t.email}${t.idNumber ? ` · ID ${t.idNumber}` : ""}` }),
+              el("div", { className: "snippet", text: `${t.lastFrom === "admin" ? "You: " : ""}${t.lastBody}` }),
+              t.unread > 0 ? el("span", { className: "chip warn", text: t.unread === 1 ? "1 new message" : `${t.unread} new messages` }) : null
+            )
+          );
+        }
+        refreshUnread();
+      } catch (err) {
+        fail(err);
+      }
+    }
+    loadList();
+    every(20000, loadList);
+
+    async function openThread(id) {
+      for (const t of timers) clearInterval(t);
+      timers = [];
+      clear(host);
+      const failThread = errorLine(host);
+      const back = el("button", { type: "button", text: "All messages", onclick: () => open("messages") });
+      const head = el("div", { className: "card spaced" });
+      const msgs = el("div", { className: "msgs" });
+      const box = el("textarea", { id: "reply", rows: "3", maxlength: "1000", placeholder: "Write your reply...", "aria-label": "Your reply" });
+      const sendButton = el("button", { type: "submit", className: "primary", text: "Send reply" });
+      const form = el(
+        "form",
+        {
+          className: "composer",
+          onsubmit: async (e) => {
+            e.preventDefault();
+            const body = box.value.trim();
+            if (!body) return;
+            sendButton.disabled = true;
+            try {
+              await sendJson(`/api/monitor/support/${encodeURIComponent(id)}/reply`, { body });
+              box.value = "";
+              await load();
+            } catch (err) {
+              failThread(err);
+            } finally {
+              sendButton.disabled = false;
+            }
+          },
+        },
+        box,
+        sendButton
+      );
+      host.append(back, head, msgs, form);
+
+      let shown = -1;
+      async function load() {
+        try {
+          const data = await api(`/api/monitor/support/${encodeURIComponent(id)}`);
+          clear(head);
+          add(head, el("h2", { text: data.student.name }), el("div", { className: "muted", text: `${data.student.email}${data.student.idNumber ? ` · ID ${data.student.idNumber}` : ""}` }));
+          clear(msgs);
+          for (const m of data.messages) {
+            const mine = m.from === "admin";
+            msgs.append(
+              el(
+                "div",
+                { className: `msg${mine ? " right" : ""}` },
+                el("div", { className: "name", text: mine ? "You (admin)" : data.student.name }),
+                el("div", { className: "body", text: m.body }),
+                el("div", { className: "at", text: when(m.at) })
+              )
+            );
+          }
+          if (data.messages.length !== shown) {
+            shown = data.messages.length;
+            if (msgs.lastElementChild) msgs.lastElementChild.scrollIntoView({ block: "end" });
+          }
+          refreshUnread();
+        } catch (err) {
+          failThread(err);
+        }
+      }
+      load();
+      every(10000, load);
+    }
+  }
+
+  refreshUnread();
+  open("messages");
 }
 
 // ---------------------------------------------------------------- start

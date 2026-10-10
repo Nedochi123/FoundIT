@@ -21,6 +21,7 @@ import WelcomeAfterSignup from "./components/WelcomeAfterSignup";
 import TagScan from "./components/tags/TagScan";
 import TagsScreen from "./components/tags/TagsScreen";
 import LocationGate from "./components/location/LocationGate";
+import SupportScreen from "./components/support/SupportScreen";
 
 // Split out of the main bundle — the admin screen is only ever loaded by
 // one account, so every other visitor's initial load shouldn't pay to
@@ -35,6 +36,8 @@ function getInitialView() {
   if (params.get("admin") === "1") return "admin";
   // an alert about a boosted lost post (?lost=1): the gallery reads the same flag to open on the Lost board
   if (params.get("lost") === "1") return "gallery";
+  // a notification that the admin replied (?support=1)
+  if (params.get("support") === "1") return "support";
   // a tag's "Activate this tag" link (?claim=CODE) or a "someone found your item" notification (?tags=1)
   if (params.get("claim") || params.get("tags") === "1") return "tags";
   return "home";
@@ -78,6 +81,8 @@ function Screens() {
     content = <Gallery onNavigate={navigate} onOpenConversation={openConversation} />;
   } else if (view === "lost") {
     content = <LostForm onNavigate={navigate} />;
+  } else if (view === "support") {
+    content = <SupportScreen onNavigate={navigate} />;
   } else if (view === "urgent") {
     content = <UrgentForm onNavigate={navigate} />;
   } else if (view === "found") {

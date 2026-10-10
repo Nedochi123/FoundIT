@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
 const { isMonitorAccount, maskNumbers, RETENTION_DAYS } = require("../utils/monitor");
+const { MAX_LENGTH, notifyStudentOfReply, toMessage } = require("../utils/support");
 
 // The owner's security view: everything students did, where they were when they did it, and the chats. Read only:
 // nothing here changes a chat, marks a message as read, or lets the owner write as someone else. Only the monitor
@@ -259,6 +260,60 @@ router.get("/chats/tag/:id", (req, res) => {
       at: m.created_at,
     })),
   });
+});
+
+// ---- messages to the admin (complaints and problems) ----
+// The one place the owner page writes: answering a student who wrote to the admin from the app.
+router.get("/support", (req, res) => {
+  const threads = db
+    .prepare(
+      `SELECT t.id, t.last_message_at, users.name, users.email, users.id_number,
+         (SELECT COUNT(*) FROM support_messages WHERE thread_id = t.id AND sender = 'student' AND read_at IS NULL) AS unread,
+         (SELECT body FROM support_messages WHERE thread_id = t.id ORDER BY created_at DESC, rowid DESC LIMIT 1) AS last_body,
+         (SELECT sender FROM support_messages WHERE thread_id = t.id ORDER BY created_at DESC, rowid DESC LIMIT 1) AS last_sender
+       FROM support_threads t JOIN users ON users.id = t.user_id
+       ORDER BY (unread > 0) DESC, t.last_message_at DESC LIMIT 200`
+    )
+    .all();
+  res.json({
+    unreadTotal: threads.reduce((sum, t) => sum + t.unread, 0),
+    threads: threads.map((t) => ({
+      id: t.id,
+      name: t.name,
+      email: t.email,
+      idNumber: t.id_number,
+      unread: t.unread,
+      lastBody: t.last_body,
+      lastFrom: t.last_sender,
+      lastAt: t.last_message_at,
+    })),
+  });
+});
+
+router.get("/support/:id", (req, res) => {
+  const thread = db
+    .prepare("SELECT t.id, users.name, users.email, users.id_number FROM support_threads t JOIN users ON users.id = t.user_id WHERE t.id = ?")
+    .get(req.params.id);
+  if (!thread) return res.status(404).json({ error: "Not found." });
+  const messages = db.prepare("SELECT * FROM support_messages WHERE thread_id = ? ORDER BY created_at ASC, rowid ASC").all(thread.id);
+  db.prepare("UPDATE support_messages SET read_at = datetime('now') WHERE thread_id = ? AND sender = 'student' AND read_at IS NULL").run(thread.id);
+  res.json({ id: thread.id, student: { name: thread.name, email: thread.email, idNumber: thread.id_number }, messages: messages.map(toMessage) });
+});
+
+router.post("/support/:id/reply", (req, res) => {
+  const body = typeof req.body?.body === "string" ? req.body.body.trim() : "";
+  if (!body) return res.status(400).json({ error: "Write your reply first." });
+  if (body.length > MAX_LENGTH) return res.status(400).json({ error: `Please keep it under ${MAX_LENGTH} characters.` });
+  const thread = db.prepare("SELECT * FROM support_threads WHERE id = ?").get(req.params.id);
+  if (!thread) return res.status(404).json({ error: "Not found." });
+
+  const id = crypto.randomUUID();
+  db.transaction(() => {
+    db.prepare("INSERT INTO support_messages (id, thread_id, sender, body) VALUES (?, ?, 'admin', ?)").run(id, thread.id, body);
+    db.prepare("UPDATE support_threads SET last_message_at = datetime('now') WHERE id = ?").run(thread.id);
+  })();
+  notifyStudentOfReply(thread.user_id);
+  res.status(201).json({ message: toMessage(db.prepare("SELECT * FROM support_messages WHERE id = ?").get(id)) });
 });
 
 // Who has opened which chat, newest first: the owner's own trail.

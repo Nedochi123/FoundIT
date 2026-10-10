@@ -54,6 +54,14 @@ To investigate theft, the owner has a private security view, and students must k
 - **Admin and owner rights need a verified email.** Anyone can type an admin address into the sign-up form, but only the real owner of that inbox receives the verification email. So an admin account counts only once its email is verified, by the emailed verification link or by finishing a password reset (also emailed); the owner account must always be verified. Admin accounts created before 2026-10-10 keep their admin access without it (`TRUSTED_BEFORE` in `utils/admin.js`), so nobody was locked out when the rule arrived. Recovering a forgotten owner password: Forgot password in the app, with the owner's email. Tests: `backend/test/verified-admin.test.js`.
 - Tests: `backend/test/monitor.test.js`, `frontend/test/geo.test.mjs`.
 
+## Messages to the admin (complaints)
+
+A bold **Complaints** card on Home says: "In case of any complaint, send a message to the admin. It will be seen and attended to immediately." It opens a private chat screen (`components/support/`) where a student writes to the admin and reads the admin's replies. One private thread per student, 1,000 characters per message, 20 messages an hour.
+
+- **The owner page's Messages tab** (`backend/owner-page/`) is where every message arrives, as a personal chat per student: unread count on the tab and in the browser tab title, automatic refresh, and a reply box. This is the only place that page writes; everything else on it is read only. Only the owner account can open it (`/api/monitor/support*`).
+- **Being told:** a new message sends the owner a push notification (if notifications are on for the owner account) and an email, both without the message text; a reply sends the student a push ("The FoundIT admin replied", opening `/?support=1`) and shows a "new reply" line on the Home card.
+- **Code:** `backend/src/routes/support.routes.js` (student side), `routes/monitor.routes.js` (owner side), `utils/support.js`, tables `support_threads`/`support_messages`. Tests: `backend/test/support.test.js`.
+
 ## Checks and tests
 
 ```bash
