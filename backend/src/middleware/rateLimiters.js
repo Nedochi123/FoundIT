@@ -61,4 +61,15 @@ const tagClaimLimiter = rateLimit({
   message: { error: "Too many attempts. Please try again later." },
 });
 
-module.exports = { postItemLimiter, messageLimiter, tagFoundLimiter, tagChatLimiter, tagClaimLimiter, boostLimiter };
+// A student writing to the admin: generous enough for a real conversation, tight enough that one account can't flood
+// the owner's inbox.
+const supportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 20,
+  skip: () => process.env.NODE_ENV === "test",
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "You've sent a lot of messages. Please wait a little before sending more." },
+});
+
+module.exports = { supportLimiter, postItemLimiter, messageLimiter, tagFoundLimiter, tagChatLimiter, tagClaimLimiter, boostLimiter };

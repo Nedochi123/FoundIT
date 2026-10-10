@@ -19,6 +19,7 @@ const tagsRoutes = require("./routes/tags.routes");
 const boostsRoutes = require("./routes/boosts.routes");
 const activityRoutes = require("./routes/activity.routes");
 const monitorRoutes = require("./routes/monitor.routes");
+const supportRoutes = require("./routes/support.routes");
 const { activityLogger } = require("./utils/monitor");
 
 const app = express();
@@ -80,6 +81,7 @@ app.use("/api/tags", tagsRoutes);
 app.use("/api/boosts", boostsRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/monitor", monitorRoutes);
+app.use("/api/support", supportRoutes);
 
 // The owner's private page: plain HTML, CSS and JS in owner-page/, separate from the app. It is only a viewer: it
 // signs in with the owner's account and reads /api/monitor (owner only). Not linked from anywhere and kept out of

@@ -7,6 +7,7 @@ import { RewardsIntroCard } from "./rewards/RewardsGuide";
 import { TagsAlertCard, TagsPromoCard } from "./tags/HomeTagsCards";
 import HomeBoostedCards from "./boost/HomeBoostedCards";
 import HomeUrgentCards from "./urgent/HomeUrgentCards";
+import HomeSupportCard from "./support/HomeSupportCard";
 
 export default function Home({ onNavigate }) {
   const { user } = useAuth();
@@ -14,12 +15,17 @@ export default function Home({ onNavigate }) {
   const [reunions, setReunions] = useState([]);
   const [tags, setTags] = useState(null); // the student's QR tags (null until loaded)
   const [boostedLost, setBoostedLost] = useState([]); // other people's boosted lost posts
+  const [supportUnread, setSupportUnread] = useState(0); // replies from the admin the student hasn't opened
   const [urgentLost, setUrgentLost] = useState([]); // open "Urgently need" alerts (the server lists them first)
 
   useEffect(() => {
     api
       .getReunitedItems()
       .then((data) => setReunions(data.items))
+      .catch(() => {});
+    api
+      .getSupportUnread()
+      .then((data) => setSupportUnread(data.unread))
       .catch(() => {});
     api
       .getMyTags()
@@ -95,6 +101,8 @@ export default function Home({ onNavigate }) {
           <p className="text-sm text-slate-300">Take a photo and help it get back to its owner.</p>
         </div>
       </button>
+
+      <HomeSupportCard unread={supportUnread} onOpen={() => onNavigate("support")} />
 
       <HomeBoostedCards
         items={boostedLost}
