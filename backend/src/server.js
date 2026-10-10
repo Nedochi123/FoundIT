@@ -3,14 +3,19 @@ const app = require("./app");
 const { runBackup } = require("./utils/backup");
 const { expireStaleItems } = require("./utils/expireItems");
 const { purgeOldActivity, RETENTION_DAYS } = require("./utils/monitor");
+const { installShutdown } = require("./utils/shutdown");
+const db = require("../db");
 
 const PORT = process.env.PORT || 4000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`FoundIT backend listening on http://localhost:${PORT}`);
   console.log(`Allowed client origin: ${process.env.CLIENT_ORIGIN || "http://localhost:5173"}`);
 });
+
+// Exit cleanly when the host stops the server, so a redeploy isn't reported as a crash (see utils/shutdown.js).
+installShutdown(server, { onClose: () => db.close() });
 
 // A failed backup logs but never crashes the process -- missing one
 // day's snapshot shouldn't take the whole app down.
