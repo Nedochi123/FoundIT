@@ -5,8 +5,6 @@ import AdminStatsScreen from "./AdminStatsScreen";
 import AdminReportsScreen from "./AdminReportsScreen";
 import AdminTagsScreen from "./AdminTagsScreen";
 import AdminBoostsScreen from "./AdminBoostsScreen";
-import AdminActivityScreen from "./AdminActivityScreen";
-import { useAuth } from "../../hooks/useAuth";
 
 const TABS = [
   { key: "cashouts", label: "Cash-outs" },
@@ -16,10 +14,7 @@ const TABS = [
   { key: "boosts", label: "Boosts" },
 ];
 
-// The security view is only offered to the monitor account (the owner), not to every admin.
-const ACTIVITY_TAB = { key: "activity", label: "Activity" };
-
-// A link can open a section directly: /?admin=1&tab=activity
+// A link can open a section directly: /?admin=1&tab=boosts
 function initialTab() {
   try {
     return new URLSearchParams(window.location.search).get("tab") || "cashouts";
@@ -29,11 +24,9 @@ function initialTab() {
 }
 
 export default function AdminScreen() {
-  const { user } = useAuth();
   const [chosen, setTab] = useState(initialTab);
-  const tabs = user?.isMonitor ? [...TABS, ACTIVITY_TAB] : TABS;
-  // a section the signed-in account isn't allowed to see falls back to the first one (and appears once it is allowed)
-  const tab = tabs.some((t) => t.key === chosen) ? chosen : "cashouts";
+  // an unknown section name in the link falls back to the first one
+  const tab = TABS.some((t) => t.key === chosen) ? chosen : "cashouts";
 
   return (
     <div className="flex flex-col gap-5">
@@ -46,7 +39,7 @@ export default function AdminScreen() {
       </div>
 
       <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Admin sections">
-        {tabs.map((t) => (
+        {TABS.map((t) => (
           <button
             key={t.key}
             role="tab"
@@ -71,8 +64,6 @@ export default function AdminScreen() {
         <AdminTagsScreen />
       ) : tab === "boosts" ? (
         <AdminBoostsScreen />
-      ) : tab === "activity" && user?.isMonitor ? (
-        <AdminActivityScreen />
       ) : (
         <AdminStatsScreen />
       )}
