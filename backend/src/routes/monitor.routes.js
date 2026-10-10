@@ -2,7 +2,7 @@ const express = require("express");
 const crypto = require("crypto");
 const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
-const { isMonitorEmail, maskNumbers, RETENTION_DAYS } = require("../utils/monitor");
+const { isMonitorAccount, maskNumbers, RETENTION_DAYS } = require("../utils/monitor");
 
 // The owner's security view: everything students did, where they were when they did it, and the chats. Read only:
 // nothing here changes a chat, marks a message as read, or lets the owner write as someone else. Only the monitor
@@ -10,7 +10,8 @@ const { isMonitorEmail, maskNumbers, RETENTION_DAYS } = require("../utils/monito
 const router = express.Router();
 
 function requireMonitor(req, res, next) {
-  if (!isMonitorEmail(req.user?.email)) return res.status(404).json({ error: "Not found." });
+  const account = db.prepare("SELECT email, email_verified_at FROM users WHERE id = ?").get(req.user.id);
+  if (!isMonitorAccount(account)) return res.status(404).json({ error: "Not found." });
   next();
 }
 router.use(requireAuth, requireMonitor);

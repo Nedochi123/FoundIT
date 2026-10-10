@@ -1,6 +1,6 @@
 const db = require("../../db");
 const { verifyAccessToken } = require("../utils/tokens");
-const { isAdminEmail } = require("../utils/admin");
+const { isAdminAccount } = require("../utils/admin");
 
 // Reads the access token from the httpOnly cookie (preferred) or an
 // Authorization: Bearer header (needed because iOS Safari's ITP can
@@ -71,7 +71,10 @@ function requireOwnedFoundItem(db) {
 // Must run after requireAuth — relies on req.user.email from the JWT
 // payload, so no extra DB lookup needed just to gate the route.
 function requireAdmin(req, res, next) {
-  if (!isAdminEmail(req.user?.email)) {
+  const account = req.user
+    ? db.prepare("SELECT email, email_verified_at, created_at FROM users WHERE id = ?").get(req.user.id)
+    : null;
+  if (!isAdminAccount(account)) {
     return res.status(403).json({ error: "Admin access required." });
   }
   next();

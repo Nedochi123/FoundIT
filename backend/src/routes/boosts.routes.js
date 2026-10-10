@@ -5,7 +5,7 @@ const db = require("../../db");
 const { requireAuth, requireAdmin } = require("../middleware/auth");
 const { boostLimiter } = require("../middleware/rateLimiters");
 const { notifyUser, broadcastPush } = require("../utils/push");
-const { isAdminEmail } = require("../utils/admin");
+const { isAdminAccount } = require("../utils/admin");
 const {
   BOOST_PLANS,
   MAX_OPEN_REQUESTS_PER_USER,
@@ -68,9 +68,9 @@ function mineById(req) {
 
 const adminUserIds = () =>
   db
-    .prepare("SELECT id, email FROM users WHERE deleted_at IS NULL")
+    .prepare("SELECT id, email, email_verified_at, created_at FROM users WHERE deleted_at IS NULL")
     .all()
-    .filter((u) => isAdminEmail(u.email))
+    .filter((u) => isAdminAccount(u))
     .map((u) => u.id);
 
 // ---------- students ----------

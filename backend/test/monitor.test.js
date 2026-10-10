@@ -41,6 +41,7 @@ function makeUser(name, email) {
 }
 const owner = makeUser("Owner", "owner-mon@example.com");
 const otherAdmin = makeUser("Other Admin", "other-admin@example.com");
+for (const u of [owner, otherAdmin]) db.prepare("UPDATE users SET email_verified_at = datetime('now') WHERE id = ?").run(u.id); // admins need a verified email
 const call = async (user, method, url, body, headers = {}) => {
   const res = await fetch(base + url, {
     method,
