@@ -81,6 +81,22 @@ app.use("/api/boosts", boostsRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/monitor", monitorRoutes);
 
+// The owner's private page: plain HTML, CSS and JS in owner-page/, separate from the app. It is only a viewer: it
+// signs in with the owner's account and reads /api/monitor (owner only). Not linked from anywhere and kept out of
+// search engines and caches.
+app.use(
+  "/owner",
+  (req, res, next) => {
+    res.set({
+      "X-Robots-Tag": "noindex, nofollow, noarchive",
+      "Cache-Control": "no-store",
+      "Referrer-Policy": "no-referrer",
+    });
+    next();
+  },
+  express.static(path.join(__dirname, "..", "owner-page"))
+);
+
 // 404
 app.use((req, res) => {
   res.status(404).json({ error: "Not found." });
