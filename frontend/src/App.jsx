@@ -18,6 +18,7 @@ import { ThemeProvider } from "./components/theme/ThemeProvider";
 import WelcomeAfterSignup from "./components/WelcomeAfterSignup";
 import TagScan from "./components/tags/TagScan";
 import TagsScreen from "./components/tags/TagsScreen";
+import LocationGate from "./components/location/LocationGate";
 
 // Split out of the main bundle — the admin screen is only ever loaded by
 // one account, so every other visitor's initial load shouldn't pay to
@@ -154,7 +155,9 @@ function MainApp() {
         {showIntro && <IntroAnimation onDone={handleIntroDone} />}
         <EmailVerifyHandler />
         <AuthGate>
-          <Screens />
+          <LocationGate>
+            <Screens />
+          </LocationGate>
         </AuthGate>
       </ThemeProvider>
     </AuthProvider>

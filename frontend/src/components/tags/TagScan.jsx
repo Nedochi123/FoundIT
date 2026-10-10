@@ -212,7 +212,7 @@ export default function TagScan({ code }) {
             </div>
           </div>
           <p className="mt-3 text-sm text-slate-300">
-            Thank you for helping! This chat is private. Keep this page open to see their replies, or scan the tag again later to come back to it.
+            Thank you for helping! This chat is private between you and the owner, except that the FoundIT administrator can review chats for security. Keep this page open to see their replies, or scan the tag again later to come back to it.
           </p>
           <div className="mt-4">
             <TagChat

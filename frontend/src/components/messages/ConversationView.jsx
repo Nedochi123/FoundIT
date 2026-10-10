@@ -108,6 +108,8 @@ export default function ConversationView({ conversationId, onBack }) {
 
       {showConfetti && <Confetti />}
 
+      <p className="mb-2 text-[11px] text-slate-500">Private between you two. For everyone's safety, the FoundIT administrator can review chats.</p>
+
       {justConfirmed ? (
         <div className="mb-3 flex items-center gap-3 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3">
           <PartyPopper className="h-5 w-5 shrink-0 text-amber-400" />

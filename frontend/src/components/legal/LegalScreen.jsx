@@ -59,13 +59,25 @@ export default function LegalScreen({ onBack }) {
             <span className="font-semibold text-slate-200">Notifications:</span> if you enable push
             notifications, a device subscription used to alert you about new reports.
           </p>
+          <p>
+            <span className="font-semibold text-slate-200">Location and activity:</span> FoundIT requires
+            your phone's location to be on. For security and to help prevent theft, the app records what you
+            do that changes something (for example posting an item, sending a message, confirming a return,
+            or opening the app) together with where your phone said it was at that moment, rounded to about
+            11 metres. We do not track you continuously or when the app is closed. This record is kept for
+            90 days and then deleted, and it is deleted when you delete your account.
+          </p>
         </Section>
 
         <Section title="Who can see what">
           <p>
             A found item's description, location, photo, and your name are visible to everyone signed in,
             so a seeker can recognize and message you. Messages inside a conversation are private between
-            its two participants — no one else, including other students, can read them.
+            its two participants: other students cannot read them. The only exception is the FoundIT
+            administrator (the owner of the app), who can read chats, and see the activity record and
+            location notes described above, for security and to investigate theft. That access is read
+            only, limited to that one account, and long numbers such as bank account numbers are hidden
+            from the administrator's view. Your location and activity are never shown to other students.
           </p>
           <p>
             Your ID number and any bank details you submit for a cash-out are visible only to FoundIT
