@@ -68,7 +68,11 @@ export default function SupportScreen({ onNavigate }) {
         <p className="mt-2 text-base font-extrabold text-amber-200">
           In case of any complaint, send a message to the admin. It will be seen and attended to immediately.
         </p>
-        <p className="mt-1.5 text-xs text-slate-300">Only the admin reads this. Replies appear here, and you'll get a notification if you've turned notifications on.</p>
+        <p className="mt-3 rounded-lg border border-amber-400/40 bg-slate-900/60 p-2.5 text-sm font-bold text-slate-50">
+          Please note: we cannot help with stolen items that have no record in FoundIT. We can only help with finding items that have been published
+          and not yet returned to their owner.
+        </p>
+        <p className="mt-2 text-xs text-slate-300">Only the admin reads this. Replies appear here, and you'll get a notification if you've turned notifications on.</p>
       </div>
 
       <div className="flex min-h-40 flex-col gap-2" aria-live="polite">

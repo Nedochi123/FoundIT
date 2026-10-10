@@ -18,6 +18,10 @@ export default function HomeSupportCard({ unread, onOpen }) {
           <p className="mt-0.5 text-base font-extrabold leading-snug text-slate-50">
             In case of any complaint, send a message to the admin. It will be seen and attended to immediately.
           </p>
+          <p className="mt-2 text-xs font-semibold text-slate-200">
+            Please note: we cannot help with stolen items that have no record in FoundIT. We can only help with finding items that have been published
+            and not yet returned to their owner.
+          </p>
           <span className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-4 text-sm font-bold text-amber-950">
             Message the admin <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </span>

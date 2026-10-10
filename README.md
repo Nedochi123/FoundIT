@@ -56,7 +56,7 @@ To investigate theft, the owner has a private security view, and students must k
 
 ## Messages to the admin (complaints)
 
-A bold **Complaints** card on Home says: "In case of any complaint, send a message to the admin. It will be seen and attended to immediately." It opens a private chat screen (`components/support/`) where a student writes to the admin and reads the admin's replies. One private thread per student, 1,000 characters per message, 20 messages an hour.
+A bold **Complaints** card on Home says: "In case of any complaint, send a message to the admin. It will be seen and attended to immediately." Under it, in bold, a note says that **FoundIT cannot help with stolen items that have no record in FoundIT; it can only help find items that have been published and not yet returned to their owner** (also shown on the chat screen, above the message box). It opens a private chat screen (`components/support/`) where a student writes to the admin and reads the admin's replies. One private thread per student, 1,000 characters per message, 20 messages an hour.
 
 - **The owner page's Messages tab** (`backend/owner-page/`) is where every message arrives, as a personal chat per student: unread count on the tab and in the browser tab title, automatic refresh, and a reply box. This is the only place that page writes; everything else on it is read only. Only the owner account can open it (`/api/monitor/support*`).
 - **Being told:** a new message sends the owner a push notification (if notifications are on for the owner account) and an email, both without the message text; a reply sends the student a push ("The FoundIT admin replied", opening `/?support=1`) and shows a "new reply" line on the Home card.
