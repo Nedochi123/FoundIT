@@ -299,6 +299,62 @@ textarea:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+.bignumber {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 2px 0;
+}
+.tablewrap {
+  overflow-x: auto;
+  margin: 12px 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+table.revenue {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+table.revenue caption {
+  text-align: left;
+  font-weight: 700;
+  padding: 12px 14px 4px;
+}
+table.revenue th,
+table.revenue td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  font-weight: 400;
+}
+table.revenue thead th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  border-top: none;
+}
+table.revenue tbody th {
+  font-weight: 700;
+}
+table.revenue .num {
+  text-align: right;
+  white-space: nowrap;
+}
+table.revenue .strong {
+  font-weight: 700;
+}
+.months {
+  background: var(--bg);
+}
+.monthrow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 4px 16px;
+  padding: 3px 0;
+  font-size: 13px;
+}
 .empty {
   text-align: center;
   color: var(--muted);

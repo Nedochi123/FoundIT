@@ -62,6 +62,14 @@ A bold **Complaints** card on Home says: "In case of any complaint, send a messa
 - **Being told:** a new message sends the owner a push notification (if notifications are on for the owner account) and an email, both without the message text; a reply sends the student a push ("The FoundIT admin replied", opening `/?support=1`) and shows a "new reply" line on the Home card.
 - **Code:** `backend/src/routes/support.routes.js` (student side), `routes/monitor.routes.js` (owner side), `utils/support.js`, tables `support_threads`/`support_messages`. Tests: `backend/test/support.test.js`.
 
+## Revenue on the owner page
+
+The owner page's **Revenue** tab shows the **total revenue FoundIT has made** and, for every calendar year, what it earned that year and the **running total at the end of that year** (for the current year, the total so far), with a month-by-month breakdown when a year is opened. Years are calendar years in Nigerian time (Africa/Lagos, UTC+1), so a payment approved at 23:30 UTC on 31 December counts in the new year.
+
+- **What counts:** boosts students paid for and the admin approved. Approving writes one row to `revenue_entries`, which is kept apart from the `boosts` table on purpose: deleting a student's account deletes their boosts, but money already earned must not vanish from the totals. Boosts approved before the ledger existed are copied in on start-up (once).
+- **What does not:** thank-you rewards (paid student to student), token cash-outs (a cost, not income) and QR sticker sales (not recorded in the app). The page says so under the table.
+- **Code:** `backend/src/utils/revenue.js`, `GET /api/monitor/revenue` (owner only), `recordBoostRevenue` in the boost approval, `backend/owner-page/`. Tests: `backend/test/revenue.test.js`.
+
 ## Checks and tests
 
 ```bash

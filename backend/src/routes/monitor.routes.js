@@ -4,6 +4,7 @@ const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
 const { isMonitorAccount, maskNumbers, RETENTION_DAYS } = require("../utils/monitor");
 const { MAX_LENGTH, notifyStudentOfReply, toMessage } = require("../utils/support");
+const { revenueReport } = require("../utils/revenue");
 
 // The owner's security view: everything students did, where they were when they did it, and the chats. Read only:
 // nothing here changes a chat, marks a message as read, or lets the owner write as someone else. Only the monitor
@@ -260,6 +261,11 @@ router.get("/chats/tag/:id", (req, res) => {
       at: m.created_at,
     })),
   });
+});
+
+// ---- revenue: what FoundIT has earned, by calendar year (see utils/revenue.js) ----
+router.get("/revenue", (req, res) => {
+  res.json(revenueReport());
 });
 
 // ---- messages to the admin (complaints and problems) ----

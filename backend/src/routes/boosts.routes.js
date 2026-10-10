@@ -6,6 +6,7 @@ const { requireAuth, requireAdmin } = require("../middleware/auth");
 const { boostLimiter } = require("../middleware/rateLimiters");
 const { notifyUser, broadcastPush } = require("../utils/push");
 const { isAdminAccount } = require("../utils/admin");
+const { recordBoostRevenue } = require("../utils/revenue");
 const {
   BOOST_PLANS,
   MAX_OPEN_REQUESTS_PER_USER,
@@ -210,6 +211,7 @@ router.post("/admin/:id/approve", requireAdmin, (req, res, next) => {
       `UPDATE boosts SET status = 'active', approved_at = datetime('now'), starts_at = datetime('now'),
          expires_at = datetime('now', ?), decided_by = ?, updated_at = datetime('now') WHERE id = ?`
     ).run(`+${b.hours} hours`, req.user.id, b.id);
+    recordBoostRevenue(b.id); // the payment now counts as revenue, even if the student's account is deleted later
 
     notifyUser(b.user_id, {
       title: "Your boost is live 🚀",

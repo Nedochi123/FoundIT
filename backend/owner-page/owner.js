@@ -41,6 +41,8 @@ function ago(iso) {
   if (hours < 24) return `${hours} h ago`;
   return `${Math.floor(hours / 24)} d ago`;
 }
+const naira = (n) => "₦" + Number(n).toLocaleString("en-NG");
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 function debounce(fn, ms = 350) {
   let t;
   return (...args) => {
@@ -183,7 +185,7 @@ function showMain() {
   clear(root);
   const content = el("div", { id: "content" });
   const tabBar = el("div", { className: "tabs", role: "tablist", "aria-label": "Views" });
-  const views = { messages: messagesView, activity: activityView, chats: chatsView, people: peopleView };
+  const views = { messages: messagesView, revenue: revenueView, activity: activityView, chats: chatsView, people: peopleView };
   let current = "messages";
   let personFilter = null; // { id, name }
   let timers = []; // refresh timers of the view on screen; stopped when another view opens
@@ -216,7 +218,7 @@ function showMain() {
     open("activity");
   }
   tabBar.append(messagesTab);
-  for (const [name, label] of [["activity", "Activity"], ["chats", "Chats"], ["people", "People"]]) {
+  for (const [name, label] of [["revenue", "Revenue"], ["activity", "Activity"], ["chats", "Chats"], ["people", "People"]]) {
     tabBar.append(el("button", { type: "button", role: "tab", "data-view": name, text: label, onclick: () => open(name) }));
   }
 
@@ -449,6 +451,80 @@ function showMain() {
         fail2(err);
       }
     }
+  }
+
+  // ---- revenue: what FoundIT has earned, by calendar year
+  function revenueView(host) {
+    const fail = errorLine(host);
+    const body = el("div", {});
+    host.append(body);
+
+    async function load() {
+      try {
+        const r = await api("/api/monitor/revenue");
+        clear(body);
+
+        add(
+          body,
+          el(
+            "div",
+            { className: "card" },
+            el("div", { className: "muted", text: "Total revenue FoundIT has made so far" }),
+            el("div", { className: "bignumber", text: naira(r.total) }),
+            el("div", { className: "muted", text: `${r.payments} approved payment${r.payments === 1 ? "" : "s"} · ${r.source}` })
+          )
+        );
+
+        const table = el("table", { className: "revenue" });
+        add(
+          table,
+          el("caption", { text: "Revenue by calendar year" }),
+          el(
+            "thead",
+            {},
+            el("tr", {}, el("th", { scope: "col", text: "Year" }), el("th", { scope: "col", className: "num", text: "Earned that year" }), el("th", { scope: "col", className: "num", text: "Total by end of year" }))
+          )
+        );
+        const tbody = el("tbody", {});
+        for (const y of [...r.years].reverse()) {
+          const label = y.complete ? String(y.year) : `${y.year} (so far)`;
+          const detail = el("tr", { hidden: true }, el("td", { colspan: "3", className: "months" }));
+          const toggle = el("button", {
+            type: "button",
+            className: "linkbtn",
+            "aria-expanded": "false",
+            text: label,
+            onclick: () => {
+              detail.hidden = !detail.hidden;
+              toggle.setAttribute("aria-expanded", String(!detail.hidden));
+            },
+          });
+          const monthsCell = detail.firstChild;
+          const shown = y.months.filter((m) => m.payments > 0);
+          if (shown.length === 0) monthsCell.append(el("span", { className: "muted", text: "Nothing earned this year." }));
+          for (const m of shown) {
+            monthsCell.append(el("div", { className: "monthrow" }, el("span", { text: MONTHS[m.month - 1] }), el("span", { className: "muted", text: `${m.payments} payment${m.payments === 1 ? "" : "s"}` }), el("span", { className: "num", text: naira(m.revenue) })));
+          }
+          tbody.append(
+            el("tr", {}, el("th", { scope: "row" }, toggle), el("td", { className: "num", text: naira(y.revenue) }), el("td", { className: "num strong", text: naira(y.cumulative) })),
+            detail
+          );
+        }
+        table.append(tbody);
+        body.append(el("div", { className: "tablewrap" }, table));
+
+        add(
+          body,
+          el("p", {
+            className: "notice",
+            text: `Years are calendar years in Nigerian time (${r.timezone}). "Total by end of year" is everything earned up to 31 December of that year; for this year it is the total so far. Revenue counts boosts that students paid for and you approved. It does not include thank-you rewards (paid directly between students), token cash-outs (a cost to you, not income) or QR sticker sales, which FoundIT does not record.`,
+          })
+        );
+      } catch (err) {
+        fail(err);
+      }
+    }
+    load();
   }
 
   // ---- messages (complaints and problems students send to the admin, answered here)

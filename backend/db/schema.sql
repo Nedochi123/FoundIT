@@ -415,3 +415,24 @@ CREATE TABLE IF NOT EXISTS support_messages (
 );
 
 CREATE INDEX IF NOT EXISTS idx_support_messages_thread ON support_messages(thread_id, created_at);
+
+-- ============================================================
+-- REVENUE LEDGER (what FoundIT has earned; shown on the owner page)
+-- ============================================================
+
+-- One row per payment the admin approved (today only boosts). It is kept apart from the boosts table on purpose:
+-- boosts are deleted with the student or the post they belong to, but money already earned must not disappear
+-- from the totals when an account is deleted. No foreign keys, so nothing cascades into it. amount is in naira.
+CREATE TABLE IF NOT EXISTS revenue_entries (
+  id         TEXT PRIMARY KEY,
+  source     TEXT NOT NULL DEFAULT 'boost',
+  amount     INTEGER NOT NULL,
+  reference  TEXT NOT NULL UNIQUE,
+  earned_at  TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_revenue_earned ON revenue_entries(earned_at);
+
+-- Boosts approved before this table existed are copied in (safe to run on every start: rows already there are skipped).
+INSERT OR IGNORE INTO revenue_entries (id, source, amount, reference, earned_at)
+SELECT id, 'boost', amount, reference, approved_at FROM boosts WHERE status = 'active' AND approved_at IS NOT NULL;
