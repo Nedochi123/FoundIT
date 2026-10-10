@@ -6,6 +6,8 @@ import EmailVerifyHandler from "./components/auth/EmailVerifyHandler";
 import Layout from "./components/layout/Layout";
 import Home from "./components/Home";
 import LostForm from "./components/lost/LostForm";
+import UrgentForm from "./components/urgent/UrgentForm";
+import UrgentAlertModal from "./components/urgent/UrgentAlertModal";
 import FoundForm from "./components/found/FoundForm";
 import Gallery from "./components/gallery/Gallery";
 import ConversationList from "./components/messages/ConversationList";
@@ -75,6 +77,8 @@ function Screens() {
     content = <Gallery onNavigate={navigate} onOpenConversation={openConversation} />;
   } else if (view === "lost") {
     content = <LostForm onNavigate={navigate} />;
+  } else if (view === "urgent") {
+    content = <UrgentForm onNavigate={navigate} />;
   } else if (view === "found") {
     content = <FoundForm onNavigate={navigate} />;
   } else if (view === "profile") {
@@ -109,6 +113,7 @@ function Screens() {
   return (
     <>
       <WelcomeAfterSignup />
+      <UrgentAlertModal onNavigate={navigate} />
       <Layout view={activeTab} onNavigate={navigate} unreadCount={unreadCount}>
         {content}
       </Layout>

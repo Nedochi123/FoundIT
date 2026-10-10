@@ -34,7 +34,7 @@ function postChatMessage(conversationId, senderId, body) {
   );
 }
 
-function createReward(convo, ownerId, amount) {
+function createReward(convo, ownerId, amount, { urgent = false } = {}) {
   db.prepare(
     `INSERT INTO rewards (id, found_item_id, conversation_id, from_user_id, to_user_id, amount)
      VALUES (?, ?, ?, ?, ?, ?)`
@@ -42,7 +42,9 @@ function createReward(convo, ownerId, amount) {
   postChatMessage(
     convo.id,
     ownerId,
-    `🎁 To say thank you, I'd like to give you a ${naira(amount)} reward. Please send me your account details here in this chat (bank and account number, or a phone number for a transfer) and I'll send it.`
+    urgent
+      ? `🎁 This is what I urgently needed, so I'm giving you the ${naira(amount)} reward I promised. Please send me your account details here in this chat (bank and account number, or a phone number for a transfer) and I'll send it.`
+      : `🎁 To say thank you, I'd like to give you a ${naira(amount)} reward. Please send me your account details here in this chat (bank and account number, or a phone number for a transfer) and I'll send it.`
   );
 }
 
@@ -51,6 +53,17 @@ function notifyRewardChosen(finderId, amount) {
     title: "A thank-you reward 🎁",
     body: `The owner chose a ${naira(amount)} reward for you. Open the chat to share your account details with them.`,
   }).catch(() => {});
+}
+
+/** The open "Urgently need" post (if any) whose promised reward this student can settle by confirming a return. */
+function urgentOfferFor(userId) {
+  const row = db
+    .prepare(
+      `SELECT id, description, urgent_reward FROM lost_items
+       WHERE poster_id = ? AND status = 'open' AND urgent_reward IS NOT NULL ORDER BY urgent_at DESC LIMIT 1`
+    )
+    .get(userId);
+  return row ? { lostItemId: row.id, description: row.description, reward: row.urgent_reward } : null;
 }
 
 /** What the chat screen needs to show about the reward, or null when there is none. */
@@ -154,9 +167,14 @@ router.get("/:id/messages", requireAuth, requireConversationAccess, (req, res) =
     foundItem.return_confirmed_conversation_id === req.conversation.id &&
     !reward;
 
+  // The owner who promised a reward in an "Urgently need" post is offered it when confirming the return.
+  const urgentOffer =
+    req.conversation.seeker_id === req.user.id && !foundItem?.return_confirmed_at ? urgentOfferFor(req.user.id) : null;
+
   res.json({
     reward: rewardView(rewardHere),
     canOfferReward,
+    urgentOffer,
     rewardOptions: REWARD_AMOUNTS,
     messages: messages.map((m) => ({
       id: m.id,
@@ -215,6 +233,8 @@ const confirmReturnSchema = z.object({
   note: z.string().trim().max(280).optional(),
   // optional voluntary reward, one of REWARD_AMOUNTS (checked below)
   rewardAmount: z.number().int().optional(),
+  // the owner's open "Urgently need" post this return settles; its promised reward is then fixed
+  urgentItemId: z.string().max(64).optional(),
 });
 
 router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req, res, next) => {
@@ -228,7 +248,20 @@ router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req,
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.issues[0].message });
     }
-    const { note, rewardAmount } = parsed.data;
+    const { note, urgentItemId } = parsed.data;
+    let { rewardAmount } = parsed.data;
+    let urgentPost = null;
+    if (urgentItemId) {
+      urgentPost = db
+        .prepare(
+          "SELECT id, urgent_reward FROM lost_items WHERE id = ? AND poster_id = ? AND status = 'open' AND urgent_reward IS NOT NULL"
+        )
+        .get(urgentItemId, req.user.id);
+      if (!urgentPost) {
+        return res.status(400).json({ error: "That urgent request isn't open any more." });
+      }
+      rewardAmount = urgentPost.urgent_reward; // the promised amount, not a new choice
+    }
     if (rewardAmount !== undefined && !REWARD_AMOUNTS.includes(rewardAmount)) {
       return res.status(400).json({ error: "Please choose one of the reward amounts shown." });
     }
@@ -265,7 +298,12 @@ router.post("/:id/confirm-return", requireAuth, requireConversationAccess, (req,
         ).run(crypto.randomUUID(), foundItem.id, req.user.id, convo.finder_id, note);
       }
 
-      if (rewardAmount) createReward(convo, req.user.id, rewardAmount);
+      if (rewardAmount) createReward(convo, req.user.id, rewardAmount, { urgent: Boolean(urgentPost) });
+      if (urgentPost) {
+        db.prepare(
+          "UPDATE lost_items SET status = 'resolved', resolved_at = datetime('now'), updated_at = datetime('now') WHERE id = ?"
+        ).run(urgentPost.id);
+      }
 
       return db.prepare("SELECT tokens FROM users WHERE id = ?").get(convo.finder_id);
     });

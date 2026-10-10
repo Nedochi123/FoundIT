@@ -66,6 +66,11 @@ CREATE TABLE IF NOT EXISTS lost_items (
   status       TEXT NOT NULL DEFAULT 'open',
   resolved_at  TEXT,
   expired_at   TEXT,
+  -- "Urgently need" posts: the reward the poster promised the finder (one of utils/rewards.js), when they
+  -- made the alert, and when they ticked the agreement to pay it. NULL on ordinary lost posts.
+  urgent_reward    INTEGER,
+  urgent_at        TEXT,
+  urgent_agreed_at TEXT,
   created_at   TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );

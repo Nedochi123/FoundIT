@@ -153,6 +153,9 @@ export const api = {
   listLostItems: (status = "open") => apiRequest(`/api/lost-items?status=${status}`),
   createLostItem: (body) => apiRequest("/api/lost-items", { method: "POST", body: JSON.stringify(body) }),
   resolveLostItem: (id) => apiRequest(`/api/lost-items/${id}/resolve`, { method: "PATCH" }),
+  // "Urgently need": a lost post with a compulsory reward; publishing alerts everyone
+  listUrgentItems: () => apiRequest("/api/lost-items/urgent"),
+  createUrgentItem: (body) => apiRequest("/api/lost-items/urgent", { method: "POST", body: JSON.stringify(body) }),
 
   // Conversations & messages
   listConversations: () => apiRequest("/api/conversations"),
@@ -164,10 +167,14 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ body }),
     }),
-  confirmReturn: (conversationId, note, rewardAmount) =>
+  confirmReturn: (conversationId, note, rewardAmount, urgentItemId) =>
     apiRequest(`/api/conversations/${conversationId}/confirm-return`, {
       method: "POST",
-      body: JSON.stringify({ note: note || undefined, rewardAmount: rewardAmount || undefined }),
+      body: JSON.stringify({
+        note: note || undefined,
+        rewardAmount: rewardAmount || undefined,
+        urgentItemId: urgentItemId || undefined,
+      }),
     }),
 
   // Voluntary thank-you reward (the owner pays the finder directly; FoundIT never handles the money)
