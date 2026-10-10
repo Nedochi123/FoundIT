@@ -7,6 +7,8 @@ const { postItemLimiter } = require("../middleware/rateLimiters");
 const { broadcastPush } = require("../utils/push");
 const { idNumberSchema } = require("../utils/idNumber");
 const { ITEM_CATEGORIES } = require("../utils/itemCategories");
+const { REWARD_AMOUNTS } = require("../utils/rewards");
+const { MAX_URGENT_OPEN_PER_USER, MAX_URGENT_PER_WEEK, ACTIVE_URGENT_SQL, alertText } = require("../utils/urgent");
 
 const router = express.Router();
 
@@ -25,18 +27,21 @@ function serialize(row, posterName) {
     status: row.status,
     createdAt: row.created_at,
     boostedUntil: row.boosted_until || null,
+    // set while an "Urgently need" post is inside its alert window: the reward everyone can see
+    urgent: row.urgent_active ? { reward: row.urgent_reward, at: row.urgent_at } : null,
   };
 }
 
 router.get("/", requireAuth, (req, res) => {
   const status = req.query.status === "resolved" ? "resolved" : "open";
-  // boosted posts first, then newest
+  // urgent posts first, then boosted, then newest
   const rows = db
     .prepare(
-      `SELECT lost_items.*, users.name AS poster_name, ${BOOSTED_UNTIL_SQL} AS boosted_until
+      `SELECT lost_items.*, users.name AS poster_name, ${BOOSTED_UNTIL_SQL} AS boosted_until,
+              ${ACTIVE_URGENT_SQL} AS urgent_active
        FROM lost_items JOIN users ON users.id = lost_items.poster_id
        WHERE lost_items.status = ?
-       ORDER BY (boosted_until IS NOT NULL) DESC, lost_items.created_at DESC`
+       ORDER BY urgent_active DESC, (boosted_until IS NOT NULL) DESC, lost_items.created_at DESC`
     )
     .all(status);
 
@@ -67,6 +72,19 @@ router.get("/", requireAuth, (req, res) => {
       return item;
     }),
   });
+});
+
+// Everything urgent right now, newest first: what the alert pop-up and the Home alerts show to every student.
+router.get("/urgent", requireAuth, (req, res) => {
+  const rows = db
+    .prepare(
+      `SELECT lost_items.*, users.name AS poster_name, 1 AS urgent_active
+       FROM lost_items JOIN users ON users.id = lost_items.poster_id
+       WHERE ${ACTIVE_URGENT_SQL}
+       ORDER BY lost_items.urgent_at DESC LIMIT 10`
+    )
+    .all();
+  res.json({ items: rows.map((r) => serialize(r, r.poster_name)) });
 });
 
 const createSchema = z.object({
@@ -106,6 +124,66 @@ router.post("/", requireAuth, postItemLimiter, (req, res, next) => {
       excludeUserId: req.user.id,
       category: "lost",
     }).catch((err) => console.error("Broadcast push failed:", err));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// "Urgently need": a lost post with a compulsory reward and the poster's agreement to pay it. Publishing it
+// alerts everyone (see utils/urgent.js for what that means and the limits).
+const urgentSchema = createSchema.extend({
+  reward: z.number({ error: "Choose a reward amount." }).int().refine((n) => REWARD_AMOUNTS.includes(n), {
+    message: "Please choose one of the reward amounts shown.",
+  }),
+  agree: z.literal(true, { error: "Please tick the box to agree to give the reward." }),
+});
+
+router.post("/urgent", requireAuth, postItemLimiter, (req, res, next) => {
+  try {
+    const parsed = urgentSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.issues[0].message });
+    }
+    const { description, location, category: itemCategory, idNumber, reward } = parsed.data;
+
+    const open = db
+      .prepare(`SELECT COUNT(*) AS n FROM lost_items WHERE poster_id = ? AND ${ACTIVE_URGENT_SQL}`)
+      .get(req.user.id).n;
+    if (open >= MAX_URGENT_OPEN_PER_USER) {
+      return res.status(409).json({ error: "You already have an urgent request open. Mark it as found before starting another." });
+    }
+    const recent = db
+      .prepare("SELECT COUNT(*) AS n FROM lost_items WHERE poster_id = ? AND urgent_at > datetime('now', '-7 days')")
+      .get(req.user.id).n;
+    if (recent >= MAX_URGENT_PER_WEEK) {
+      return res.status(429).json({ error: "You've used your urgent alerts for this week. You can still post it as a normal lost item." });
+    }
+
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+    if (idNumber && !user.id_number) {
+      db.prepare("UPDATE users SET id_number = ? WHERE id = ?").run(idNumber, req.user.id);
+    }
+
+    const id = crypto.randomUUID();
+    db.prepare(
+      `INSERT INTO lost_items (id, poster_id, description, location, category, urgent_reward, urgent_at, urgent_agreed_at)
+       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+    ).run(id, req.user.id, description, location || null, itemCategory || null, reward);
+
+    const item = db
+      .prepare(`SELECT lost_items.*, ${ACTIVE_URGENT_SQL} AS urgent_active FROM lost_items WHERE id = ?`)
+      .get(id);
+    res.status(201).json({ item: serialize(item, req.user.name) });
+
+    // everyone with notifications on gets this, whatever their lost-alert setting; the poster is left out
+    const { title, body } = alertText(req.user.name, description, reward);
+    broadcastPush({
+      title,
+      body,
+      url: "/?lost=1",
+      excludeUserId: req.user.id,
+      extra: { urgent: true, tag: `urgent-${id}`, icon: "/icons/alert-192.png", badge: "/icons/alert-192.png" },
+    }).catch((err) => console.error("Urgent broadcast failed:", err));
   } catch (err) {
     next(err);
   }

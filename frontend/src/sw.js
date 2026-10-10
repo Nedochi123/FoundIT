@@ -22,9 +22,13 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || "",
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
+      icon: data.icon || "/icons/icon-192.png",
+      badge: data.badge || "/icons/icon-192.png",
       data: { url: data.url || "/" },
+      // an urgent alert (someone needs a lost item and is offering a reward) stays until it is dealt with and
+      // buzzes the phone; the tag makes a repeat of the same alert replace the old one instead of stacking
+      ...(data.urgent ? { requireInteraction: true, vibrate: [250, 120, 250, 120, 250] } : {}),
+      ...(data.tag ? { tag: data.tag } : {}),
     })
   );
 });

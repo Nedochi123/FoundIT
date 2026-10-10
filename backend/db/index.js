@@ -78,6 +78,10 @@ function runMigrations() {
       "return_confirmed_conversation_id",
       "ALTER TABLE found_items ADD COLUMN return_confirmed_conversation_id TEXT",
     ],
+    // "Urgently need" posts (see utils/urgent.js)
+    ["lost_items", "urgent_reward", "ALTER TABLE lost_items ADD COLUMN urgent_reward INTEGER"],
+    ["lost_items", "urgent_at", "ALTER TABLE lost_items ADD COLUMN urgent_at TEXT"],
+    ["lost_items", "urgent_agreed_at", "ALTER TABLE lost_items ADD COLUMN urgent_agreed_at TEXT"],
   ];
   for (const [table, column, ddl] of migrations) {
     if (!columnExists(table, column)) {

@@ -11,8 +11,9 @@ if (configured) {
   );
 }
 
-async function sendToSubscriptions(subs, title, body, url) {
-  const payload = JSON.stringify({ title, body, url });
+// `extra` carries optional display hints for the service worker (icon, urgent) next to the text.
+async function sendToSubscriptions(subs, title, body, url, extra = {}) {
+  const payload = JSON.stringify({ title, body, url, ...extra });
 
   const results = await Promise.allSettled(
     subs.map((sub) =>
@@ -37,9 +38,9 @@ async function sendToSubscriptions(subs, title, body, url) {
 // `category` ('lost' | 'found') filters out anyone who opted out of
 // that specific alert type via their notification preferences, without
 // touching subscriptions for the other category or disabling push
-// entirely. Degrades to a console log when VAPID keys aren't
+// entirely; any other value (or none) goes to everyone, which is what urgent alerts use. Degrades to a console log when VAPID keys aren't
 // configured, matching the email.js "optional integration" pattern.
-async function broadcastPush({ title, body, url = "/", excludeUserId, category }) {
+async function broadcastPush({ title, body, url = "/", excludeUserId, category, extra }) {
   if (!configured) {
     console.log(`[push disabled — no VAPID keys configured] Would broadcast: "${title}" — ${body}`);
     return;
@@ -58,7 +59,7 @@ async function broadcastPush({ title, body, url = "/", excludeUserId, category }
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
   const subs = db.prepare(`SELECT * FROM push_subscriptions ${where}`).all(...params);
 
-  await sendToSubscriptions(subs, title, body, url);
+  await sendToSubscriptions(subs, title, body, url, extra);
 }
 
 // Targets one specific user's device(s) — used for things like "your

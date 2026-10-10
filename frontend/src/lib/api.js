@@ -2,6 +2,8 @@
 // (that's a Create React App convention and silently does nothing here).
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
+import { geoHeaderValue } from "./geo";
+
 const TOKEN_STORAGE_KEY = "foundit_auth_tokens";
 // A cached copy of the last-known user, purely for optimistic startup
 // rendering — every network round-trip on this connection costs a fixed
@@ -80,6 +82,8 @@ async function apiRequest(path, options = {}, _isRetry = false) {
   const headers = {
     ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(tokens?.accessToken ? { Authorization: `Bearer ${tokens.accessToken}` } : {}),
+    // where the phone is, sent with anything that changes something (the owner's security log; see lib/geo.js)
+    ...(options.method && options.method !== "GET" && geoHeaderValue() ? { "X-Geo": geoHeaderValue() } : {}),
     ...(options.headers || {}),
   };
 
@@ -125,6 +129,19 @@ async function apiRequest(path, options = {}, _isRetry = false) {
 }
 
 export const api = {
+  // Security: the app tells the server it was opened (the location goes in the X-Geo header); owner-only views below
+  checkin: () => apiRequest("/api/activity/checkin", { method: "POST" }),
+  monitorActivity: ({ user, q, before, limit = 40 } = {}) => {
+    const p = new URLSearchParams({ limit });
+    if (user) p.set("user", user);
+    if (q) p.set("q", q);
+    if (before) p.set("before", before);
+    return apiRequest(`/api/monitor/activity?${p}`);
+  },
+  monitorPeople: (q) => apiRequest(`/api/monitor/people${q ? `?q=${encodeURIComponent(q)}` : ""}`),
+  monitorChats: (q) => apiRequest(`/api/monitor/chats${q ? `?q=${encodeURIComponent(q)}` : ""}`),
+  monitorChat: (kind, id) => apiRequest(`/api/monitor/chats/${kind}/${id}`),
+
   // Auth
   signup: (body) => apiRequest("/api/auth/signup", { method: "POST", body: JSON.stringify(body) }),
   login: (body) => apiRequest("/api/auth/login", { method: "POST", body: JSON.stringify(body) }),
@@ -153,6 +170,9 @@ export const api = {
   listLostItems: (status = "open") => apiRequest(`/api/lost-items?status=${status}`),
   createLostItem: (body) => apiRequest("/api/lost-items", { method: "POST", body: JSON.stringify(body) }),
   resolveLostItem: (id) => apiRequest(`/api/lost-items/${id}/resolve`, { method: "PATCH" }),
+  // "Urgently need": a lost post with a compulsory reward; publishing alerts everyone
+  listUrgentItems: () => apiRequest("/api/lost-items/urgent"),
+  createUrgentItem: (body) => apiRequest("/api/lost-items/urgent", { method: "POST", body: JSON.stringify(body) }),
 
   // Conversations & messages
   listConversations: () => apiRequest("/api/conversations"),
@@ -164,10 +184,14 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ body }),
     }),
-  confirmReturn: (conversationId, note, rewardAmount) =>
+  confirmReturn: (conversationId, note, rewardAmount, urgentItemId) =>
     apiRequest(`/api/conversations/${conversationId}/confirm-return`, {
       method: "POST",
-      body: JSON.stringify({ note: note || undefined, rewardAmount: rewardAmount || undefined }),
+      body: JSON.stringify({
+        note: note || undefined,
+        rewardAmount: rewardAmount || undefined,
+        urgentItemId: urgentItemId || undefined,
+      }),
     }),
 
   // Voluntary thank-you reward (the owner pays the finder directly; FoundIT never handles the money)

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, PartyPopper, Coins, Flag } from "lucide-react";
+import { ArrowLeft, Send, PartyPopper, Coins, Flag, TriangleAlert } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import { usePolling } from "../../hooks/usePolling";
@@ -31,6 +31,9 @@ export default function ConversationView({ conversationId, onBack }) {
   const [canOfferReward, setCanOfferReward] = useState(false);
   const [rewardOptions, setRewardOptions] = useState([]);
   const [rewardChoice, setRewardChoice] = useState(null); // chosen while confirming the return (null = no reward)
+  // the owner's open "Urgently need" post, if they have one: confirming this return can settle its promised reward
+  const [urgentOffer, setUrgentOffer] = useState(null);
+  const [thisIsUrgent, setThisIsUrgent] = useState(true);
   const bottomRef = useRef(null);
 
   async function load() {
@@ -42,15 +45,23 @@ export default function ConversationView({ conversationId, onBack }) {
     setReward(data.reward || null);
     setCanOfferReward(!!data.canOfferReward);
     setRewardOptions(data.rewardOptions || []);
+    setUrgentOffer(data.urgentOffer || null);
   }
 
   usePolling(load, 4000, [conversationId]);
+
+  const usingUrgent = Boolean(urgentOffer) && thisIsUrgent;
 
   async function handleConfirmReturn() {
     setConfirming(true);
     setError("");
     try {
-      await api.confirmReturn(conversationId, thankYouNote.trim(), rewardChoice);
+      await api.confirmReturn(
+        conversationId,
+        thankYouNote.trim(),
+        usingUrgent ? null : rewardChoice,
+        usingUrgent ? urgentOffer.lostItemId : null
+      );
       setReturnConfirmed(true);
       setJustConfirmed(true);
       setShowConfetti(true);
@@ -108,6 +119,8 @@ export default function ConversationView({ conversationId, onBack }) {
 
       {showConfetti && <Confetti />}
 
+      <p className="mb-2 text-[11px] text-slate-500">Private between you two. For everyone's safety, the FoundIT administrator can review chats.</p>
+
       {justConfirmed ? (
         <div className="mb-3 flex items-center gap-3 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3">
           <PartyPopper className="h-5 w-5 shrink-0 text-amber-400" />
@@ -129,7 +142,29 @@ export default function ConversationView({ conversationId, onBack }) {
             placeholder="Leave a thank-you note for them (optional)"
             className="w-full rounded-lg border border-amber-400/20 bg-slate-900/50 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-amber-400/40"
           />
-          {rewardOptions.length > 0 && (
+          {urgentOffer && (
+            <label
+              htmlFor="this-is-urgent"
+              className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-red-500/40 bg-red-500/10 p-2.5"
+            >
+              <input
+                id="this-is-urgent"
+                type="checkbox"
+                checked={thisIsUrgent}
+                onChange={(e) => setThisIsUrgent(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-red-500"
+              />
+              <span className="text-xs text-slate-200">
+                <span className="flex items-center gap-1 font-bold text-slate-50">
+                  <TriangleAlert className="h-3.5 w-3.5 text-red-400" aria-hidden="true" /> This is what I urgently needed
+                </span>
+                You promised <span className="font-bold text-amber-300">{naira(urgentOffer.reward)}</span> for "
+                {urgentOffer.description.length > 50 ? urgentOffer.description.slice(0, 50) + "…" : urgentOffer.description}". Confirming
+                gives the finder that reward and ends your alert.
+              </span>
+            </label>
+          )}
+          {!usingUrgent && rewardOptions.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs font-semibold text-slate-100">
                 Say thanks with a reward? <span className="font-normal text-slate-400">(optional)</span>
@@ -147,7 +182,13 @@ export default function ConversationView({ conversationId, onBack }) {
             className="flex items-center justify-center gap-1.5 self-end rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-2 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95 disabled:opacity-60"
           >
             <Coins className="h-3.5 w-3.5" />
-            {confirming ? "Confirming..." : rewardChoice ? `Confirm + ${naira(rewardChoice)} reward` : "Confirm"}
+            {confirming
+              ? "Confirming..."
+              : usingUrgent
+                ? `Confirm + ${naira(urgentOffer.reward)} reward`
+                : rewardChoice
+                  ? `Confirm + ${naira(rewardChoice)} reward`
+                  : "Confirm"}
           </button>
         </div>
       ) : null}

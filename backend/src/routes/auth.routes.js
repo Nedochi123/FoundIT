@@ -118,6 +118,7 @@ router.post("/signup", authLimiter, async (req, res, next) => {
     }).catch((err) => console.error("Welcome email failed:", err));
 
     const { accessToken, refreshToken } = issueSession(res, user);
+    res.locals.actorId = user.id; // for the activity log: this request has no signed-in user yet
     res.status(201).json({ user: publicUser(user), accessToken, refreshToken });
   } catch (err) {
     next(err);
@@ -152,6 +153,7 @@ router.post("/login", authLimiter, async (req, res, next) => {
     }
 
     const { accessToken, refreshToken } = issueSession(res, user);
+    res.locals.actorId = user.id; // for the activity log
     res.json({ user: publicUser(user), accessToken, refreshToken });
   } catch (err) {
     next(err);

@@ -1,11 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { getTheme, normalizeLook } from "../../lib/themes";
-import { applyThemedIcons } from "../../lib/themedIcon";
+import { applyThemedIcons, setManifestForTheme } from "../../lib/themedIcon";
 import DoodleField from "./DoodleField";
 
 const STORAGE_KEY = "foundit_theme";
 const STILL_KEY = "foundit_doodles_still";
+const SAVED_THEME_KEY = "foundit_saved_theme"; // the last SAVED color (never a preview); index.html reads it at load
 const ThemeContext = createContext(null);
 
 // "Keep doodles still": a per-device switch that stops the floating without removing the doodles.
@@ -43,6 +44,17 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     if (savedTheme) setLook(normalizeLook({ theme: savedTheme, doodle: savedDoodle }));
   }, [savedTheme, savedDoodle]);
+
+  // The Home Screen icon follows the saved color only (see setManifestForTheme), so a preview never changes it.
+  useEffect(() => {
+    if (!savedTheme) return;
+    setManifestForTheme(savedTheme);
+    try {
+      localStorage.setItem(SAVED_THEME_KEY, savedTheme);
+    } catch {
+      // Private browsing: the page just starts from the default manifest next time.
+    }
+  }, [savedTheme]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", look.theme);

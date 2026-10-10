@@ -66,6 +66,11 @@ CREATE TABLE IF NOT EXISTS lost_items (
   status       TEXT NOT NULL DEFAULT 'open',
   resolved_at  TEXT,
   expired_at   TEXT,
+  -- "Urgently need" posts: the reward the poster promised the finder (one of utils/rewards.js), when they
+  -- made the alert, and when they ticked the agreement to pay it. NULL on ordinary lost posts.
+  urgent_reward    INTEGER,
+  urgent_at        TEXT,
+  urgent_agreed_at TEXT,
   created_at   TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -350,3 +355,36 @@ CREATE TABLE IF NOT EXISTS boosts (
 CREATE INDEX IF NOT EXISTS idx_boosts_item ON boosts(lost_item_id, status);
 CREATE INDEX IF NOT EXISTS idx_boosts_user ON boosts(user_id, status);
 CREATE INDEX IF NOT EXISTS idx_boosts_status ON boosts(status, created_at);
+
+-- ============================================================
+-- SECURITY: ACTIVITY LOG (owner-only view; see utils/monitor.js)
+-- ============================================================
+
+-- One row per thing a student did that changed something (posted, messaged, confirmed a return...) plus one
+-- when the app is opened. Never the content of a request (no passwords, no message text: chats are read from
+-- the messages table). lat/lng are rounded to about 11 m and come from the phone location when the app sent
+-- it; NULL means none was sent. Rows older than 90 days are deleted; deleting an account deletes its rows.
+CREATE TABLE IF NOT EXISTS activity_log (
+  id          TEXT PRIMARY KEY,
+  user_id     TEXT REFERENCES users(id) ON DELETE CASCADE,
+  action      TEXT NOT NULL,
+  detail      TEXT,
+  target_type TEXT,
+  target_id   TEXT,
+  lat         REAL,
+  lng         REAL,
+  accuracy    INTEGER,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at);
+CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id, created_at);
+
+-- Every time the owner opens a chat in the monitor, so access to private messages is accountable.
+CREATE TABLE IF NOT EXISTS monitor_access_log (
+  id         TEXT PRIMARY KEY,
+  user_id    TEXT REFERENCES users(id) ON DELETE SET NULL,
+  what       TEXT NOT NULL,
+  target_id  TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

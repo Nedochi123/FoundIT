@@ -60,6 +60,12 @@ export default function LookCard() {
           {status === "saving" ? "Saving..." : "Save my look"}
         </button>
         {status === "saved" && !dirty && <p role="status" className="text-sm text-emerald-300">Saved. It will follow you to any device.</p>}
+        {status === "saved" && !dirty && (
+          <p className="text-xs text-slate-400">
+            Home Screen icon: on Android it changes to this color by itself within a day or two, after you open FoundIT. On an iPhone, remove FoundIT
+            from your Home Screen and add it again to get the new color.
+          </p>
+        )}
       </div>
       <button
         type="button"

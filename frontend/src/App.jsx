@@ -6,6 +6,8 @@ import EmailVerifyHandler from "./components/auth/EmailVerifyHandler";
 import Layout from "./components/layout/Layout";
 import Home from "./components/Home";
 import LostForm from "./components/lost/LostForm";
+import UrgentForm from "./components/urgent/UrgentForm";
+import UrgentAlertModal from "./components/urgent/UrgentAlertModal";
 import FoundForm from "./components/found/FoundForm";
 import Gallery from "./components/gallery/Gallery";
 import ConversationList from "./components/messages/ConversationList";
@@ -18,6 +20,7 @@ import { ThemeProvider } from "./components/theme/ThemeProvider";
 import WelcomeAfterSignup from "./components/WelcomeAfterSignup";
 import TagScan from "./components/tags/TagScan";
 import TagsScreen from "./components/tags/TagsScreen";
+import LocationGate from "./components/location/LocationGate";
 
 // Split out of the main bundle — the admin screen is only ever loaded by
 // one account, so every other visitor's initial load shouldn't pay to
@@ -75,6 +78,8 @@ function Screens() {
     content = <Gallery onNavigate={navigate} onOpenConversation={openConversation} />;
   } else if (view === "lost") {
     content = <LostForm onNavigate={navigate} />;
+  } else if (view === "urgent") {
+    content = <UrgentForm onNavigate={navigate} />;
   } else if (view === "found") {
     content = <FoundForm onNavigate={navigate} />;
   } else if (view === "profile") {
@@ -109,6 +114,7 @@ function Screens() {
   return (
     <>
       <WelcomeAfterSignup />
+      <UrgentAlertModal onNavigate={navigate} />
       <Layout view={activeTab} onNavigate={navigate} unreadCount={unreadCount}>
         {content}
       </Layout>
@@ -154,7 +160,9 @@ function MainApp() {
         {showIntro && <IntroAnimation onDone={handleIntroDone} />}
         <EmailVerifyHandler />
         <AuthGate>
-          <Screens />
+          <LocationGate>
+            <Screens />
+          </LocationGate>
         </AuthGate>
       </ThemeProvider>
     </AuthProvider>

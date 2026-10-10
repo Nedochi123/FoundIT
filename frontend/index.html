@@ -52,6 +52,15 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="manifest" href="/manifest.json" />
+    <script>
+      // the Home Screen icon follows the last SAVED color (never a preview): point the manifest at it straight away
+      try {
+        var saved = localStorage.getItem("foundit_saved_theme");
+        if (saved && saved !== "classic" && /^[a-z]+$/.test(saved)) {
+          document.querySelector('link[rel="manifest"]').href = "/manifests/" + saved + ".json";
+        }
+      } catch (e) {}
+    </script>
     <meta name="theme-color" content="#0a0e1a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />

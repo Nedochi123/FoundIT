@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, TriangleAlert } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import CategoryPicker from "../shared/CategoryPicker";
@@ -70,6 +70,17 @@ export default function LostForm({ onNavigate }) {
           Describe it well — everyone on FoundIT will be notified, and you'll get to browse everything found so far.
         </p>
       </div>
+
+      <button
+        type="button"
+        onClick={() => onNavigate("urgent")}
+        className="flex items-center gap-3 rounded-2xl border border-red-500/40 bg-red-500/10 p-3.5 text-left transition hover:border-red-400/70 active:scale-[0.98]"
+      >
+        <TriangleAlert className="h-6 w-6 shrink-0 text-red-400" aria-hidden="true" />
+        <span className="text-sm text-slate-200">
+          <span className="font-bold text-slate-50">Can't do without it?</span> Make it urgent: offer a reward and alert everyone.
+        </span>
+      </button>
 
       <button
         type="button"

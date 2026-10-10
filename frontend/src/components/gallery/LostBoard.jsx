@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Megaphone } from "lucide-react";
+import { Megaphone, TriangleAlert } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import LostCard from "./LostCard";
@@ -32,9 +32,11 @@ export default function LostBoard({ onNavigate }) {
   }, [load]);
 
   async function handleResolve(item) {
-    const warning = item.boostedUntil
-      ? "Mark this as found? Your boost will end now and can't be refunded."
-      : "Mark this as found? It will be taken off the Lost board.";
+    const warning = item.urgent
+      ? "Mark this as found? Your urgent alert will stop. If someone returned it to you, confirm it in Messages instead, so they get their tokens and the reward you promised."
+      : item.boostedUntil
+        ? "Mark this as found? Your boost will end now and can't be refunded."
+        : "Mark this as found? It will be taken off the Lost board.";
     if (!window.confirm(warning)) return;
     setResolvingId(item.id);
     try {
@@ -52,6 +54,13 @@ export default function LostBoard({ onNavigate }) {
   return (
     <div className="flex flex-col gap-3">
       {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+      <button
+        type="button"
+        onClick={() => onNavigate("urgent")}
+        className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-500/50 bg-red-500/10 px-3 text-sm font-bold text-red-200 transition hover:bg-red-500/20 active:scale-[0.98]"
+      >
+        <TriangleAlert className="h-4 w-4" aria-hidden="true" /> I urgently need something
+      </button>
       {items.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-600 py-12 text-center">
           <Megaphone className="h-8 w-8 text-slate-500" />
