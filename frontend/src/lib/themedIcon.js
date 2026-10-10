@@ -2,9 +2,12 @@
 // in the browser tab, and the picture an iPhone saves when "Add to Home Screen" is used. It is drawn on a canvas
 // (the same artwork as components/theme/Logo.jsx) and handed to the page's <link> tags as a PNG.
 //
-// Limits: an app already INSTALLED from Chrome on Android keeps the icon from the install (that comes from
-// manifest.json and a page can't change it per student), and push notification pictures are fixed files too.
-// On iPhone the icon is read when the app is added to the Home Screen, so the color must be chosen before that.
+// The Home Screen icon of an app that is ALREADY installed is another matter: a web page can't redraw it. What it
+// can do is point the page at a web-app manifest in the student's saved color (setManifestForTheme below, with the
+// files from scripts/build-theme-icons.mjs). Chrome on Android re-checks the manifest of an installed app and
+// updates the icon by itself, usually within a day or two of the app being opened. An iPhone never updates it:
+// the icon is read once, when "Add to Home Screen" is used, so the app must be removed and added again.
+// Push notification pictures are fixed files too.
 
 const DEFAULT_ICON = "/icons/icon-192.png";
 const SIZE = 192;
@@ -60,6 +63,16 @@ function draw(px, { a, b, check }, rounded) {
   g.stroke();
 
   return canvas.toDataURL("image/png");
+}
+
+/**
+ * Points the page's web-app manifest at the given SAVED color (Default goes back to manifest.json). Not used for
+ * previews: a phone may read the manifest at any moment, and it should only ever see a color the student kept.
+ */
+export function setManifestForTheme(themeId) {
+  const link = document.querySelector('link[rel="manifest"]');
+  if (!link || !/^[a-z]+$/.test(themeId || "")) return;
+  link.href = themeId === "classic" ? "/manifest.json" : `/manifests/${themeId}.json`;
 }
 
 /** Points the tab icon and the Home Screen icon at the given look (Default goes back to the original files). */
