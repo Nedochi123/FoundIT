@@ -24,7 +24,13 @@ async function sendEmail({ to, subject, html, devLogLabel }) {
   }
 
   try {
-    await client.emails.send({ from: FROM_ADDRESS, to, subject, html });
+    // The Resend library does NOT throw when the service refuses an email (unverified sender domain, invalid
+    // address, ...): it returns { data, error }. Without this check a rejected email looked like a success.
+    const { error } = await client.emails.send({ from: FROM_ADDRESS, to, subject, html });
+    if (error) {
+      console.error(`Resend rejected the email "${subject}": ${error.name || "error"}: ${error.message}`);
+      return { sent: false, reason: "rejected" };
+    }
     return { sent: true };
   } catch (err) {
     console.error("Resend email send failed:", err.message);
