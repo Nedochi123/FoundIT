@@ -2,6 +2,7 @@ require("./instrument");
 const app = require("./app");
 const { runBackup } = require("./utils/backup");
 const { expireStaleItems } = require("./utils/expireItems");
+const { purgeOldActivity, RETENTION_DAYS } = require("./utils/monitor");
 
 const PORT = process.env.PORT || 4000;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -44,3 +45,17 @@ setTimeout(() => {
   expireItemsOnSchedule();
   setInterval(expireItemsOnSchedule, DAY_MS);
 }, 3 * 60 * 1000);
+
+// The activity log (and the locations in it) is only kept for RETENTION_DAYS.
+function purgeActivityOnSchedule() {
+  try {
+    const { activity } = purgeOldActivity();
+    if (activity) console.log(`Deleted ${activity} activity row(s) older than ${RETENTION_DAYS} days`);
+  } catch (err) {
+    console.error("Activity purge failed:", err);
+  }
+}
+setTimeout(() => {
+  purgeActivityOnSchedule();
+  setInterval(purgeActivityOnSchedule, DAY_MS);
+}, 4 * 60 * 1000);

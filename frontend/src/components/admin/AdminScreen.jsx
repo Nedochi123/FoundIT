@@ -5,6 +5,8 @@ import AdminStatsScreen from "./AdminStatsScreen";
 import AdminReportsScreen from "./AdminReportsScreen";
 import AdminTagsScreen from "./AdminTagsScreen";
 import AdminBoostsScreen from "./AdminBoostsScreen";
+import AdminActivityScreen from "./AdminActivityScreen";
+import { useAuth } from "../../hooks/useAuth";
 
 const TABS = [
   { key: "cashouts", label: "Cash-outs" },
@@ -14,8 +16,13 @@ const TABS = [
   { key: "boosts", label: "Boosts" },
 ];
 
+// The security view is only offered to the monitor account (the owner), not to every admin.
+const ACTIVITY_TAB = { key: "activity", label: "Activity" };
+
 export default function AdminScreen() {
+  const { user } = useAuth();
   const [tab, setTab] = useState("cashouts");
+  const tabs = user?.isMonitor ? [...TABS, ACTIVITY_TAB] : TABS;
 
   return (
     <div className="flex flex-col gap-5">
@@ -28,7 +35,7 @@ export default function AdminScreen() {
       </div>
 
       <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1" role="tablist" aria-label="Admin sections">
-        {TABS.map((t) => (
+        {tabs.map((t) => (
           <button
             key={t.key}
             role="tab"
@@ -53,6 +60,8 @@ export default function AdminScreen() {
         <AdminTagsScreen />
       ) : tab === "boosts" ? (
         <AdminBoostsScreen />
+      ) : tab === "activity" && user?.isMonitor ? (
+        <AdminActivityScreen />
       ) : (
         <AdminStatsScreen />
       )}

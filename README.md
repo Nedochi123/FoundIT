@@ -44,6 +44,15 @@ A student can **boost** their own open lost post (24 hours ₦300, 3 days ₦700
 - **Limits:** one boost at a time per post, at most 3 unpaid/unchecked boosts per student, and only the owner can see their boost's reference and the bank details.
 - **Code:** `backend/src/routes/boosts.routes.js` (`/api/boosts`), `backend/src/utils/boosts.js`, tables `boosts` and `app_settings` in `schema.sql`, `lost-items.routes.js` (boosted first, `boostedUntil`, the owner's own `boost`); frontend `components/boost/` (`BoostSheet`, `HomeBoostedCards`), `components/gallery/` (`LostBoard`, `LostCard`), `components/admin/AdminBoostsScreen.jsx`. Tests: `backend/test/boosts.test.js`.
 
+## Security view: compulsory location, activity log and chats (owner only)
+
+To investigate theft, the owner has a private security view, and students must keep their phone's location on. Both are disclosed to students (the location screen, a note in every chat, and the Privacy & Terms), because secretly watching private chats and locations would break the app's own promises and data-protection law.
+
+- **Compulsory location.** After sign-in, `components/location/LocationGate.jsx` shows a full screen (no "Not now") until the phone shares its location, explains why and who sees it, and gives Android and iPhone steps if it is blocked. Admin accounts are exempt so they can't be locked out. The app keeps the latest position in memory and sends it as an `X-Geo` header (`lib/geo.js`, `lib/api.js`) with each request that *changes* something, plus one "Opened the app" check-in per visit. There is no background tracking. **The server does not refuse requests that arrive without a location** (old app versions and direct API calls would break); instead the monitor flags every action that has none. A location is a phone-reported value and can be faked, so treat it as a lead, not proof.
+- **Activity log** (`activity_log`, `utils/monitor.js`): one row per successful change (who, what, when, a short public detail such as a posted item's description, and the location rounded to about 11 m). Never passwords or message text. Deleted after 90 days (`RETENTION_DAYS`) and when the account is deleted.
+- **The monitor** (Admin → **Activity**, `routes/monitor.routes.js`, `components/admin/AdminActivityScreen.jsx`): **Activity** (filter by person or search), **Chats** (item chats and QR tag chats, full text, searchable) and **People** (last seen place, actions with no location). Read only: opening a chat never marks messages as read. Only the monitor account can use it: `MONITOR_EMAILS` (comma separated) or, if unset, the *first* address in `ADMIN_EMAILS`; everyone else, other admins included, gets a plain 404. Every chat the owner opens is recorded (`monitor_access_log`). Long digit runs (bank account, card and phone numbers) are hidden down to their last 4 digits in what the monitor shows; `MONITOR_SHOW_NUMBERS=1` turns that off.
+- Tests: `backend/test/monitor.test.js`, `frontend/test/geo.test.mjs`.
+
 ## Checks and tests
 
 ```bash

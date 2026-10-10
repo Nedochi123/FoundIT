@@ -17,6 +17,9 @@ const adminRoutes = require("./routes/admin.routes");
 const reportsRoutes = require("./routes/reports.routes");
 const tagsRoutes = require("./routes/tags.routes");
 const boostsRoutes = require("./routes/boosts.routes");
+const activityRoutes = require("./routes/activity.routes");
+const monitorRoutes = require("./routes/monitor.routes");
+const { activityLogger } = require("./utils/monitor");
 
 const app = express();
 
@@ -46,6 +49,9 @@ app.use(
   })
 );
 
+// records what students do (and where their phone said it was) for the owner's security view; see utils/monitor.js
+app.use(activityLogger);
+
 app.get("/api/health", (req, res) => res.json({ ok: true, service: "foundit-backend" }));
 
 // Uploaded found-item photos — served from a different origin than the
@@ -72,6 +78,8 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/tags", tagsRoutes);
 app.use("/api/boosts", boostsRoutes);
+app.use("/api/activity", activityRoutes);
+app.use("/api/monitor", monitorRoutes);
 
 // 404
 app.use((req, res) => {
