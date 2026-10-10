@@ -82,6 +82,11 @@ function runMigrations() {
     ["lost_items", "urgent_reward", "ALTER TABLE lost_items ADD COLUMN urgent_reward INTEGER"],
     ["lost_items", "urgent_at", "ALTER TABLE lost_items ADD COLUMN urgent_at TEXT"],
     ["lost_items", "urgent_agreed_at", "ALTER TABLE lost_items ADD COLUMN urgent_agreed_at TEXT"],
+    // sticker sales recorded by the owner (see utils/revenue.js)
+    ["revenue_entries", "quantity", "ALTER TABLE revenue_entries ADD COLUMN quantity INTEGER"],
+    ["revenue_entries", "note", "ALTER TABLE revenue_entries ADD COLUMN note TEXT"],
+    ["revenue_entries", "recorded_at", "ALTER TABLE revenue_entries ADD COLUMN recorded_at TEXT"],
+    ["revenue_entries", "voided_at", "ALTER TABLE revenue_entries ADD COLUMN voided_at TEXT"],
   ];
   for (const [table, column, ddl] of migrations) {
     if (!columnExists(table, column)) {
