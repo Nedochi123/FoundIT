@@ -105,7 +105,10 @@ label {
 }
 input[type="email"],
 input[type="password"],
-input[type="search"] {
+input[type="search"],
+input[type="date"],
+input[type="number"],
+input[type="text"] {
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
@@ -354,6 +357,22 @@ table.revenue .strong {
   gap: 4px 16px;
   padding: 3px 0;
   font-size: 13px;
+}
+.breakdown {
+  font-size: 13px;
+  margin: 4px 0;
+}
+.salegrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0 12px;
+  align-items: end;
+}
+.salegrid .wide {
+  grid-column: 1 / -1;
+}
+.salegrid .primary {
+  grid-column: 1 / -1;
 }
 .empty {
   text-align: center;

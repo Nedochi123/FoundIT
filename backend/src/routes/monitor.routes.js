@@ -4,7 +4,8 @@ const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
 const { isMonitorAccount, maskNumbers, RETENTION_DAYS } = require("../utils/monitor");
 const { MAX_LENGTH, notifyStudentOfReply, toMessage } = require("../utils/support");
-const { revenueReport } = require("../utils/revenue");
+const { z } = require("zod");
+const { revenueReport, addStickerSale, listStickerSales, voidStickerSale, isRealDate, todayInNigeria, EARLIEST_SALE } = require("../utils/revenue");
 
 // The owner's security view: everything students did, where they were when they did it, and the chats. Read only:
 // nothing here changes a chat, marks a message as read, or lets the owner write as someone else. Only the monitor
@@ -266,6 +267,36 @@ router.get("/chats/tag/:id", (req, res) => {
 // ---- revenue: what FoundIT has earned, by calendar year (see utils/revenue.js) ----
 router.get("/revenue", (req, res) => {
   res.json(revenueReport());
+});
+
+// Sticker sales are sold by hand, so the owner records them here (money in, from selling QR "Return me" stickers).
+router.get("/sticker-sales", (req, res) => {
+  res.json({ sales: listStickerSales(), today: todayInNigeria() });
+});
+
+const stickerSaleSchema = z.object({
+  quantity: z.number({ error: "Enter how many stickers were sold." }).int("Stickers must be a whole number.").min(1, "Enter at least 1 sticker.").max(100000, "That is too many stickers for one entry."),
+  amount: z.number({ error: "Enter the total amount received in naira." }).int("Enter whole naira, without kobo.").min(1, "The amount must be more than 0.").max(100000000, "That amount is too large for one entry."),
+  soldOn: z
+    .string({ error: "Choose the date of the sale." })
+    .refine(isRealDate, "Choose a real date.")
+    .refine((d) => d >= EARLIEST_SALE, "That date is too far in the past.")
+    .refine((d) => d <= todayInNigeria(), "A sale can't be dated in the future."),
+  note: z.string().trim().max(200, "Keep the note under 200 characters.").optional(),
+});
+
+router.post("/sticker-sales", (req, res) => {
+  const parsed = stickerSaleSchema.safeParse(req.body || {});
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
+  const id = addStickerSale(parsed.data);
+  audit(req, "recorded a sticker sale", id);
+  res.status(201).json({ sale: listStickerSales().find((s) => s.id === id) });
+});
+
+router.delete("/sticker-sales/:id", (req, res) => {
+  if (!voidStickerSale(req.params.id)) return res.status(404).json({ error: "Not found." });
+  audit(req, "removed a sticker sale", req.params.id);
+  res.json({ ok: true });
 });
 
 // ---- messages to the admin (complaints and problems) ----

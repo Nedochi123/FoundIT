@@ -428,7 +428,13 @@ CREATE TABLE IF NOT EXISTS revenue_entries (
   source     TEXT NOT NULL DEFAULT 'boost',
   amount     INTEGER NOT NULL,
   reference  TEXT NOT NULL UNIQUE,
-  earned_at  TEXT NOT NULL
+  earned_at  TEXT NOT NULL,
+  -- sticker sales only (entered by the owner): how many stickers, an optional note, and when the entry was made.
+  -- A mistaken sale is voided (voided_at set), never deleted, so the record stays; voided rows don't count.
+  quantity    INTEGER,
+  note        TEXT,
+  recorded_at TEXT,
+  voided_at   TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_revenue_earned ON revenue_entries(earned_at);

@@ -92,6 +92,8 @@ const SKIP = new Set([
   "POST /api/push/unsubscribe",
   "PATCH /api/push/preferences",
   "POST /api/monitor/support/:id/reply", // the owner answering a student is not student activity
+  "POST /api/monitor/sticker-sales", // the owner's own bookkeeping is not student activity either
+  "DELETE /api/monitor/sticker-sales/:id",
 ]);
 
 // A little context for a few actions: never a password or a message, only what was posted publicly.

@@ -107,11 +107,11 @@ async function api(path) {
   return r.data;
 }
 
-/** A write (the owner's reply to a student): same sign-in handling as api(). */
-async function sendJson(path, body) {
+/** A write (a reply to a student, a sticker sale): same sign-in handling as api(). */
+async function sendJson(path, body, method = "POST") {
   if (!session) throw new SignedOut();
-  let r = await send(path, { method: "POST", body, token: session.accessToken });
-  if (r.status === 401 && (await refreshSession())) r = await send(path, { method: "POST", body, token: session.accessToken });
+  let r = await send(path, { method, body, token: session.accessToken });
+  if (r.status === 401 && (await refreshSession())) r = await send(path, { method, body, token: session.accessToken });
   if (r.status === 401) throw new SignedOut();
   if (!r.ok) throw new Error(r.data?.error || `The server answered ${r.status}.`);
   return r.data;
@@ -453,6 +453,82 @@ function showMain() {
     }
   }
 
+  // ---- sticker sales: recorded by hand, because the app can't see them
+  function stickerSection(data, reload) {
+    const failSale = el("p", { className: "error", role: "alert" });
+    const date = el("input", { id: "sale-date", type: "date", value: data.today, max: data.today, min: "2020-01-01", required: true });
+    const qty = el("input", { id: "sale-qty", type: "number", min: "1", step: "1", inputmode: "numeric", required: true });
+    const total = el("input", { id: "sale-amount", type: "number", min: "1", step: "1", inputmode: "numeric", required: true });
+    const note = el("input", { id: "sale-note", type: "text", maxlength: "200", placeholder: "Optional: who bought, where, cash or transfer" });
+    const button = el("button", { type: "submit", className: "primary", text: "Record sale" });
+    const form = el(
+      "form",
+      {
+        className: "salegrid",
+        onsubmit: async (e) => {
+          e.preventDefault();
+          failSale.textContent = "";
+          button.disabled = true;
+          try {
+            await sendJson("/api/monitor/sticker-sales", {
+              soldOn: date.value,
+              quantity: Number(qty.value),
+              amount: Number(total.value),
+              note: note.value.trim() || undefined,
+            });
+            await reload();
+          } catch (err) {
+            if (err instanceof SignedOut) signOut("Your session ended. Please sign in again.");
+            else failSale.textContent = err.message || "Couldn't save that sale.";
+            button.disabled = false;
+          }
+        },
+      },
+      el("div", {}, el("label", { for: "sale-date", text: "Date of sale" }), date),
+      el("div", {}, el("label", { for: "sale-qty", text: "Stickers sold" }), qty),
+      el("div", {}, el("label", { for: "sale-amount", text: "Total received (₦)" }), total),
+      el("div", { className: "wide" }, el("label", { for: "sale-note", text: "Note" }), note),
+      button
+    );
+
+    const list = el("ul", { className: "list spaced" });
+    for (const s of data.sales) {
+      const average = s.quantity > 0 ? Math.round(s.amount / s.quantity) : 0;
+      list.append(
+        el(
+          "li",
+          { className: "row" },
+          el("div", { className: "head" }, el("span", { className: "title", text: `${s.quantity} sticker${s.quantity === 1 ? "" : "s"} · ${naira(s.amount)}` }), el("span", { className: "when", text: s.soldOn })),
+          el("div", { className: "muted", text: `About ${naira(average)} each${s.note ? ` · ${s.note}` : ""}` }),
+          el("div", { className: "meta" }, el("button", {
+            type: "button",
+            className: "linkbtn",
+            text: "Remove (mistake)",
+            onclick: async () => {
+              if (!window.confirm(`Remove this sale of ${s.quantity} sticker${s.quantity === 1 ? "" : "s"} for ${naira(s.amount)}? It will no longer count toward revenue.`)) return;
+              try {
+                await sendJson(`/api/monitor/sticker-sales/${encodeURIComponent(s.id)}`, undefined, "DELETE");
+                await reload();
+              } catch (err) {
+                if (err instanceof SignedOut) signOut("Your session ended. Please sign in again.");
+                else failSale.textContent = err.message || "Couldn't remove that sale.";
+              }
+            },
+          }))
+        )
+      );
+    }
+    return el(
+      "div",
+      { className: "card spaced" },
+      el("h2", { text: "Sticker sales" }),
+      el("p", { className: "muted", text: "Record each batch of QR stickers you sell, with the total money you received. It is added to the revenue above on the date of the sale." }),
+      form,
+      failSale,
+      data.sales.length ? list : el("p", { className: "empty", text: "No sticker sales recorded yet." })
+    );
+  }
+
   // ---- revenue: what FoundIT has earned, by calendar year
   function revenueView(host) {
     const fail = errorLine(host);
@@ -461,7 +537,7 @@ function showMain() {
 
     async function load() {
       try {
-        const r = await api("/api/monitor/revenue");
+        const [r, stickers] = await Promise.all([api("/api/monitor/revenue"), api("/api/monitor/sticker-sales")]);
         clear(body);
 
         add(
@@ -471,7 +547,8 @@ function showMain() {
             { className: "card" },
             el("div", { className: "muted", text: "Total revenue FoundIT has made so far" }),
             el("div", { className: "bignumber", text: naira(r.total) }),
-            el("div", { className: "muted", text: `${r.payments} approved payment${r.payments === 1 ? "" : "s"} · ${r.source}` })
+            el("div", { className: "muted", text: `${r.payments} payment${r.payments === 1 ? "" : "s"} · ${r.source}` }),
+            el("div", { className: "breakdown", text: `Boosts ${naira(r.bySource.boost.revenue)} · Sticker sales ${naira(r.bySource.sticker.revenue)} (${r.bySource.sticker.units} sticker${r.bySource.sticker.units === 1 ? "" : "s"})` })
           )
         );
 
@@ -500,6 +577,7 @@ function showMain() {
             },
           });
           const monthsCell = detail.firstChild;
+          monthsCell.append(el("div", { className: "breakdown", text: `Boosts ${naira(y.bySource.boost.revenue)} · Sticker sales ${naira(y.bySource.sticker.revenue)} (${y.bySource.sticker.units} sticker${y.bySource.sticker.units === 1 ? "" : "s"})` }));
           const shown = y.months.filter((m) => m.payments > 0);
           if (shown.length === 0) monthsCell.append(el("span", { className: "muted", text: "Nothing earned this year." }));
           for (const m of shown) {
@@ -517,9 +595,10 @@ function showMain() {
           body,
           el("p", {
             className: "notice",
-            text: `Years are calendar years in Nigerian time (${r.timezone}). "Total by end of year" is everything earned up to 31 December of that year; for this year it is the total so far. Revenue counts boosts that students paid for and you approved. It does not include thank-you rewards (paid directly between students), token cash-outs (a cost to you, not income) or QR sticker sales, which FoundIT does not record.`,
+            text: `Years are calendar years in Nigerian time (${r.timezone}). "Total by end of year" is everything earned up to 31 December of that year; for this year it is the total so far. Revenue is boosts that students paid for and you approved, plus the sticker sales you record below. It does not include thank-you rewards (paid directly between students) or token cash-outs (a cost to you, not income).`,
           })
         );
+        body.append(stickerSection(stickers, load));
       } catch (err) {
         fail(err);
       }
