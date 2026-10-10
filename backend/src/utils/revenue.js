@@ -8,7 +8,8 @@ const db = require("../../db");
 //    owner page (addStickerSale). A mistaken entry is removed by voiding it: it stays in the table for the record but no
 //    longer counts.
 // Rows live in revenue_entries, apart from the boosts table on purpose (see db/schema.sql). Not counted because they are
-// not FoundIT's income: thank-you rewards (paid student to student) and token cash-outs (a cost).
+// not FoundIT's income: thank-you rewards (paid student to student). Token cash-outs (a cost) are recorded the same way
+// in payout_entries, when the admin marks one as paid, and shown next to the revenue as "paid out" and "left after cash-outs".
 //
 // Years are calendar years in Nigerian time (Africa/Lagos, UTC+1 all year), so a payment approved at 23:30 UTC on
 // 31 December counts in the new year, as it did on the owner's clock.
@@ -24,6 +25,17 @@ function recordBoostRevenue(boostId) {
   db.prepare(
     "INSERT OR IGNORE INTO revenue_entries (id, source, amount, reference, earned_at, recorded_at) VALUES (?, 'boost', ?, ?, datetime('now'), datetime('now'))"
   ).run(boost.id, boost.amount, boost.reference);
+}
+
+/** Writes the payout row for a token cash-out the admin has just marked as paid. Safe to call twice for the same one. */
+function recordCashoutPaid(cashoutId) {
+  const cashout = db.prepare("SELECT id, amount_naira FROM cashout_requests WHERE id = ?").get(cashoutId);
+  if (!cashout) return;
+  db.prepare("INSERT OR IGNORE INTO payout_entries (id, source, amount, reference, paid_at) VALUES (?, 'cashout', ?, ?, datetime('now'))").run(
+    cashout.id,
+    cashout.amount_naira,
+    cashout.id
+  );
 }
 
 /** Today's date in Nigeria as YYYY-MM-DD. */
@@ -87,6 +99,18 @@ function monthlyRows() {
     .all();
 }
 
+/** One row per (year, month) that has any cash-outs paid, in Nigerian time. */
+function monthlyPayoutRows() {
+  return db
+    .prepare(
+      `SELECT CAST(strftime('%Y', datetime(paid_at, '+${WAT_HOURS} hours')) AS INTEGER) AS year,
+              CAST(strftime('%m', datetime(paid_at, '+${WAT_HOURS} hours')) AS INTEGER) AS month,
+              COUNT(*) AS payments, SUM(amount) AS amount
+       FROM payout_entries GROUP BY year, month ORDER BY year, month`
+    )
+    .all();
+}
+
 const emptySources = () => ({ boost: { payments: 0, revenue: 0 }, sticker: { payments: 0, revenue: 0, units: 0 } });
 
 /**
@@ -95,9 +119,19 @@ const emptySources = () => ({ boost: { payments: 0, revenue: 0 }, sticker: { pay
  * that year.
  * @param rows  [{ year, month, source?, payments, revenue, units? }] as returned by monthlyRows() (source defaults to boost)
  * @param thisYear the current year (a parameter so it can be tested)
+ * @param payoutRows [{ year, month, payments, amount }] token cash-outs paid, from monthlyPayoutRows(): shown as a cost, and
+ *        subtracted to give what is left after cash-outs
  */
-function buildReport(rows, thisYear = currentYear()) {
-  const first = rows.length ? Math.min(rows[0].year, thisYear) : thisYear;
+function buildReport(rows, thisYear = currentYear(), payoutRows = []) {
+  const firstYears = [thisYear];
+  if (rows.length) firstYears.push(rows[0].year);
+  if (payoutRows.length) firstYears.push(payoutRows[0].year);
+  const first = Math.min(...firstYears);
+  const payoutByYear = new Map();
+  for (const p of payoutRows) {
+    if (!payoutByYear.has(p.year)) payoutByYear.set(p.year, []);
+    payoutByYear.get(p.year).push(p);
+  }
   const byYear = new Map();
   for (const r of rows) {
     if (!byYear.has(r.year)) byYear.set(r.year, []);
@@ -108,8 +142,10 @@ function buildReport(rows, thisYear = currentYear()) {
   const overall = emptySources();
   let cumulative = 0;
   let payments = 0;
+  let paidOut = 0;
+  let paidOutCount = 0;
   for (let year = first; year <= thisYear; year++) {
-    const months = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, payments: 0, revenue: 0 }));
+    const months = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, payments: 0, revenue: 0, cashouts: 0, cashoutCount: 0 }));
     const bySource = emptySources();
     for (const r of byYear.get(year) || []) {
       const m = months[r.month - 1];
@@ -120,8 +156,14 @@ function buildReport(rows, thisYear = currentYear()) {
       bySource[source].revenue += r.revenue;
       if (source === "sticker") bySource.sticker.units += r.units || 0;
     }
+    for (const p of payoutByYear.get(year) || []) {
+      months[p.month - 1].cashouts += p.amount;
+      months[p.month - 1].cashoutCount += p.payments;
+    }
     const revenue = months.reduce((sum, m) => sum + m.revenue, 0);
     const count = months.reduce((sum, m) => sum + m.payments, 0);
+    const yearPaidOut = months.reduce((sum, m) => sum + m.cashouts, 0);
+    const yearPaidOutCount = months.reduce((sum, m) => sum + m.cashoutCount, 0);
     for (const s of ["boost", "sticker"]) {
       overall[s].payments += bySource[s].payments;
       overall[s].revenue += bySource[s].revenue;
@@ -129,7 +171,20 @@ function buildReport(rows, thisYear = currentYear()) {
     overall.sticker.units += bySource.sticker.units;
     cumulative += revenue;
     payments += count;
-    years.push({ year, payments: count, revenue, cumulative, complete: year < thisYear, bySource, months });
+    paidOut += yearPaidOut;
+    paidOutCount += yearPaidOutCount;
+    years.push({
+      year,
+      payments: count,
+      revenue,
+      cumulative,
+      cashouts: { payments: yearPaidOutCount, amount: yearPaidOut },
+      net: revenue - yearPaidOut, // left after cash-outs, for this year
+      netCumulative: cumulative - paidOut, // left after cash-outs, by the end of this year
+      complete: year < thisYear,
+      bySource,
+      months,
+    });
   }
   return {
     currency: "NGN",
@@ -137,16 +192,20 @@ function buildReport(rows, thisYear = currentYear()) {
     source: "Approved boosts, plus the sticker sales recorded by the owner",
     total: cumulative,
     payments,
+    cashouts: { payments: paidOutCount, amount: paidOut },
+    net: cumulative - paidOut,
     bySource: overall,
     thisYear,
     years,
   };
 }
 
-const revenueReport = () => buildReport(monthlyRows());
+const revenueReport = () => buildReport(monthlyRows(), currentYear(), monthlyPayoutRows());
 
 module.exports = {
   recordBoostRevenue,
+  recordCashoutPaid,
+  monthlyPayoutRows,
   addStickerSale,
   listStickerSales,
   voidStickerSale,

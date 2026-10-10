@@ -362,6 +362,16 @@ table.revenue .strong {
   font-size: 13px;
   margin: 4px 0;
 }
+.breakdown.strong {
+  font-weight: 700;
+  font-size: 15px;
+}
+.negative {
+  color: var(--bad);
+}
+.monthrow.sub {
+  padding-top: 0;
+}
 .salegrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

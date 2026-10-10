@@ -42,6 +42,7 @@ function ago(iso) {
   return `${Math.floor(hours / 24)} d ago`;
 }
 const naira = (n) => "₦" + Number(n).toLocaleString("en-NG");
+const money = (n) => (n < 0 ? "−" : "") + naira(Math.abs(n)); // a negative amount keeps its minus sign
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 function debounce(fn, ms = 350) {
   let t;
@@ -548,7 +549,9 @@ function showMain() {
             el("div", { className: "muted", text: "Total revenue FoundIT has made so far" }),
             el("div", { className: "bignumber", text: naira(r.total) }),
             el("div", { className: "muted", text: `${r.payments} payment${r.payments === 1 ? "" : "s"} · ${r.source}` }),
-            el("div", { className: "breakdown", text: `Boosts ${naira(r.bySource.boost.revenue)} · Sticker sales ${naira(r.bySource.sticker.revenue)} (${r.bySource.sticker.units} sticker${r.bySource.sticker.units === 1 ? "" : "s"})` })
+            el("div", { className: "breakdown", text: `Boosts ${naira(r.bySource.boost.revenue)} · Sticker sales ${naira(r.bySource.sticker.revenue)} (${r.bySource.sticker.units} sticker${r.bySource.sticker.units === 1 ? "" : "s"})` }),
+            el("div", { className: "breakdown", text: `Paid out in token cash-outs ${naira(r.cashouts.amount)} (${r.cashouts.payments} cash-out${r.cashouts.payments === 1 ? "" : "s"})` }),
+            el("div", { className: `breakdown strong${r.net < 0 ? " negative" : ""}`, text: `Left after cash-outs ${money(r.net)}` })
           )
         );
 
@@ -578,10 +581,13 @@ function showMain() {
           });
           const monthsCell = detail.firstChild;
           monthsCell.append(el("div", { className: "breakdown", text: `Boosts ${naira(y.bySource.boost.revenue)} · Sticker sales ${naira(y.bySource.sticker.revenue)} (${y.bySource.sticker.units} sticker${y.bySource.sticker.units === 1 ? "" : "s"})` }));
-          const shown = y.months.filter((m) => m.payments > 0);
+          const shown = y.months.filter((m) => m.payments > 0 || m.cashouts > 0);
           if (shown.length === 0) monthsCell.append(el("span", { className: "muted", text: "Nothing earned this year." }));
           for (const m of shown) {
             monthsCell.append(el("div", { className: "monthrow" }, el("span", { text: MONTHS[m.month - 1] }), el("span", { className: "muted", text: `${m.payments} payment${m.payments === 1 ? "" : "s"}` }), el("span", { className: "num", text: naira(m.revenue) })));
+            if (m.cashouts > 0) {
+              monthsCell.append(el("div", { className: "monthrow sub" }, el("span", { className: "muted", text: "paid out in cash-outs" }), el("span", { className: "muted", text: `${m.cashoutCount} cash-out${m.cashoutCount === 1 ? "" : "s"}` }), el("span", { className: "num", text: "−" + naira(m.cashouts) })));
+            }
           }
           tbody.append(
             el("tr", {}, el("th", { scope: "row" }, toggle), el("td", { className: "num", text: naira(y.revenue) }), el("td", { className: "num strong", text: naira(y.cumulative) })),
@@ -591,11 +597,44 @@ function showMain() {
         table.append(tbody);
         body.append(el("div", { className: "tablewrap" }, table));
 
+        const costs = el("table", { className: "revenue" });
+        add(
+          costs,
+          el("caption", { text: "After token cash-outs" }),
+          el(
+            "thead",
+            {},
+            el(
+              "tr",
+              {},
+              el("th", { scope: "col", text: "Year" }),
+              el("th", { scope: "col", className: "num", text: "Cash-outs paid" }),
+              el("th", { scope: "col", className: "num", text: "Left that year" }),
+              el("th", { scope: "col", className: "num", text: "Left by end of year" })
+            )
+          )
+        );
+        const costBody = el("tbody", {});
+        for (const y of [...r.years].reverse()) {
+          costBody.append(
+            el(
+              "tr",
+              {},
+              el("th", { scope: "row", text: y.complete ? String(y.year) : `${y.year} (so far)` }),
+              el("td", { className: "num", text: y.cashouts.amount > 0 ? "−" + naira(y.cashouts.amount) : naira(0) }),
+              el("td", { className: `num${y.net < 0 ? " negative" : ""}`, text: money(y.net) }),
+              el("td", { className: `num strong${y.netCumulative < 0 ? " negative" : ""}`, text: money(y.netCumulative) })
+            )
+          );
+        }
+        costs.append(costBody);
+        body.append(el("div", { className: "tablewrap" }, costs));
+
         add(
           body,
           el("p", {
             className: "notice",
-            text: `Years are calendar years in Nigerian time (${r.timezone}). "Total by end of year" is everything earned up to 31 December of that year; for this year it is the total so far. Revenue is boosts that students paid for and you approved, plus the sticker sales you record below. It does not include thank-you rewards (paid directly between students) or token cash-outs (a cost to you, not income).`,
+            text: `Years are calendar years in Nigerian time (${r.timezone}). "Total by end of year" is everything earned up to 31 December of that year; for this year it is the total so far. Revenue is boosts that students paid for and you approved, plus the sticker sales you record below. Token cash-outs are money you paid out to students, counted when you mark one as paid; "left after cash-outs" is revenue minus those. Thank-you rewards are paid directly between students, so they are in neither.`,
           })
         );
         body.append(stickerSection(stickers, load));

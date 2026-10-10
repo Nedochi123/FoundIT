@@ -442,3 +442,24 @@ CREATE INDEX IF NOT EXISTS idx_revenue_earned ON revenue_entries(earned_at);
 -- Boosts approved before this table existed are copied in (safe to run on every start: rows already there are skipped).
 INSERT OR IGNORE INTO revenue_entries (id, source, amount, reference, earned_at)
 SELECT id, 'boost', amount, reference, approved_at FROM boosts WHERE status = 'active' AND approved_at IS NOT NULL;
+
+-- ============================================================
+-- PAYOUT LEDGER (money FoundIT paid students for token cash-outs: a cost; shown on the owner page)
+-- ============================================================
+
+-- One row per cash-out the admin marked as paid. Kept apart from cashout_requests on purpose, for the same reason as
+-- revenue_entries: cash-out requests are deleted with the student's account, but money already paid out must not vanish
+-- from the totals. No foreign keys, so nothing cascades into it. amount is in naira.
+CREATE TABLE IF NOT EXISTS payout_entries (
+  id        TEXT PRIMARY KEY,
+  source    TEXT NOT NULL DEFAULT 'cashout',
+  amount    INTEGER NOT NULL,
+  reference TEXT NOT NULL UNIQUE,
+  paid_at   TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_payout_paid ON payout_entries(paid_at);
+
+-- Cash-outs paid before this table existed are copied in (safe to run on every start: rows already there are skipped).
+INSERT OR IGNORE INTO payout_entries (id, source, amount, reference, paid_at)
+SELECT id, 'cashout', amount_naira, id, processed_at FROM cashout_requests WHERE status = 'paid' AND processed_at IS NOT NULL;

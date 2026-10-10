@@ -5,6 +5,7 @@ const db = require("../../db");
 const { requireAuth, requireAdmin } = require("../middleware/auth");
 const { runBackup, listBackups, BACKUP_DIR } = require("../utils/backup");
 const { revokeAllRefreshTokensForUser } = require("../utils/tokens");
+const { recordCashoutPaid } = require("../utils/revenue");
 
 const router = express.Router();
 
@@ -102,6 +103,8 @@ router.patch("/cashout-requests/:id", (req, res, next) => {
         parsed.data.status,
         request.id
       );
+
+      if (parsed.data.status === "paid") recordCashoutPaid(request.id); // a cost now, even if the student deletes their account later
 
       if (parsed.data.status === "rejected") {
         db.prepare("UPDATE users SET tokens = tokens + ?, updated_at = datetime('now') WHERE id = ?").run(
