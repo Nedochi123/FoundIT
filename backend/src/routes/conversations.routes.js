@@ -83,7 +83,7 @@ function rewardView(row) {
 router.post("/", requireAuth, (req, res, next) => {
   try {
     const foundItemId = req.body?.foundItemId;
-    if (!foundItemId) return res.status(400).json({ error: "foundItemId is required." });
+    if (typeof foundItemId !== "string" || !foundItemId || foundItemId.length > 64) return res.status(400).json({ error: "foundItemId is required." });
 
     const foundItem = db.prepare("SELECT * FROM found_items WHERE id = ?").get(foundItemId);
     if (!foundItem) return res.status(404).json({ error: "Found item not found." });

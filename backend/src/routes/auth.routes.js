@@ -3,7 +3,8 @@ const crypto = require("crypto");
 const rateLimit = require("express-rate-limit");
 const { z } = require("zod");
 const db = require("../../db");
-const { hashPassword, verifyPassword } = require("../utils/password");
+const { hashPassword, verifyPassword, DUMMY_HASH, isAcceptablePassword, MAX_PASSWORD_BYTES } = require("../utils/password");
+const { createThrottle } = require("../utils/loginThrottle");
 const {
   signAccessToken,
   hashToken,
@@ -36,6 +37,9 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: "Too many attempts. Please try again later." },
 });
+
+// Wrong passwords per account: 10 wrong tries lock that account's sign-in for 15 minutes, whatever address they come from.
+const loginThrottle = createThrottle({ max: 10, windowMs: 15 * 60 * 1000 });
 
 function cookieOptions(maxAgeMs) {
   return {
@@ -75,7 +79,10 @@ const signupSchema = z.object({
       (email) => email.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`) || isAdminEmail(email),
       `Signup requires a @${ALLOWED_EMAIL_DOMAIN} email address.`
     ),
-  password: z.string().min(8, "Password must be at least 8 characters."),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters.")
+    .refine((p) => Buffer.byteLength(p) <= MAX_PASSWORD_BYTES, `Password must be at most ${MAX_PASSWORD_BYTES} characters.`),
   idNumber: idNumberSchema,
   // the look they chose on the sign-up form; leaving it out keeps the default
   theme: z.enum(THEMES, { message: "Pick one of the available colors." }).optional(),
@@ -127,7 +134,7 @@ router.post("/signup", authLimiter, async (req, res, next) => {
 
 const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email(),
-  password: z.string().min(1),
+  password: z.string().min(1).max(200),
 });
 
 router.post("/login", authLimiter, async (req, res, next) => {
@@ -142,11 +149,18 @@ router.post("/login", authLimiter, async (req, res, next) => {
     // an attacker from using this endpoint to enumerate real accounts.
     const genericError = () => res.status(401).json({ error: "Invalid email or password." });
 
-    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
-    if (!user) return genericError();
+    if (loginThrottle.isLocked(email)) {
+      return res.status(429).json({ error: "Too many sign-in attempts for this account. Please try again in 15 minutes." });
+    }
 
-    const valid = await verifyPassword(password, user.password_hash);
-    if (!valid) return genericError();
+    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+    // an unknown email is checked against a dummy hash, so it takes as long as a wrong password (see utils/password.js)
+    const valid = await verifyPassword(password, user ? user.password_hash : DUMMY_HASH);
+    if (!user || !valid) {
+      loginThrottle.recordFail(email);
+      return genericError();
+    }
+    loginThrottle.clear(email);
 
     if (user.suspended_at) {
       return res.status(403).json({ error: "This account has been suspended." });
@@ -163,7 +177,7 @@ router.post("/login", authLimiter, async (req, res, next) => {
 router.post("/refresh", async (req, res, next) => {
   try {
     const rawToken = req.cookies?.refresh_token || req.body?.refreshToken;
-    if (!rawToken) return res.status(401).json({ error: "No refresh token provided." });
+    if (!rawToken || typeof rawToken !== "string") return res.status(401).json({ error: "No refresh token provided." });
 
     const stored = findValidRefreshToken(rawToken);
     if (!stored) {
@@ -201,7 +215,7 @@ router.get("/me", requireAuth, (req, res) => {
 
 router.post("/logout", (req, res) => {
   const rawToken = req.cookies?.refresh_token || req.body?.refreshToken;
-  if (rawToken) revokeRefreshToken(rawToken);
+  if (rawToken && typeof rawToken === "string") revokeRefreshToken(rawToken);
   clearAuthCookies(res);
   res.json({ ok: true });
 });
@@ -243,7 +257,7 @@ router.post("/forgot-password", authLimiter, async (req, res, next) => {
 router.post("/reset-password", authLimiter, async (req, res, next) => {
   try {
     const { token, password } = req.body || {};
-    if (!token || !password || password.length < 8) {
+    if (typeof token !== "string" || !token || !isAcceptablePassword(password)) {
       return res.status(400).json({ error: "A valid token and an 8+ character password are required." });
     }
 
@@ -278,7 +292,7 @@ router.post("/reset-password", authLimiter, async (req, res, next) => {
 router.post("/change-password", authLimiter, requireAuth, async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body || {};
-    if (!currentPassword || !newPassword || newPassword.length < 8) {
+    if (typeof currentPassword !== "string" || !currentPassword || !isAcceptablePassword(newPassword)) {
       return res.status(400).json({ error: "Current password and a new 8+ character password are required." });
     }
 
@@ -314,7 +328,7 @@ router.post("/change-password", authLimiter, requireAuth, async (req, res, next)
 router.post("/delete-account", authLimiter, requireAuth, async (req, res, next) => {
   try {
     const { password } = req.body || {};
-    if (!password) {
+    if (typeof password !== "string" || !password) {
       return res.status(400).json({ error: "Enter your password to confirm." });
     }
 
@@ -362,7 +376,7 @@ router.post("/resend-verification", authLimiter, requireAuth, (req, res) => {
 
 router.post("/verify-email", (req, res) => {
   const { token } = req.body || {};
-  if (!token) return res.status(400).json({ error: "A token is required." });
+  if (typeof token !== "string" || !token) return res.status(400).json({ error: "A token is required." });
 
   const row = db
     .prepare(

@@ -8,6 +8,15 @@ if (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET) {
   );
 }
 
+// A short signing secret can be guessed from a stolen token: in production the server refuses to run with one.
+for (const name of ["JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"]) {
+  if (process.env[name].length < 32) {
+    const message = `${name} is shorter than 32 characters. Use a long random value.`;
+    if (process.env.NODE_ENV === "production") throw new Error(message);
+    console.warn(message);
+  }
+}
+
 const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || "15m";
 const REFRESH_TOKEN_TTL_DAYS = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 30);
 
@@ -15,12 +24,13 @@ function signAccessToken(user) {
   return jwt.sign(
     { sub: user.id, email: user.email, name: user.name },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: ACCESS_TOKEN_TTL }
+    { algorithm: "HS256", expiresIn: ACCESS_TOKEN_TTL }
   );
 }
 
+// only the one algorithm we sign with is accepted, so a token cannot choose a weaker one for itself
 function verifyAccessToken(token) {
-  return jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+  return jwt.verify(token, process.env.JWT_ACCESS_SECRET, { algorithms: ["HS256"] });
 }
 
 function hashToken(rawToken) {

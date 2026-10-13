@@ -21,6 +21,7 @@ const activityRoutes = require("./routes/activity.routes");
 const monitorRoutes = require("./routes/monitor.routes");
 const supportRoutes = require("./routes/support.routes");
 const { activityLogger } = require("./utils/monitor");
+const { originGuard } = require("./middleware/originGuard");
 
 const app = express();
 
@@ -32,6 +33,12 @@ app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+// Answers from the API (accounts, chats, payments) must never be kept by a browser or a shared cache. This comes before the
+// body reader so even an "unreadable request" answer carries it.
+app.use("/api", (req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 
@@ -49,6 +56,9 @@ app.use(
     credentials: true,
   })
 );
+
+// No other website may make a signed-in browser change anything (see middleware/originGuard.js).
+app.use(originGuard(allowedOrigins));
 
 // records what students do (and where their phone said it was) for the owner's security view; see utils/monitor.js
 app.use(activityLogger);
@@ -111,7 +121,10 @@ Sentry.setupExpressErrorHandler(app);
 // instead of an HTML stack trace or a hung request.
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(err.status || 500).json({ error: err.message || "Internal server error." });
+  // A mistake in the request (unreadable JSON, a photo that is too big or the wrong type) says what was wrong. Anything else
+  // is ours: its details stay in the log and never reach the visitor (they can name tables, files and paths).
+  const status = err.status >= 400 && err.status < 600 ? err.status : err.name === "MulterError" ? 400 : 500;
+  res.status(status).json({ error: status < 500 && err.expose !== false && err.message ? err.message : "Something went wrong. Please try again." });
 });
 
 module.exports = app;

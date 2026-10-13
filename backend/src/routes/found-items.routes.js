@@ -10,6 +10,7 @@ const { postItemLimiter } = require("../middleware/rateLimiters");
 const { broadcastPush } = require("../utils/push");
 const { idNumberSchema } = require("../utils/idNumber");
 const { ITEM_CATEGORIES } = require("../utils/itemCategories");
+const { fileIsImage } = require("../utils/imageCheck");
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     if (!ALLOWED_MIME_TYPES[file.mimetype]) {
-      return cb(new Error("Only JPEG, PNG, or WEBP images are allowed."));
+      return cb(Object.assign(new Error("Only JPEG, PNG, or WEBP images are allowed."), { status: 400 }));
     }
     cb(null, true);
   },
@@ -89,8 +90,16 @@ router.post("/", requireAuth, postItemLimiter, upload.single("photo"), (req, res
     if (!req.file) {
       return res.status(400).json({ error: "A photo of the found item is required." });
     }
+    // the file is already on disk: a photo that is refused below must not be left there
+    const discard = () => fs.rm(req.file.path, { force: true }, () => {});
+    // the upload SAYS it is an image; the file's first bytes must agree (a web page renamed ".png" is not kept)
+    if (!fileIsImage(req.file.path, req.file.mimetype)) {
+      discard();
+      return res.status(400).json({ error: "That file doesn't look like a photo. Please choose a JPEG, PNG or WEBP image." });
+    }
     const parsed = createSchema.safeParse(req.body);
     if (!parsed.success) {
+      discard();
       return res.status(400).json({ error: parsed.error.issues[0].message });
     }
     const { description, location, category: itemCategory, idNumber } = parsed.data;
