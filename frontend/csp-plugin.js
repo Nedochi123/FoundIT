@@ -29,6 +29,7 @@ const ANALYTICS = [
   "https://*.googletagmanager.com",
   "https://*.g.doubleclick.net",
   "https://www.google.com",
+  "https://www.google.com.ng", // the same audience hits go to Google's Nigerian address for visitors in Nigeria
 ];
 const SENTRY = ["https://*.ingest.sentry.io", "https://*.ingest.us.sentry.io", "https://*.ingest.de.sentry.io"];
 
@@ -40,7 +41,7 @@ export function buildPolicy({ hashes = [], apiOrigin = null } = {}) {
     "script-src": ["'self'", ...hashes, "https://www.googletagmanager.com"],
     "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
     "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
-    "img-src": ["'self'", "data:", "blob:", ...api, "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://*.g.doubleclick.net", "https://www.google.com"],
+    "img-src": ["'self'", "data:", "blob:", ...api, "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://*.g.doubleclick.net", "https://www.google.com", "https://www.google.com.ng"],
     "connect-src": ["'self'", ...api, ...SENTRY, ...ANALYTICS],
     "worker-src": ["'self'"],
     "manifest-src": ["'self'"],
