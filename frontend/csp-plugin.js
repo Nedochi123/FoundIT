@@ -19,7 +19,17 @@ export function inlineScriptHashes(html) {
   return [...new Set(hashes)];
 }
 
-const ANALYTICS = ["https://www.google-analytics.com", "https://*.google-analytics.com", "https://*.analytics.google.com", "https://*.googletagmanager.com"];
+// Google Analytics 4. The first four are Google's own list; the last two (Google's ad network and its main site) are where it sends
+// the "Google signals" audience hits, which show up as blocked requests if they are left out.
+const ANALYTICS = [
+  "https://www.google-analytics.com",
+  "https://*.google-analytics.com",
+  "https://analytics.google.com",
+  "https://*.analytics.google.com",
+  "https://*.googletagmanager.com",
+  "https://*.g.doubleclick.net",
+  "https://www.google.com",
+];
 const SENTRY = ["https://*.ingest.sentry.io", "https://*.ingest.us.sentry.io", "https://*.ingest.de.sentry.io"];
 
 /** The policy text. `apiOrigin` is the server the app talks to (it also serves the photos), e.g. "https://api.example.com". */
@@ -30,7 +40,7 @@ export function buildPolicy({ hashes = [], apiOrigin = null } = {}) {
     "script-src": ["'self'", ...hashes, "https://www.googletagmanager.com"],
     "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
     "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
-    "img-src": ["'self'", "data:", "blob:", ...api, "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://*.google-analytics.com"],
+    "img-src": ["'self'", "data:", "blob:", ...api, "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://*.g.doubleclick.net", "https://www.google.com"],
     "connect-src": ["'self'", ...api, ...SENTRY, ...ANALYTICS],
     "worker-src": ["'self'"],
     "manifest-src": ["'self'"],
