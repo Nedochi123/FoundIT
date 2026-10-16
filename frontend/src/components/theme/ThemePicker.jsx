@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Ban, Check } from "lucide-react";
-import { THEMES, DOODLES, DEFAULT_THEME, DEFAULT_DOODLE, buttonColor, getTheme } from "../../lib/themes";
+import { THEMES, DOODLES, DEFAULT_THEME, DEFAULT_DOODLE, getTheme } from "../../lib/themes";
 import { DOODLE_ICON } from "./doodles";
 import { useTheme } from "./ThemeProvider";
 
@@ -43,19 +43,19 @@ export default function ThemePicker({ value, onChange, autoSuggest = true }) {
                 className="group flex flex-col items-center gap-1.5 rounded-xl py-1 transition active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal/60"
               >
                 <span
-                  className={`relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl ring-2 ring-offset-2 ring-offset-slate-900 transition ${
+                  className={`relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl ring-2 ring-offset-2 ring-offset-slate-900 transition ${
                     selected ? "scale-105 ring-brand-teal" : "ring-white/10 group-hover:ring-white/30"
                   }`}
                   style={{ background: t.swatchBg }}
                 >
                   <span
-                    className="flex h-7 w-7 items-center justify-center rounded-full"
-                    style={{ background: buttonColor(t) }}
+                    className="flex h-7 w-7 items-center justify-center rounded-full shadow-md shadow-black/30"
+                    style={{ background: `linear-gradient(135deg, ${t.brand.a}, ${t.brand.b})` }}
                   >
                     {selected && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
                   </span>
                 </span>
-                <span className={`px-0.5 text-center text-xs font-semibold leading-tight ${selected ? "text-slate-50" : "text-slate-400"}`}>{t.label}</span>
+                <span className={`px-0.5 text-center text-[11px] font-semibold leading-tight ${selected ? "text-slate-50" : "text-slate-400"}`}>{t.label}</span>
               </button>
             );
           })}
@@ -108,8 +108,8 @@ export default function ThemePicker({ value, onChange, autoSuggest = true }) {
 
       <p className="text-xs text-slate-400">
         {isDefault
-          ? "You're using the standard FoundIT look. Pick a color to change the whole app."
-          : "The whole app now looks like this. For the standard look, choose Default and None."}
+          ? "You're keeping the original FoundIT look. Pick a color to change the whole app."
+          : "The whole app now looks like this. For the original look, choose Default and None."}
       </p>
     </div>
   );

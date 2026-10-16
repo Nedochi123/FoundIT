@@ -123,7 +123,7 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5 rounded-xl bg-slate-800 p-1" role="tablist" aria-label="Found or lost items">
+      <div className="grid grid-cols-2 gap-1.5 rounded-xl bg-slate-800/70 p-1" role="tablist" aria-label="Found or lost items">
         {[
           ["found", "Found"],
           ["lost", "Lost"],
@@ -135,7 +135,7 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
             aria-selected={tab === key}
             onClick={() => setTab(key)}
             className={`min-h-11 rounded-lg px-2 text-sm font-semibold transition ${
-              tab === key ? "bg-brand-btn text-white" : "text-slate-300 hover:text-slate-50"
+              tab === key ? "bg-brand-gradient text-white shadow-md shadow-brand-blue/20" : "text-slate-300 hover:text-slate-50"
             }`}
           >
             {label}
@@ -148,7 +148,7 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
       ) : (
         <>
           {justPosted && boostEnabled && (
-            <div className="relative rounded-xl border border-amber-400/30 bg-slate-900 p-4" role="status">
+            <div className="relative rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-400/10 to-transparent p-4" role="status">
               <button
                 type="button"
                 onClick={() => setJustPosted(false)}
@@ -165,7 +165,7 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
                   setJustPosted(false);
                   setTab("lost");
                 }}
-                className="mt-2.5 flex min-h-11 items-center gap-1.5 rounded-lg bg-amber-400 px-4 text-sm font-bold text-amber-950 transition hover:brightness-105 active:scale-95"
+                className="mt-2.5 flex min-h-11 items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-4 text-sm font-bold text-amber-950 transition hover:brightness-105 active:scale-95"
               >
                 <Rocket className="h-4 w-4" /> Boost my post
               </button>
@@ -181,7 +181,7 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search by description or location"
                 placeholder="Search by description or location"
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-9 pr-11 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal"
+                className="w-full rounded-lg border border-slate-700 bg-slate-800/60 py-2.5 pl-9 pr-11 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal"
               />
               {query && (
                 <button

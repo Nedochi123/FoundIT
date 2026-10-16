@@ -92,6 +92,7 @@ export default function LocationGate({ children }) {
   if (showLegal) {
     return (
       <div className="flex min-h-app justify-center px-4 py-10">
+        <div className="bg-glow" aria-hidden="true" />
         <div className="w-full max-w-sm">
           <LegalScreen onBack={() => setShowLegal(false)} />
         </div>
@@ -119,8 +120,9 @@ export default function LocationGate({ children }) {
 
   return (
     <div className="flex min-h-app items-center justify-center px-4 py-10">
+      <div className="bg-glow" aria-hidden="true" />
       <main className="w-full max-w-sm animate-fade-up">
-        <div className="rounded-xl border border-white/10 bg-slate-900 p-6">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl shadow-black/40 backdrop-blur">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand-teal/15 ring-2 ring-brand-teal/40">
             <MapPin className="h-8 w-8 text-brand-teal" aria-hidden="true" />
           </div>
@@ -139,7 +141,7 @@ export default function LocationGate({ children }) {
             </ul>
           )}
 
-          <div className="mt-4 flex items-start gap-2 rounded-xl bg-slate-800 p-3 text-xs text-slate-300">
+          <div className="mt-4 flex items-start gap-2 rounded-xl bg-slate-800/60 p-3 text-xs text-slate-300">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
             <p>
               When you do things like post an item, send a message or confirm a return, FoundIT notes where your phone was. Only the FoundIT
@@ -153,7 +155,7 @@ export default function LocationGate({ children }) {
               type="button"
               onClick={ask}
               disabled={state === "working"}
-              className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-btn font-bold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+              className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient font-bold text-white shadow-lg shadow-brand-blue/30 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
             >
               {state === "working" ? (
                 "Finding you..."

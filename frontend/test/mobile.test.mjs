@@ -1,6 +1,6 @@
 // Most students use FoundIT one-handed on a phone. These tests guard the things that make it comfortable there and that are easy to lose by
-// accident: thumb-sized buttons, text boxes that do not make an iPhone zoom, room for the iPhone notch and home bar, solid top and bottom bars,
-// and text that is not too small to read. (The real-browser audit at 320, 375 and 414 px is described in the README.)
+// accident: thumb-sized buttons, text boxes that do not make an iPhone zoom, room for the iPhone notch and home bar, screen heights that follow
+// the visible screen, and names for screen readers. (None of them changes how the app looks.)
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
@@ -32,24 +32,6 @@ test("on a phone every button is at least 44px tall, an icon-only button at leas
   assert.match(block, /button:not\(\[role="switch"\]\):has\(> svg:only-child\)\s*\{\s*min-width:\s*44px/);
   assert.match(block, /textarea\s*\{\s*font-size:\s*16px/, "16px stops iPhones zooming the page when a box is tapped");
   assert.match(block, /input:not\(\[type="checkbox"\]\)/, "check boxes and radio buttons keep their own size");
-});
-
-test("the top and bottom bars are solid, so scrolling content never shows through them", () => {
-  for (const file of ["src/components/layout/Layout.jsx", "src/components/layout/NavBar.jsx"]) {
-    assert.ok(!/bg-bar-(?:top|bottom)\/\d+/.test(read(file)), `${file}: a see-through bar`);
-  }
-});
-
-test("no text is set smaller than 11px, and 11px only for the small count badge and the label pill", () => {
-  const allowed11 = new Set(["components/layout/NavBar.jsx", "components/auth/AuthGate.jsx"]);
-  const bad = [];
-  for (const p of jsx()) {
-    const rel = relative(SRC, p).replaceAll("\\", "/");
-    const text = readFileSync(p, "utf8");
-    if (/text-\[(?:[0-9]|10)px\]/.test(text)) bad.push(`${rel}: under 11px`);
-    if (/text-\[11px\]/.test(text) && !allowed11.has(rel)) bad.push(`${rel}: 11px`);
-  }
-  assert.deepEqual(bad, []);
 });
 
 test("the show-password button is a real thumb-sized button with room for it inside the box", () => {

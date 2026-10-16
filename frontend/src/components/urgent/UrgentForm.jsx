@@ -9,7 +9,7 @@ import { RewardChips } from "../messages/RewardCard";
 import { RewardsGuideLink } from "../rewards/RewardsGuide";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-red-400/60 focus:border-red-400";
+  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-red-400/60 focus:border-red-400";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 
 /**
@@ -74,7 +74,7 @@ export default function UrgentForm({ onNavigate }) {
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
 
-      <div className="flex items-start gap-3 rounded-xl border border-red-500/40 bg-slate-900 p-4">
+      <div className="flex items-start gap-3 rounded-2xl border border-red-500/40 bg-gradient-to-br from-red-500/15 to-transparent p-4">
         <TriangleAlert className="mt-0.5 h-7 w-7 shrink-0 text-red-400" strokeWidth={2.2} aria-hidden="true" />
         <div>
           <h1 className="text-xl font-bold text-slate-50">I urgently need something</h1>
@@ -163,7 +163,7 @@ export default function UrgentForm({ onNavigate }) {
           <RewardsGuideLink>How rewards work</RewardsGuideLink>
         </div>
 
-        <label htmlFor="urgent-agree" className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-700 bg-slate-900 p-3.5">
+        <label htmlFor="urgent-agree" className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-3.5">
           <input
             id="urgent-agree"
             type="checkbox"
@@ -181,7 +181,7 @@ export default function UrgentForm({ onNavigate }) {
           </span>
         </label>
 
-        <p className="flex items-start gap-1.5 text-xs text-slate-400">
+        <p className="flex items-start gap-1.5 text-[11px] text-slate-400">
           <ShieldAlert className="mt-px h-3.5 w-3.5 shrink-0" /> Only people who return your item should get the reward. Never share your PIN,
           OTP or card details with anyone.
         </p>
@@ -194,7 +194,7 @@ export default function UrgentForm({ onNavigate }) {
         <button
           type="submit"
           disabled={submitting}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-600 py-3 font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 py-3 font-semibold text-white shadow-lg shadow-red-950/40 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
         >
           <TriangleAlert className="h-5 w-5" />
           {submitting ? "Publishing..." : "Publish urgent alert"}

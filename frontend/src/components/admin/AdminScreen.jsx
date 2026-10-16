@@ -48,7 +48,7 @@ export default function AdminScreen() {
             className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition ${
               tab === t.key
                 ? "bg-amber-500/15 text-amber-300 ring-1 ring-amber-400/40"
-                : "bg-slate-800 text-slate-300 hover:text-slate-100"
+                : "bg-slate-800/50 text-slate-300 hover:text-slate-100"
             }`}
           >
             {t.label}

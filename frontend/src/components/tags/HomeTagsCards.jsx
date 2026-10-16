@@ -17,13 +17,13 @@ export function TagsAlertCard({ tags, onOpen }) {
   return (
     <div
       role="status"
-      className="animate-fade-up rounded-xl border border-brand-teal/50 bg-slate-900 p-4"
+      className="animate-fade-up rounded-2xl border border-brand-teal/50 bg-gradient-to-br from-brand-teal/20 to-transparent p-4 shadow-lg shadow-black/20"
       style={{ "--delay": "0.04s" }}
     >
       <div className="flex items-start gap-3">
         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-teal/20 ring-1 ring-inset ring-brand-teal/40">
           <MessagesSquare className="h-5 w-5 text-brand-teal" />
-          <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white ring-2 ring-bar-bottom">
+          <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white ring-2 ring-bar-bottom">
             {unread > 9 ? "9+" : unread}
           </span>
         </div>
@@ -36,7 +36,7 @@ export function TagsAlertCard({ tags, onOpen }) {
           <button
             type="button"
             onClick={onOpen}
-            className="mt-2.5 min-h-11 rounded-lg bg-brand-btn px-4 text-sm font-bold text-white transition hover:brightness-110 active:scale-95"
+            className="mt-2.5 min-h-11 rounded-lg bg-brand-gradient px-4 text-sm font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-95"
           >
             Open chat
           </button>
@@ -69,7 +69,7 @@ export function TagsPromoCard({ tags, onOpen }) {
 
   return (
     <div
-      className="relative animate-fade-up rounded-xl border border-brand-teal/25 bg-slate-900 p-4"
+      className="relative animate-fade-up rounded-2xl border border-brand-teal/25 bg-gradient-to-br from-brand-teal/10 to-transparent p-4"
       style={{ "--delay": "0.2s" }}
     >
       <button
@@ -93,7 +93,7 @@ export function TagsPromoCard({ tags, onOpen }) {
           <button
             type="button"
             onClick={onOpen}
-            className="mt-2.5 min-h-11 rounded-lg bg-brand-btn px-4 text-sm font-bold text-white transition hover:brightness-110 active:scale-95"
+            className="mt-2.5 min-h-11 rounded-lg bg-brand-gradient px-4 text-sm font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-95"
           >
             Set up a tag
           </button>

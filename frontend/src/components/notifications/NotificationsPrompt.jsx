@@ -46,7 +46,7 @@ export default function NotificationsPrompt() {
   if (!visible) return null;
 
   return (
-    <div className="mb-4 rounded-xl border border-brand-teal/30 bg-brand-teal/10 p-4">
+    <div className="mb-4 rounded-xl border border-brand-teal/30 bg-brand-teal/10 p-4 backdrop-blur">
       <div className="flex items-start gap-3">
         <Bell className="mt-0.5 h-5 w-5 shrink-0 text-brand-teal" />
         <div className="flex-1">

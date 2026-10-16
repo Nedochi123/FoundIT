@@ -17,7 +17,7 @@ export default function HomeUrgentCards({ items, currentUserId, onFound, onSeeAl
         {items.slice(0, 3).map((item) => {
           const own = item.posterId === currentUserId;
           return (
-            <div key={item.id} role="alert" className="rounded-xl border border-red-500/50 bg-slate-900 p-3.5">
+            <div key={item.id} role="alert" className="rounded-2xl border border-red-500/50 bg-gradient-to-br from-red-500/15 to-transparent p-3.5">
               <div className="flex items-start justify-between gap-3">
                 <p className="line-clamp-3 min-w-0 whitespace-pre-wrap break-words text-sm font-bold text-slate-50">{item.description}</p>
                 <span className="shrink-0 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-extrabold text-amber-950">
@@ -36,7 +36,7 @@ export default function HomeUrgentCards({ items, currentUserId, onFound, onSeeAl
                 <button
                   type="button"
                   onClick={onFound}
-                  className="mt-2.5 min-h-11 rounded-lg bg-red-600 px-4 text-xs font-bold text-white transition hover:brightness-110 active:scale-95"
+                  className="mt-2.5 min-h-11 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-4 text-xs font-bold text-white shadow-md shadow-red-950/40 transition hover:brightness-110 active:scale-95"
                 >
                   I found this
                 </button>

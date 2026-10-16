@@ -8,9 +8,10 @@ export default function Layout({ view, onNavigate, unreadCount, children }) {
 
   return (
     <div className="min-h-app" style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}>
-      <header className="sticky top-0 z-10 border-b border-white/5 bg-bar-top" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+      <div className="bg-glow" aria-hidden="true" />
+      <header className="sticky top-0 z-10 border-b border-white/5 bg-bar-top/80 backdrop-blur-md" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
         <div className="mx-auto flex max-w-md items-center gap-2 px-4 py-1.5">
-          <Logo className="h-7 w-7 rounded-[8px]" />
+          <Logo className="h-7 w-7 rounded-[8px] shadow-md shadow-black/40" />
           <span className="text-[15px] font-extrabold tracking-tight text-slate-50">
             Found<span className="text-brand-teal">IT</span>
           </span>

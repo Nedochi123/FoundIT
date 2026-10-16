@@ -91,13 +91,13 @@ export default function UrgentAlertModal({ onNavigate }) {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
       <div
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="urgent-alert-title"
         aria-describedby="urgent-alert-text"
-        className="w-full max-w-sm rounded-xl border border-red-500/60 bg-slate-950 p-5"
+        className="w-full max-w-sm rounded-2xl border border-red-500/60 bg-slate-950 p-5 shadow-2xl shadow-red-950/60"
       >
         <div className="flex flex-col items-center gap-2 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15 ring-2 ring-red-500/50 motion-safe:animate-pulse">
@@ -128,7 +128,7 @@ export default function UrgentAlertModal({ onNavigate }) {
             ref={primaryRef}
             type="button"
             onClick={iFoundIt}
-            className="min-h-11 rounded-lg bg-red-600 px-4 text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.98]"
+            className="min-h-11 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-4 text-sm font-bold text-white shadow-md shadow-red-950/40 transition hover:brightness-110 active:scale-[0.98]"
           >
             I found it
           </button>
