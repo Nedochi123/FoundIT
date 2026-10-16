@@ -179,13 +179,15 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                aria-label="Search by description or location"
                 placeholder="Search by description or location"
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-9 pr-9 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal"
+                className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2.5 pl-9 pr-11 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal"
               />
               {query && (
                 <button
                   onClick={() => setQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                  aria-label="Clear search"
+                  className="absolute right-0 top-1/2 flex -translate-y-1/2 items-center justify-center text-slate-500 hover:text-slate-300"
                 >
                   <X className="h-4 w-4" />
                 </button>

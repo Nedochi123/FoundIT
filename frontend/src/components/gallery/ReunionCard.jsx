@@ -24,7 +24,7 @@ export default function ReunionCard({ item }) {
             <CategoryIcon className="h-3 w-3" />
           </span>
         )}
-        <span className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[10px] font-bold text-emerald-950">
+        <span className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-xs font-bold text-emerald-950">
           <PackageCheck className="h-3 w-3" aria-hidden="true" /> Reunited
         </span>
       </div>

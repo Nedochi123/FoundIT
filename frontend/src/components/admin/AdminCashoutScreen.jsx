@@ -121,7 +121,7 @@ export default function AdminCashoutScreen() {
                 </div>
               ) : (
                 <span
-                  className={`mt-3 inline-block rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                  className={`mt-3 inline-block rounded-full px-2.5 py-1 text-xs font-bold ${
                     r.status === "paid" ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"
                   }`}
                 >

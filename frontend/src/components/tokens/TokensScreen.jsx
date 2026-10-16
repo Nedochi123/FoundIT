@@ -160,7 +160,7 @@ export default function TokensScreen() {
                   <p className="text-xs text-slate-400">{timeAgo(r.createdAt)}</p>
                 </div>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                  className={`rounded-full px-2.5 py-1 text-xs font-bold ${
                     r.status === "paid"
                       ? "bg-emerald-500/15 text-emerald-400"
                       : r.status === "rejected"

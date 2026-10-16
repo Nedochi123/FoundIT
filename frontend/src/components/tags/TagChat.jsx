@@ -11,7 +11,7 @@ function ContactCard({ message, mine, otherName }) {
   const who = mine ? "You shared your contact" : `${otherName[0].toUpperCase()}${otherName.slice(1)} shared their contact`;
   return (
     <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2.5 text-sm text-slate-100">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">{who}</p>
+      <p className="text-xs font-bold uppercase tracking-wider text-emerald-300">{who}</p>
       {message.contactName && (
         <p className="mt-1.5 flex items-center gap-1.5 font-semibold">
           <UserRound className="h-4 w-4 text-emerald-300" /> {message.contactName}
@@ -91,7 +91,7 @@ export default function TagChat({ messages, mySide, onSend, onShareContact, open
 
   return (
     <div className="flex flex-col gap-3">
-      <div ref={listRef} className="flex max-h-[50vh] min-h-24 flex-col gap-2 overflow-y-auto pr-1" aria-live="polite">
+      <div ref={listRef} className="flex max-h-half min-h-24 flex-col gap-2 overflow-y-auto pr-1" aria-live="polite">
         {messages.map((m) => {
           const mine = m.sender === mySide;
           return (
@@ -109,7 +109,7 @@ export default function TagChat({ messages, mySide, onSend, onShareContact, open
                   {m.body}
                 </div>
               )}
-              <span className="mt-0.5 px-1 text-[10px] text-slate-500">{timeOf(m.createdAt)}</span>
+              <span className="mt-0.5 px-1 text-xs text-slate-500">{timeOf(m.createdAt)}</span>
             </div>
           );
         })}
@@ -168,7 +168,7 @@ export default function TagChat({ messages, mySide, onSend, onShareContact, open
 
       {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
 
-      <p className="flex items-start gap-1.5 text-[11px] text-slate-400">
+      <p className="flex items-start gap-1.5 text-xs text-slate-400">
         <ShieldAlert className="mt-px h-3.5 w-3.5 shrink-0" />
         Meet in a public place on campus. Never pay anyone before you have your item back, and never share bank or card details.
       </p>

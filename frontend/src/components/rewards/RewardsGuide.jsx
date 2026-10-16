@@ -71,7 +71,7 @@ export default function RewardsGuide({ open, onClose, startTab = "lost" }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="rewards-guide-title"
-        className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-y-auto rounded-t-2xl border border-white/10 bg-slate-900 p-5 sm:rounded-xl"
+        className="relative flex max-h-sheet w-full max-w-md flex-col overflow-y-auto rounded-t-2xl border border-white/10 bg-slate-900 p-5 sm:rounded-xl"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">

@@ -87,11 +87,11 @@ export default function LocationGate({ children }) {
   }, [state, exempt]);
 
   if (state === "ok" || exempt) return children;
-  if (state === "checking") return <div className="min-h-screen" aria-busy="true" />;
+  if (state === "checking") return <div className="min-h-app" aria-busy="true" />;
 
   if (showLegal) {
     return (
-      <div className="flex min-h-screen justify-center px-4 py-10">
+      <div className="flex min-h-app justify-center px-4 py-10">
         <div className="w-full max-w-sm">
           <LegalScreen onBack={() => setShowLegal(false)} />
         </div>
@@ -118,7 +118,7 @@ export default function LocationGate({ children }) {
   }[state];
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-10">
+    <div className="flex min-h-app items-center justify-center px-4 py-10">
       <main className="w-full max-w-sm animate-fade-up">
         <div className="rounded-xl border border-white/10 bg-slate-900 p-6">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand-teal/15 ring-2 ring-brand-teal/40">

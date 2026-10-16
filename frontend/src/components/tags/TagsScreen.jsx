@@ -80,7 +80,7 @@ function TagCard({ tag, onChanged, onOpenChat }) {
           <p className="mt-0.5 font-mono text-xs text-slate-400">{prettyCode(tag.code)}</p>
         </div>
         <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
             paused ? "bg-slate-700 text-slate-300" : "bg-emerald-500/15 text-emerald-300 ring-1 ring-inset ring-emerald-500/30"
           }`}
         >
@@ -93,7 +93,7 @@ function TagCard({ tag, onChanged, onOpenChat }) {
           <MessageSquare className="h-3.5 w-3.5" />
           {open ? "Hide chats" : `Chats (${tag.chatCount})`}
           {!open && tag.unreadCount > 0 && (
-            <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{tag.unreadCount} new</span>
+            <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">{tag.unreadCount} new</span>
           )}
         </button>
         <button type="button" disabled={busy} onClick={() => setRenaming((r) => !r)} className="min-h-9 text-xs font-medium text-slate-300 underline underline-offset-2 hover:text-slate-50">
@@ -140,11 +140,11 @@ function TagCard({ tag, onChanged, onOpenChat }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <p className="truncate text-sm font-semibold text-slate-50">{t.finderName || "Someone who found it"}</p>
-                    <p className="shrink-0 text-[11px] text-slate-400">{timeAgo(t.lastMessageAt)}</p>
+                    <p className="shrink-0 text-xs text-slate-400">{timeAgo(t.lastMessageAt)}</p>
                   </div>
                   <p className="mt-0.5 truncate text-xs text-slate-300">{t.preview || "Shared their contact"}</p>
                 </div>
-                {t.unreadCount > 0 && <span className="shrink-0 rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{t.unreadCount} new</span>}
+                {t.unreadCount > 0 && <span className="shrink-0 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">{t.unreadCount} new</span>}
                 <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" />
               </button>
             ))
@@ -305,7 +305,7 @@ export default function TagsScreen({ onBack, initialCode = "" }) {
         <div>
           <label htmlFor="tag-label" className={labelClass}>What is it stuck on? <span className="font-normal text-slate-500">(optional)</span></label>
           <input id="tag-label" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={60} placeholder="e.g. Blue backpack" className={inputClass} />
-          <p className="mt-1 text-[11px] text-slate-500">Finders will see this, so don't put your name or number in it.</p>
+          <p className="mt-1 text-xs text-slate-500">Finders will see this, so don't put your name or number in it.</p>
         </div>
         {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
         {justActivated && <p role="status" className="text-sm text-emerald-300">Tag activated. Anyone who scans it can now reach you.</p>}

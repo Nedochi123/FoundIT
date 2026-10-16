@@ -97,7 +97,7 @@ export default function AdminReportsScreen() {
                   </p>
                   <p className="mt-0.5 font-semibold text-slate-50">{REASON_LABELS[r.reason] || r.reason}</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-slate-800 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                <span className="shrink-0 rounded-full bg-slate-800 px-2 py-1 text-xs font-bold uppercase tracking-wide text-slate-400">
                   {r.targetType === "user" ? "User" : "Post"}
                 </span>
               </div>
@@ -112,7 +112,7 @@ export default function AdminReportsScreen() {
                     <p className="truncate text-sm text-slate-100">{r.target.name}</p>
                     <p className="truncate text-xs text-slate-400">{r.target.email}</p>
                     {r.target.suspended && (
-                      <span className="mt-1 inline-block rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold text-red-400">
+                      <span className="mt-1 inline-block rounded-full bg-red-500/15 px-2 py-0.5 text-xs font-bold text-red-400">
                         Suspended
                       </span>
                     )}
@@ -160,7 +160,7 @@ export default function AdminReportsScreen() {
                 </div>
               ) : (
                 <span
-                  className={`mt-3 inline-block rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                  className={`mt-3 inline-block rounded-full px-2.5 py-1 text-xs font-bold ${
                     r.status === "actioned" ? "bg-red-500/15 text-red-400" : "bg-slate-700 text-slate-300"
                   }`}
                 >

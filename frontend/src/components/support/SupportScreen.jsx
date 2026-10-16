@@ -87,9 +87,9 @@ export default function SupportScreen({ onNavigate }) {
           return (
             <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[85%] rounded-xl px-3.5 py-2 text-sm ${mine ? "bg-brand-btn text-white" : "border border-amber-400/40 bg-amber-400/10 text-slate-50"}`}>
-                {!mine && <p className="text-[11px] font-bold uppercase tracking-wide text-amber-300">FoundIT admin</p>}
+                {!mine && <p className="text-xs font-bold uppercase tracking-wide text-amber-300">FoundIT admin</p>}
                 <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                <p className={`mt-0.5 text-right text-[10px] ${mine ? "text-white/70" : "text-slate-400"}`}>{formatTime(m.at)}</p>
+                <p className={`mt-0.5 text-right text-xs ${mine ? "text-white/70" : "text-slate-400"}`}>{formatTime(m.at)}</p>
               </div>
             </div>
           );

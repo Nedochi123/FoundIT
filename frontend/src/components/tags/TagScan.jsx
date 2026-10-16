@@ -31,7 +31,7 @@ function saveToken(code, token) {
 
 function Shell({ children }) {
   return (
-    <div className="min-h-screen px-4 py-8">
+    <div className="min-h-app px-4 py-8">
       <div className="mx-auto w-full max-w-md">
         <div className="mb-6 flex items-center gap-2">
           <Logo className="h-8 w-8 rounded-[9px]" />

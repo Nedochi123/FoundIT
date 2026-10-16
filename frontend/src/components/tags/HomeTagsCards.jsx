@@ -23,7 +23,7 @@ export function TagsAlertCard({ tags, onOpen }) {
       <div className="flex items-start gap-3">
         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-teal/20 ring-1 ring-inset ring-brand-teal/40">
           <MessagesSquare className="h-5 w-5 text-brand-teal" />
-          <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white ring-2 ring-bar-bottom">
+          <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white ring-2 ring-bar-bottom">
             {unread > 9 ? "9+" : unread}
           </span>
         </div>

@@ -30,7 +30,7 @@ export default function LostCard({ item, currentUserId, boostEnabled, onBoost, o
     >
       {urgent && (
         <div className="mb-2.5 flex items-center justify-between gap-2">
-          <span className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-red-400">
+          <span className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-red-400">
             <TriangleAlert className="h-4 w-4" aria-hidden="true" /> Urgent
           </span>
           <span className="rounded-full bg-amber-400 px-2.5 py-1 text-xs font-extrabold text-amber-950">
@@ -39,7 +39,7 @@ export default function LostCard({ item, currentUserId, boostEnabled, onBoost, o
         </div>
       )}
       {boosted && (
-        <div className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-300">
+        <div className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-300">
           <Rocket className="h-3.5 w-3.5" /> Boosted <span className="font-semibold normal-case tracking-normal text-slate-400">· {timeLeft(item.boostedUntil)}</span>
         </div>
       )}

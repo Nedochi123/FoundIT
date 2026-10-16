@@ -90,7 +90,7 @@ export default function AdminTagsScreen() {
             ].map(([label, n]) => (
               <div key={label} className="rounded-lg bg-slate-800 py-2">
                 <p className="text-lg font-extrabold text-slate-50">{n}</p>
-                <p className="text-[11px] text-slate-400">{label}</p>
+                <p className="text-xs text-slate-400">{label}</p>
               </div>
             ))}
           </div>

@@ -141,7 +141,7 @@ export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
       </button>
       <p className="text-center text-sm text-slate-400">
         Already have an account?{" "}
-        <button type="button" onClick={onSwitchToLogin} className="font-semibold text-brand-teal hover:underline">
+        <button type="button" onClick={onSwitchToLogin} className="px-2 font-semibold text-brand-teal hover:underline">
           Log in
         </button>
       </p>

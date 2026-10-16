@@ -19,7 +19,7 @@ export default function AuthGate({ children }) {
 
   if (showLegal) {
     return (
-      <div className="flex min-h-screen justify-center px-4 py-10">
+      <div className="flex min-h-app justify-center px-4 py-10">
         <div className="w-full max-w-sm">
           <LegalScreen onBack={() => setShowLegal(false)} />
         </div>
@@ -40,7 +40,7 @@ export default function AuthGate({ children }) {
   // shortcut below.
   if (resetToken) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-10">
+      <div className="flex min-h-app items-center justify-center px-4 py-10">
         <div className="w-full max-w-sm animate-fade-up">
           <div className="mb-8 flex flex-col items-center gap-1.5">
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">
@@ -57,7 +57,7 @@ export default function AuthGate({ children }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-app items-center justify-center">
         <p className="text-slate-400">Loading...</p>
       </div>
     );
@@ -66,12 +66,12 @@ export default function AuthGate({ children }) {
   if (user) return children;
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-10">
+    <div className="flex min-h-app items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm animate-fade-up">
         <div className="mb-8 flex flex-col items-center gap-3">
           <Logo label="FoundIT" className="h-16 w-16 rounded-xl" />
           <div className="flex flex-col items-center gap-1.5">
-            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Nile University
             </span>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">

@@ -71,7 +71,7 @@ function BarChart({ months, series, height = 140 }) {
           );
         })}
       </svg>
-      <div className="mt-1 flex text-[9px] text-slate-500">
+      <div className="mt-1 flex text-xs text-slate-500">
         {months.map((m) => (
           <span key={m} style={{ width: `${barGroupWidth}%` }} className="truncate text-center">
             {monthLabel(m)}

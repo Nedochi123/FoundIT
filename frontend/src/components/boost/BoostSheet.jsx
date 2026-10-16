@@ -12,7 +12,7 @@ function CopyRow({ label, value, copied, onCopy, mono }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-800 px-3 py-2.5">
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p>
         <p className={`break-words font-bold text-slate-50 ${mono ? "font-mono tracking-wider" : ""}`}>{value}</p>
       </div>
       <button
@@ -102,7 +102,7 @@ export default function BoostSheet({ item, onClose, onChanged }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="boost-title"
-        className="relative grid max-h-[92vh] w-full max-w-md content-start gap-4 overflow-y-auto rounded-t-2xl border border-white/10 bg-slate-900 p-5 sm:rounded-xl"
+        className="relative grid max-h-sheet w-full max-w-md content-start gap-4 overflow-y-auto rounded-t-2xl border border-white/10 bg-slate-900 p-5 sm:rounded-xl"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -208,7 +208,7 @@ export default function BoostSheet({ item, onClose, onChanged }) {
             >
               Cancel this boost
             </button>
-            <p className="flex items-start gap-1.5 text-[11px] text-slate-400">
+            <p className="flex items-start gap-1.5 text-xs text-slate-400">
               <ShieldAlert className="mt-px h-3.5 w-3.5 shrink-0" />
               Only pay into the account shown here. FoundIT never asks for your PIN, OTP or card details. Once a boost is live it can't be refunded.
             </p>

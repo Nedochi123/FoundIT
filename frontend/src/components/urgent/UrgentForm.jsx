@@ -181,7 +181,7 @@ export default function UrgentForm({ onNavigate }) {
           </span>
         </label>
 
-        <p className="flex items-start gap-1.5 text-[11px] text-slate-400">
+        <p className="flex items-start gap-1.5 text-xs text-slate-400">
           <ShieldAlert className="mt-px h-3.5 w-3.5 shrink-0" /> Only people who return your item should get the reward. Never share your PIN,
           OTP or card details with anyone.
         </p>

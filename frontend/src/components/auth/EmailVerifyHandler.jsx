@@ -50,7 +50,7 @@ export default function EmailVerifyHandler() {
   if (status === "idle") return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-slate-950/95 px-4 py-10">
+    <div className="fixed inset-0 z-50 flex min-h-app items-center justify-center bg-slate-950/95 px-4 py-10">
       <div className="w-full max-w-sm rounded-xl border border-white/10 bg-slate-900 p-6 text-center">
         {status === "verifying" && <p className="text-sm text-slate-300">Verifying your email...</p>}
 

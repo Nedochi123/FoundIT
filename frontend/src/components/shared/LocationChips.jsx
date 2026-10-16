@@ -11,7 +11,7 @@ export default function LocationChips({ onPick }) {
           key={loc}
           type="button"
           onClick={() => onPick(loc)}
-          className="rounded-full bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-300 transition hover:bg-slate-800"
+          className="rounded-full bg-slate-800 px-3 py-1 text-xs font-medium text-slate-300 transition hover:bg-slate-800"
         >
           {loc}
         </button>

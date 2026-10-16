@@ -41,7 +41,7 @@ export default function ReportDialog({ targetType, targetId, onClose }) {
   // containing block for position:fixed descendants, which would
   // otherwise clip this dialog to the card instead of the viewport.
   return createPortal(
-    <div className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-slate-950/95 px-4 py-10">
+    <div className="fixed inset-0 z-50 flex min-h-app items-center justify-center bg-slate-950/95 px-4 py-10">
       <div className="w-full max-w-sm rounded-xl border border-white/10 bg-slate-900 p-6">
         {status === "sent" ? (
           <div className="text-center">

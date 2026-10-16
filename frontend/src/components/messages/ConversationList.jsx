@@ -66,7 +66,7 @@ export default function ConversationList({ onOpenConversation, onUnreadChange })
             <p className="truncate text-sm text-slate-300">{c.lastMessage || "No messages yet"}</p>
           </div>
           {c.unreadCount > 0 && (
-            <span className="flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-brand-btn px-1.5 text-[11px] font-bold text-white">
+            <span className="flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-brand-btn px-1.5 text-xs font-bold text-white">
               {c.unreadCount}
             </span>
           )}

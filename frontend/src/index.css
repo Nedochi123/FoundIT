@@ -18,6 +18,7 @@ body {
   background-attachment: fixed;
   color: rgb(var(--body-text));
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 h1, h2, h3 {
@@ -27,6 +28,46 @@ h1, h2, h3 {
 /* Codes and times are set like a printed label: a tag code (FND-7K3Q), a time, a quantity. */
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Screen heights that follow what is actually visible on a phone: "vh" counts the area under Safari's collapsing toolbar, so a
+   sheet or a full-height screen sized in vh runs off the bottom. Each has a vh fallback for older browsers. */
+.min-h-app {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.max-h-sheet {
+  max-height: 92vh;
+  max-height: 92dvh;
+}
+.max-h-half {
+  max-height: 50vh;
+  max-height: 50dvh;
+}
+/* the open chat: the screen minus the top bar and the bottom bar, each with its iPhone notch / home-bar room */
+.h-chat {
+  height: calc(100vh - 6rem);
+  height: calc(100dvh - 6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+}
+
+/* ---- phones ----------------------------------------------------------------------------------------------------------
+   Most students use FoundIT one-handed on a phone, so on a small or touch screen:
+   - every button is at least 44px tall, and a button that is only an icon is at least 44px wide (Apple's and WCAG's
+     comfortable thumb size). Switches keep their own size: they are drawn as a track and a knob.
+   - text boxes are 16px: below that, iPhones zoom the whole page in when you tap one and do not zoom back out. */
+@media (max-width: 767px), (pointer: coarse) {
+  button:not([role="switch"]),
+  [role="button"] {
+    min-height: 44px;
+  }
+  button:not([role="switch"]):has(> svg:only-child) {
+    min-width: 44px;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
 @keyframes fade-up {
