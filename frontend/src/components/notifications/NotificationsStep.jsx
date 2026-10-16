@@ -62,7 +62,7 @@ export default function NotificationsStep({ reason = "So you hear straight away 
               type="button"
               onClick={turnOn}
               disabled={status === "requesting"}
-              className="mt-2.5 min-h-11 rounded-lg bg-brand-btn px-4 text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+              className="mt-2.5 min-h-11 rounded-lg bg-brand-gradient px-4 text-sm font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
             >
               {status === "requesting" ? "Asking your phone..." : "Turn on notifications"}
             </button>
@@ -86,7 +86,7 @@ export default function NotificationsStep({ reason = "So you hear straight away 
               <button
                 type="button"
                 onClick={turnOn}
-                className="min-h-11 rounded-lg bg-brand-btn px-4 text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.98]"
+                className="min-h-11 rounded-lg bg-brand-gradient px-4 text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.98]"
               >
                 Try again
               </button>

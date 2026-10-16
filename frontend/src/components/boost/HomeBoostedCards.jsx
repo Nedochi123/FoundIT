@@ -14,7 +14,7 @@ export default function HomeBoostedCards({ items, onFound, onSeeAll }) {
       </div>
       <div className="flex flex-col gap-2.5">
         {items.map((item) => (
-          <div key={item.id} className="rounded-xl border border-amber-400/40 bg-slate-900 p-3.5">
+          <div key={item.id} className="rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-400/10 to-transparent p-3.5">
             <p className="line-clamp-3 whitespace-pre-wrap break-words text-sm font-semibold text-slate-50">{item.description}</p>
             <div className="mt-1 flex items-center gap-1 text-xs text-slate-400">
               {item.location && (
@@ -27,7 +27,7 @@ export default function HomeBoostedCards({ items, onFound, onSeeAll }) {
             <button
               type="button"
               onClick={onFound}
-              className="mt-2.5 min-h-11 rounded-lg bg-brand-btn px-4 text-xs font-bold text-white transition hover:brightness-110 active:scale-95"
+              className="mt-2.5 min-h-11 rounded-lg bg-brand-gradient px-4 text-xs font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-95"
             >
               I found this
             </button>

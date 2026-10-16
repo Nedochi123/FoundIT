@@ -7,14 +7,22 @@
 
 body {
   margin: 0;
-  font-family: "Public Sans", system-ui, sans-serif;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* One flat page color from the student's chosen look (src/themes.css), with an optional pattern under it (the camo
-     look's camouflage shows through because that look's color is translucent). No gradients, lights or blurred shapes:
-     the app is a utility people use in a hurry, so the page stays out of the way. */
+  /* A calm, static version of the intro's navy palette, with a faint
+     brand-teal/blue tint low in the frame — the intro's animated glow
+     blobs are a one-time "hero" moment and would be visual noise on
+     every other screen, but a hint of the brand color keeps the app
+     from reading as generic dark-mode grey. */
+  /* Every color below comes from the student's chosen look (src/themes.css). Layers, top to bottom: two
+     soft colored lights, the page gradient, and an optional pattern (the camo theme's camouflage). The
+     Default look has no lights and no pattern, so it is just the gradient, as it always was. */
   background-color: rgb(var(--slate-950));
-  background-image: linear-gradient(var(--bg), var(--bg)), var(--bg-pattern);
-  background-size: auto, var(--bg-pattern-size);
+  background-image: radial-gradient(ellipse 900px 500px at 100% 0%, var(--glow-two) 0%, transparent 55%),
+    radial-gradient(ellipse 900px 500px at 15% 115%, var(--glow-one) 0%, transparent 60%),
+    radial-gradient(circle at 50% -10%, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bottom) 100%),
+    var(--bg-pattern);
+  background-size: auto, auto, auto, var(--bg-pattern-size);
   background-attachment: fixed;
   color: rgb(var(--body-text));
   min-height: 100vh;
@@ -25,49 +33,42 @@ h1, h2, h3 {
   letter-spacing: -0.01em;
 }
 
-/* Codes and times are set like a printed label: a tag code (FND-7K3Q), a time, a quantity. */
-.tabular {
-  font-variant-numeric: tabular-nums;
+/* Static glow blobs behind every screen — a quiet echo of the intro
+   animation's energy so the app never reads as flat, static dark-mode
+   grey. Deliberately NOT animated: a large filter:blur() element is
+   expensive to composite on mobile GPUs, and animating its transform
+   forces that blur to recompute every frame, forever, on every screen
+   — a real, continuous perf cost for a decoration nobody consciously
+   watches move. Fixed + very low opacity so it never competes with
+   foreground content either way. */
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
 }
-
-/* Screen heights that follow what is actually visible on a phone: "vh" counts the area under Safari's collapsing toolbar, so a
-   sheet or a full-height screen sized in vh runs off the bottom. Each has a vh fallback for older browsers. */
-.min-h-app {
-  min-height: 100vh;
-  min-height: 100dvh;
+.bg-glow::before,
+.bg-glow::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.16;
 }
-.max-h-sheet {
-  max-height: 92vh;
-  max-height: 92dvh;
+.bg-glow::before {
+  width: 380px;
+  height: 380px;
+  background: var(--blob-one);
+  top: -6%;
+  right: -10%;
 }
-.max-h-half {
-  max-height: 50vh;
-  max-height: 50dvh;
-}
-/* the open chat: the screen minus the top bar and the bottom bar, each with its iPhone notch / home-bar room */
-.h-chat {
-  height: calc(100vh - 6rem);
-  height: calc(100dvh - 6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-}
-
-/* ---- phones ----------------------------------------------------------------------------------------------------------
-   Most students use FoundIT one-handed on a phone, so on a small or touch screen:
-   - every button is at least 44px tall, and a button that is only an icon is at least 44px wide (Apple's and WCAG's
-     comfortable thumb size). Switches keep their own size: they are drawn as a track and a knob.
-   - text boxes are 16px: below that, iPhones zoom the whole page in when you tap one and do not zoom back out. */
-@media (max-width: 767px), (pointer: coarse) {
-  button:not([role="switch"]),
-  [role="button"] {
-    min-height: 44px;
-  }
-  button:not([role="switch"]):has(> svg:only-child) {
-    min-width: 44px;
-  }
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
-  select,
-  textarea {
-    font-size: 16px;
-  }
+.bg-glow::after {
+  width: 420px;
+  height: 420px;
+  background: var(--blob-two);
+  bottom: -10%;
+  left: -12%;
 }
 
 @keyframes fade-up {
@@ -173,4 +174,44 @@ h1, h2, h3 {
 }
 :root[data-theme]:not([data-theme="classic"]) .logo-themed {
   display: inline-block;
+}
+
+/* Screen heights that follow what is actually visible on a phone: "vh" counts the area under Safari's collapsing toolbar, so a
+   sheet or a full-height screen sized in vh runs off the bottom. Each has a vh fallback for older browsers. */
+.min-h-app {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.max-h-sheet {
+  max-height: 92vh;
+  max-height: 92dvh;
+}
+.max-h-half {
+  max-height: 50vh;
+  max-height: 50dvh;
+}
+/* the open chat: the screen minus the top bar and the bottom bar, each with its iPhone notch / home-bar room */
+.h-chat {
+  height: calc(100vh - 6rem);
+  height: calc(100dvh - 6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+}
+
+/* ---- phones ----------------------------------------------------------------------------------------------------------
+   Most students use FoundIT one-handed on a phone, so on a small or touch screen:
+   - every button is at least 44px tall, and a button that is only an icon is at least 44px wide (Apple's and WCAG's
+     comfortable thumb size). Switches keep their own size: they are drawn as a track and a knob.
+   - text boxes are 16px: below that, iPhones zoom the whole page in when you tap one and do not zoom back out. */
+@media (max-width: 767px), (pointer: coarse) {
+  button:not([role="switch"]),
+  [role="button"] {
+    min-height: 44px;
+  }
+  button:not([role="switch"]):has(> svg:only-child) {
+    min-width: 44px;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }

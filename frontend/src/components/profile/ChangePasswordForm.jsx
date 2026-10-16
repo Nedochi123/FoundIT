@@ -4,7 +4,7 @@ import { api } from "../../lib/api";
 import PasswordInput from "../auth/PasswordInput";
 
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
-const cardClass = "rounded-xl border border-white/10 bg-slate-900 p-4";
+const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
 
 export default function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -94,7 +94,7 @@ export default function ChangePasswordForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="rounded-lg bg-brand-btn py-2.5 font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+        className="rounded-lg bg-brand-gradient py-2.5 font-semibold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
       >
         {submitting ? "Changing..." : "Change password"}
       </button>

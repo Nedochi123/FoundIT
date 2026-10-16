@@ -20,6 +20,7 @@ export default function AuthGate({ children }) {
   if (showLegal) {
     return (
       <div className="flex min-h-app justify-center px-4 py-10">
+        <div className="bg-glow" aria-hidden="true" />
         <div className="w-full max-w-sm">
           <LegalScreen onBack={() => setShowLegal(false)} />
         </div>
@@ -41,13 +42,14 @@ export default function AuthGate({ children }) {
   if (resetToken) {
     return (
       <div className="flex min-h-app items-center justify-center px-4 py-10">
+        <div className="bg-glow" aria-hidden="true" />
         <div className="w-full max-w-sm animate-fade-up">
           <div className="mb-8 flex flex-col items-center gap-1.5">
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">
               Found<span className="text-brand-teal">IT</span>
             </h1>
           </div>
-          <div className="rounded-xl border border-white/10 bg-slate-900 p-6">
+          <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
             <ResetPasswordForm token={resetToken} onDone={clearResetToken} />
           </div>
         </div>
@@ -67,20 +69,28 @@ export default function AuthGate({ children }) {
 
   return (
     <div className="flex min-h-app items-center justify-center px-4 py-10">
+      <div className="bg-glow" aria-hidden="true" />
       <div className="w-full max-w-sm animate-fade-up">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <Logo label="FoundIT" className="h-16 w-16 rounded-xl" />
+          <div className="relative flex items-center justify-center">
+            <div
+              className="absolute h-20 w-20 rounded-full opacity-50 blur-2xl"
+              style={{ background: "radial-gradient(circle, var(--brand-a) 0%, var(--brand-b) 70%, transparent 100%)" }}
+              aria-hidden="true"
+            />
+            <Logo label="FoundIT" className="relative h-16 w-16 rounded-2xl shadow-xl shadow-black/50 ring-1 ring-white/10" />
+          </div>
           <div className="flex flex-col items-center gap-1.5">
-            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Nile University
             </span>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">
               Found<span className="text-brand-teal">IT</span>
             </h1>
-            <p className="text-sm text-slate-400">Lost and found for Nile University students.</p>
+            <p className="text-sm text-slate-400">Reuniting campus, one item at a time.</p>
           </div>
         </div>
-        <div className="rounded-xl border border-white/10 bg-slate-900 p-6">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
           {mode === "login" ? (
             <LoginForm onSwitchToSignup={() => setMode("signup")} onForgotPassword={() => setMode("forgot")} />
           ) : mode === "forgot" ? (
