@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Users, PackageCheck, HandHeart, Coins, Wallet2 } from "lucide-react";
 import { api } from "../../lib/api";
 
-const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20";
+const cardClass = "rounded-xl border border-white/10 bg-slate-900 p-4";
 
 function monthLabel(ym) {
   if (!ym) return "";
@@ -71,7 +71,7 @@ function BarChart({ months, series, height = 140 }) {
           );
         })}
       </svg>
-      <div className="mt-1 flex text-[9px] text-slate-500">
+      <div className="mt-1 flex text-xs text-slate-500">
         {months.map((m) => (
           <span key={m} style={{ width: `${barGroupWidth}%` }} className="truncate text-center">
             {monthLabel(m)}

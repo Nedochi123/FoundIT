@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Camera, Sparkles, TriangleAlert } from "lucide-react";
+import { Search, Camera, ChevronRight, PackageCheck, TriangleAlert } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../lib/api";
 import ReunionCard from "./gallery/ReunionCard";
@@ -8,6 +8,13 @@ import { TagsAlertCard, TagsPromoCard } from "./tags/HomeTagsCards";
 import HomeBoostedCards from "./boost/HomeBoostedCards";
 import HomeUrgentCards from "./urgent/HomeUrgentCards";
 import HomeSupportCard from "./support/HomeSupportCard";
+
+// The three things a student comes here to do. `key` is also the screen it opens.
+const ACTIONS = [
+  { key: "lost", title: "I lost something", note: "Report it. We alert students and show you what has been found.", Icon: Search, tone: "text-red-400" },
+  { key: "found", title: "I found something", note: "Take a photo so its owner can find it.", Icon: Camera, tone: "text-emerald-400" },
+  { key: "urgent", title: "I urgently need something", note: "Offer a reward and alert every student now.", Icon: TriangleAlert, tone: "text-red-400" },
+];
 
 export default function Home({ onNavigate }) {
   const { user } = useAuth();
@@ -53,54 +60,29 @@ export default function Home({ onNavigate }) {
     <div className="flex flex-col gap-6">
       <div className="animate-fade-up" style={{ "--delay": "0s" }}>
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">Hi, {firstName}</h1>
-        <p className="mt-1 text-slate-300">What's going on today?</p>
+        <p className="mt-1 text-slate-300">Lost something? Found something? Start here.</p>
       </div>
 
       <HomeUrgentCards items={urgentLost} currentUserId={user?.id} onFound={() => onNavigate("found")} onSeeAll={seeLostBoard} />
 
       <TagsAlertCard tags={tags} onOpen={() => onNavigate("tags")} />
 
-      <button
-        onClick={() => onNavigate("lost")}
-        className="group flex animate-fade-up items-center gap-4 rounded-2xl border border-white/10 bg-slate-900/70 p-5 text-left shadow-lg shadow-black/20 backdrop-blur transition hover:-translate-y-0.5 hover:border-red-500/40 hover:bg-slate-900 hover:shadow-xl active:scale-[0.98]"
-        style={{ "--delay": "0.08s" }}
-      >
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-500/20 to-red-500/5 ring-1 ring-inset ring-red-500/20 transition group-hover:ring-red-500/40">
-          <Search className="h-6 w-6 text-red-400" strokeWidth={2.2} />
-        </div>
-        <div>
-          <p className="font-bold text-slate-50">I lost something</p>
-          <p className="text-sm text-slate-300">Report it — we'll notify everyone and show you what's been found.</p>
-        </div>
-      </button>
-
-      <button
-        onClick={() => onNavigate("urgent")}
-        className="group flex animate-fade-up items-center gap-4 rounded-2xl border border-red-500/40 bg-gradient-to-br from-red-500/10 to-slate-900/70 p-5 text-left shadow-lg shadow-black/20 backdrop-blur transition hover:-translate-y-0.5 hover:border-red-400/70 hover:shadow-xl active:scale-[0.98]"
-        style={{ "--delay": "0.12s" }}
-      >
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-500/25 to-red-500/5 ring-1 ring-inset ring-red-500/30">
-          <TriangleAlert className="h-6 w-6 text-red-400" strokeWidth={2.2} />
-        </div>
-        <div>
-          <p className="font-bold text-slate-50">I urgently need something</p>
-          <p className="text-sm text-slate-300">Offer a reward and alert everyone on FoundIT.</p>
-        </div>
-      </button>
-
-      <button
-        onClick={() => onNavigate("found")}
-        className="group flex animate-fade-up items-center gap-4 rounded-2xl border border-white/10 bg-slate-900/70 p-5 text-left shadow-lg shadow-black/20 backdrop-blur transition hover:-translate-y-0.5 hover:border-emerald-500/40 hover:bg-slate-900 hover:shadow-xl active:scale-[0.98]"
-        style={{ "--delay": "0.16s" }}
-      >
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 ring-1 ring-inset ring-emerald-500/20 transition group-hover:ring-emerald-500/40">
-          <Camera className="h-6 w-6 text-emerald-400" strokeWidth={2.2} />
-        </div>
-        <div>
-          <p className="font-bold text-slate-50">I found something</p>
-          <p className="text-sm text-slate-300">Take a photo and help it get back to its owner.</p>
-        </div>
-      </button>
+      <div className="animate-fade-up divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-slate-900" style={{ "--delay": "0.08s" }}>
+        {ACTIONS.map(({ key, title, note, Icon, tone }) => (
+          <button
+            key={key}
+            onClick={() => onNavigate(key)}
+            className="flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-white/[0.04] active:bg-white/[0.07]"
+          >
+            <Icon className={`h-5 w-5 shrink-0 ${tone}`} strokeWidth={2.2} aria-hidden="true" />
+            <span className="min-w-0 flex-1">
+              <span className="block font-bold text-slate-50">{title}</span>
+              <span className="block text-sm text-slate-300">{note}</span>
+            </span>
+            <ChevronRight className="h-5 w-5 shrink-0 text-slate-500" aria-hidden="true" />
+          </button>
+        ))}
+      </div>
 
       <HomeSupportCard unread={supportUnread} onOpen={() => onNavigate("support")} />
 
@@ -117,7 +99,7 @@ export default function Home({ onNavigate }) {
       {reunions.length > 0 && (
         <div className="animate-fade-up" style={{ "--delay": "0.24s" }}>
           <div className="mb-2.5 flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+            <PackageCheck className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
             <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Recently reunited</p>
           </div>
           <div className="grid grid-cols-2 gap-3">

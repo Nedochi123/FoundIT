@@ -98,7 +98,7 @@ export default function ConversationView({ conversationId, onBack }) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] flex-col">
+    <div className="flex h-chat flex-col">
       <div className="mb-3 flex items-center justify-between">
         <button
           onClick={onBack}
@@ -119,7 +119,7 @@ export default function ConversationView({ conversationId, onBack }) {
 
       {showConfetti && <Confetti />}
 
-      <p className="mb-2 text-[11px] text-slate-500">Private between you two. For everyone's safety, the FoundIT administrator can review chats.</p>
+      <p className="mb-2 text-xs text-slate-500">Private between you two. For everyone's safety, the FoundIT administrator can review chats.</p>
 
       {justConfirmed ? (
         <div className="mb-3 flex items-center gap-3 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3">
@@ -139,8 +139,9 @@ export default function ConversationView({ conversationId, onBack }) {
             value={thankYouNote}
             onChange={(e) => setThankYouNote(e.target.value)}
             maxLength={280}
+            aria-label="Thank-you note (optional)"
             placeholder="Leave a thank-you note for them (optional)"
-            className="w-full rounded-lg border border-amber-400/20 bg-slate-900/50 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-amber-400/40"
+            className="w-full rounded-lg border border-amber-400/20 bg-slate-900 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-amber-400/40"
           />
           {urgentOffer && (
             <label
@@ -170,7 +171,7 @@ export default function ConversationView({ conversationId, onBack }) {
                 Say thanks with a reward? <span className="font-normal text-slate-400">(optional)</span>
               </p>
               <RewardChips options={rewardOptions} value={rewardChoice} onChange={setRewardChoice} />
-              <p className="text-[11px] text-slate-400">
+              <p className="text-xs text-slate-400">
                 A voluntary thank-you. You would pay the finder yourself, directly; FoundIT never handles the money.
               </p>
               <RewardsGuideLink>How rewards work</RewardsGuideLink>
@@ -179,7 +180,7 @@ export default function ConversationView({ conversationId, onBack }) {
           <button
             onClick={handleConfirmReturn}
             disabled={confirming}
-            className="flex items-center justify-center gap-1.5 self-end rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-2 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95 disabled:opacity-60"
+            className="flex items-center justify-center gap-1.5 self-end rounded-lg bg-amber-400 px-3 py-2 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95 disabled:opacity-60"
           >
             <Coins className="h-3.5 w-3.5" />
             {confirming
@@ -208,12 +209,12 @@ export default function ConversationView({ conversationId, onBack }) {
           return (
             <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${
-                  mine ? "bg-brand-gradient text-white shadow-md shadow-brand-blue/20" : "bg-slate-800 text-slate-100 border border-slate-700"
+                className={`max-w-[75%] rounded-xl px-3.5 py-2 text-sm ${
+                  mine ? "bg-brand-btn text-white" : "bg-slate-800 text-slate-100 border border-slate-700"
                 }`}
               >
                 <p>{m.body}</p>
-                <p className={`mt-0.5 text-[10px] ${mine ? "text-cyan-100/80" : "text-slate-400"}`}>
+                <p className={`mt-0.5 text-xs ${mine ? "text-cyan-100/80" : "text-slate-400"}`}>
                   {formatTime(m.createdAt)}
                 </p>
               </div>
@@ -230,13 +231,15 @@ export default function ConversationView({ conversationId, onBack }) {
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
+          aria-label="Message"
           placeholder="Type a message..."
-          className="flex-1 rounded-full border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal"
+          className="flex-1 rounded-full border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal"
         />
         <button
           type="submit"
+          aria-label="Send message"
           disabled={sending || !draft.trim()}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 disabled:opacity-50"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-btn text-white transition hover:brightness-110 disabled:opacity-50"
         >
           <Send className="h-4 w-4" />
         </button>

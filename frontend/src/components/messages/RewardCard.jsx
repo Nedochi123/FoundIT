@@ -11,7 +11,7 @@ export function RewardChips({ options, value, onChange, allowNone = true }) {
     `min-h-9 rounded-full border px-3 text-xs font-semibold transition ${
       selected
         ? "border-amber-400 bg-amber-400 text-amber-950"
-        : "border-amber-400/30 bg-slate-900/50 text-slate-100 hover:border-amber-400/60"
+        : "border-amber-400/30 bg-slate-900 text-slate-100 hover:border-amber-400/60"
     }`;
   return (
     <div className="flex flex-wrap gap-1.5" role="group" aria-label="Reward amount">
@@ -57,7 +57,7 @@ export default function RewardCard({ conversationId, reward, canOffer, options, 
 
   const box = "mb-3 flex flex-col gap-2 rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-4 py-3";
   const button =
-    "self-end rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-2 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95 disabled:opacity-60";
+    "self-end rounded-lg bg-amber-400 px-3 py-2 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95 disabled:opacity-60";
 
   if (!reward && canOffer) {
     return (
@@ -75,7 +75,7 @@ export default function RewardCard({ conversationId, reward, canOffer, options, 
           </button>
         )}
         {error && <p className="text-xs text-red-400">{error}</p>}
-        <p className="flex items-start gap-1.5 text-[11px] text-slate-400">
+        <p className="flex items-start gap-1.5 text-xs text-slate-400">
           <ShieldAlert className="mt-px h-3.5 w-3.5 shrink-0" /> {SAFETY}
         </p>
         <RewardsGuideLink>How rewards work</RewardsGuideLink>
@@ -120,7 +120,7 @@ export default function RewardCard({ conversationId, reward, canOffer, options, 
       )}
       {error && <p className="text-xs text-red-400">{error}</p>}
       {reward.status !== "received" && (
-        <p className="flex items-start gap-1.5 text-[11px] text-slate-400">
+        <p className="flex items-start gap-1.5 text-xs text-slate-400">
           <ShieldAlert className="mt-px h-3.5 w-3.5 shrink-0" /> {SAFETY}
         </p>
       )}

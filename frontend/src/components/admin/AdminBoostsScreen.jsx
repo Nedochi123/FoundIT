@@ -4,9 +4,9 @@ import { api } from "../../lib/api";
 import { formatNaira } from "../../lib/rewards";
 import { timeAgo } from "../../lib/boosts";
 
-const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
+const cardClass = "rounded-xl border border-white/10 bg-slate-900 p-4";
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-amber-400/50";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-amber-400/50";
 const labelClass = "mb-1 block text-sm font-medium text-slate-300";
 
 const lengthLabel = (hours) => (hours === 24 ? "24 hours" : `${hours / 24} days`);
@@ -20,7 +20,7 @@ function RequestCard({ boost, busy, onApprove, onReject }) {
       <div className="flex items-start justify-between gap-3">
         <p className="min-w-0 break-words text-sm font-semibold text-slate-50">{boost.itemDescription}</p>
         <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
             claimed ? "bg-amber-500/15 text-amber-300 ring-1 ring-inset ring-amber-400/40" : "bg-slate-700 text-slate-300"
           }`}
         >
@@ -29,19 +29,19 @@ function RequestCard({ boost, busy, onApprove, onReject }) {
       </div>
       <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
         <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Amount</dt>
+          <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Amount</dt>
           <dd className="font-extrabold text-amber-300">{formatNaira(boost.amount)} <span className="font-normal text-slate-400">· {lengthLabel(boost.hours)}</span></dd>
         </div>
         <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Reference</dt>
+          <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Reference</dt>
           <dd className="font-mono font-bold tracking-wider text-slate-50">{boost.reference}</dd>
         </div>
         <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Student</dt>
+          <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Student</dt>
           <dd className="text-slate-100">{boost.requester.name}</dd>
         </div>
         <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{claimed ? "Said paid" : "Started"}</dt>
+          <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">{claimed ? "Said paid" : "Started"}</dt>
           <dd className="text-slate-100">{timeAgo(claimed ? boost.paidClaimedAt : boost.createdAt)}</dd>
         </div>
       </dl>
@@ -149,9 +149,9 @@ export default function AdminBoostsScreen() {
           ["All time", formatNaira(data.revenue.total)],
           ["Boosts sold", data.revenue.count],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-lg bg-slate-800/70 py-2.5">
+          <div key={label} className="rounded-lg bg-slate-800 py-2.5">
             <p className="text-base font-extrabold text-slate-50">{value}</p>
-            <p className="text-[11px] text-slate-400">{label}</p>
+            <p className="text-xs text-slate-400">{label}</p>
           </div>
         ))}
       </div>
@@ -175,7 +175,7 @@ export default function AdminBoostsScreen() {
           <label htmlFor="boost-account-name" className={labelClass}>Name on the account</label>
           <input id="boost-account-name" value={form.accountName} onChange={(e) => setForm({ ...form, accountName: e.target.value })} className={inputClass} />
         </div>
-        <button type="submit" disabled={saving} className="min-h-11 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-4 text-sm font-bold text-amber-950 disabled:opacity-60">
+        <button type="submit" disabled={saving} className="min-h-11 rounded-lg bg-amber-400 px-4 text-sm font-bold text-amber-950 disabled:opacity-60">
           {saving ? "Saving..." : data.settings ? "Save changes" : "Save and switch boosts on"}
         </button>
         {saved && <p role="status" className="text-sm text-emerald-300">Saved.</p>}
@@ -207,13 +207,13 @@ export default function AdminBoostsScreen() {
           <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Recent</p>
           <div className="flex flex-col gap-2">
             {data.recent.map((b) => (
-              <div key={b.id} className="flex items-center justify-between gap-3 rounded-lg bg-slate-800/60 px-3 py-2.5">
+              <div key={b.id} className="flex items-center justify-between gap-3 rounded-lg bg-slate-800 px-3 py-2.5">
                 <div className="min-w-0">
                   <p className="truncate text-sm text-slate-100">{b.itemDescription}</p>
                   <p className="text-xs text-slate-400">{b.requester.name} · {formatNaira(b.amount)} · {lengthLabel(b.hours)}</p>
                 </div>
                 <span
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
                     b.state === "live" ? "bg-emerald-500/15 text-emerald-300" : b.state === "ended" ? "bg-slate-700 text-slate-300" : "bg-red-500/15 text-red-300"
                   }`}
                 >

@@ -49,7 +49,7 @@ export default function ConversationList({ onOpenConversation, onUnreadChange })
         <button
           key={c.id}
           onClick={() => onOpenConversation(c.id)}
-          className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/85 p-3 text-left shadow-lg shadow-black/20 transition hover:border-brand-teal/40"
+          className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900 p-3 text-left transition hover:border-brand-teal/40"
         >
           <img
             src={resolvePhotoUrl(c.itemPhotoUrl)}
@@ -66,7 +66,7 @@ export default function ConversationList({ onOpenConversation, onUnreadChange })
             <p className="truncate text-sm text-slate-300">{c.lastMessage || "No messages yet"}</p>
           </div>
           {c.unreadCount > 0 && (
-            <span className="flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-brand-gradient px-1.5 text-[11px] font-bold text-white">
+            <span className="flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-brand-btn px-1.5 text-xs font-bold text-white">
               {c.unreadCount}
             </span>
           )}

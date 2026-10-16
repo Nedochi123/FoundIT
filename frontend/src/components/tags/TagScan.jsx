@@ -5,9 +5,9 @@ import TagChat from "./TagChat";
 import Logo from "../theme/Logo";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
-const card = "rounded-2xl border border-white/10 bg-slate-900/70 p-5 shadow-lg shadow-black/20 backdrop-blur";
+const card = "rounded-xl border border-white/10 bg-slate-900 p-5";
 
 const POLL_MS = 6000;
 const storageKey = (code) => `foundit_tagchat_${String(code).toUpperCase()}`;
@@ -31,11 +31,10 @@ function saveToken(code, token) {
 
 function Shell({ children }) {
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="bg-glow" aria-hidden="true" />
+    <div className="min-h-app px-4 py-8">
       <div className="mx-auto w-full max-w-md">
         <div className="mb-6 flex items-center gap-2">
-          <Logo className="h-8 w-8 rounded-[9px] shadow-md shadow-black/40" />
+          <Logo className="h-8 w-8 rounded-[9px]" />
           <span className="text-lg font-extrabold tracking-tight text-slate-50">
             Found<span className="text-brand-teal">IT</span>
           </span>
@@ -156,7 +155,7 @@ export default function TagScan({ code }) {
       <Shell>
         <div className={card}>
           <p className="text-sm text-slate-200">{loadError}</p>
-          <button onClick={() => window.location.reload()} className="mt-3 rounded-lg bg-brand-gradient px-4 py-2 text-sm font-bold text-white">
+          <button onClick={() => window.location.reload()} className="mt-3 rounded-lg bg-brand-btn px-4 py-2 text-sm font-bold text-white">
             Try again
           </button>
         </div>
@@ -184,7 +183,7 @@ export default function TagScan({ code }) {
           </p>
           <a
             href={`/?claim=${encodeURIComponent(code)}`}
-            className="mt-4 inline-block rounded-lg bg-brand-gradient px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-brand-blue/20"
+            className="mt-4 inline-block rounded-lg bg-brand-btn px-4 py-2.5 text-sm font-bold text-white"
           >
             Activate this tag
           </a>
@@ -269,7 +268,7 @@ export default function TagScan({ code }) {
             <PackageCheck className="h-6 w-6 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-lg font-extrabold leading-tight text-slate-50">You found something that belongs to someone!</h1>
+            <h1 className="text-lg font-extrabold leading-tight text-slate-50">You found something that belongs to someone.</h1>
             {info.label && <p className="mt-1 text-sm text-slate-300">Item: <span className="font-semibold text-slate-100">{info.label}</span></p>}
           </div>
         </div>
@@ -293,7 +292,7 @@ export default function TagScan({ code }) {
             className="absolute -left-[9999px] h-0 w-0 opacity-0"
           />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
-          <button type="submit" disabled={sending || !message.trim()} className="rounded-lg bg-brand-gradient px-4 py-3 text-sm font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 disabled:opacity-50">
+          <button type="submit" disabled={sending || !message.trim()} className="rounded-lg bg-brand-btn px-4 py-3 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50">
             {sending ? "Sending..." : "Message the owner"}
           </button>
           <p className="text-xs text-slate-400">

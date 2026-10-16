@@ -81,7 +81,7 @@ router.get("/plans", (req, res) => {
 });
 
 const createSchema = z.object({
-  lostItemId: z.string().min(1, "Choose the post to boost."),
+  lostItemId: z.string().min(1, "Choose the post to boost.").max(64),
   plan: z.enum(BOOST_PLANS.map((p) => p.id), { message: "Choose how long to boost it for." }),
 });
 

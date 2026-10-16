@@ -10,7 +10,7 @@ export default function ItemCard({ item, currentUserId, onMessage, onResolve, me
   const CategoryIcon = item.category ? getCategoryIcon(item.category) : null;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/85 shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:border-white/20 hover:shadow-xl">
+    <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900 transition hover:-translate-y-0.5 hover:border-white/20">
       <div className="relative">
         <img
           src={resolvePhotoUrl(item.photoUrl)}
@@ -20,7 +20,7 @@ export default function ItemCard({ item, currentUserId, onMessage, onResolve, me
           decoding="async"
         />
         {CategoryIcon && (
-          <span className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-slate-950/70 text-slate-100 backdrop-blur">
+          <span className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-slate-950/70 text-slate-100">
             <CategoryIcon className="h-3.5 w-3.5" />
           </span>
         )}
@@ -50,7 +50,7 @@ export default function ItemCard({ item, currentUserId, onMessage, onResolve, me
             <button
               onClick={() => onMessage(item.id)}
               disabled={messaging}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-gradient py-2 text-xs font-semibold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-btn py-2 text-xs font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
             >
               <MessageCircle className="h-3.5 w-3.5" /> Message
             </button>

@@ -4,7 +4,7 @@ import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import PasswordInput from "../auth/PasswordInput";
 
-const cardClass = "rounded-xl border border-red-900/40 bg-red-950/20 p-4 shadow-lg shadow-black/20";
+const cardClass = "rounded-xl border border-red-900/40 bg-red-950/20 p-4";
 
 export default function DeleteAccountForm() {
   const { logout } = useAuth();

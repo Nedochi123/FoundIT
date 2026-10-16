@@ -35,7 +35,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
+        sans: ["'Public Sans'", "system-ui", "sans-serif"],
+        // item codes, tag codes and times: the printed-label feel of a lost-property tag
+        mono: ["'IBM Plex Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       colors: {
         white,
@@ -46,6 +48,7 @@ export default {
         cyan: textAwareShades("cyan", [100, 200]),
         blue: textAwareShades("blue", [300]),
         brand: {
+          btn: rgbVar("brand-btn"), // the flat fill of every button (white text on it always reads at 4.5:1)
           teal: rgbVar("brand-teal"),
           blue: rgbVar("brand-blue"),
           solid: rgbVar("brand-solid"),
@@ -57,7 +60,8 @@ export default {
         },
       },
       backgroundImage: {
-        "brand-gradient": "linear-gradient(135deg, var(--brand-a) 0%, var(--brand-b) 100%)",
+        // only the logo tile (artwork) uses a gradient; buttons and cards are flat
+        "logo-gradient": "linear-gradient(135deg, var(--brand-a) 0%, var(--brand-b) 100%)",
       },
     },
   },

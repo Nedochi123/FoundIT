@@ -47,7 +47,8 @@ function makeUser(name) {
   return { id, name, email, token: signAccessToken({ id, email, name }) };
 }
 function subscribe(user, { notifyLost = 1 } = {}) {
-  const endpoint = `https://push.example/${user.id}`;
+  // a real push service's address: the server refuses to send to anywhere else (utils/pushEndpoint.js)
+  const endpoint = `https://fcm.googleapis.com/fcm/send/${user.id}`;
   db.prepare("INSERT INTO push_subscriptions (id, user_id, endpoint, p256dh, auth, notify_lost) VALUES (?, ?, ?, 'k', 'a', ?)").run(
     uid(),
     user.id,

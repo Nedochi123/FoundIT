@@ -3,6 +3,10 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 import { geoHeaderValue } from "./geo";
+import { createRefreshGate } from "./refreshGate";
+import { RENEW_BEFORE_SECONDS, secondsLeft } from "./tokenExpiry";
+
+const refreshOnce = createRefreshGate();
 
 const TOKEN_STORAGE_KEY = "foundit_auth_tokens";
 // A cached copy of the last-known user, purely for optimistic startup
@@ -76,7 +80,17 @@ const NO_REFRESH_RETRY_PATHS = new Set([
 ]);
 
 async function apiRequest(path, options = {}, _isRetry = false) {
-  const tokens = getStoredTokens();
+  let tokens = getStoredTokens();
+
+  // Renew a session that is about to run out BEFORE using it, so a request is never sent with an expired token: the server
+  // would refuse it and the browser would print a red "Failed to load resource" line for every one (see lib/tokenExpiry.js).
+  if (!_isRetry && tokens?.accessToken && tokens?.refreshToken && !NO_REFRESH_RETRY_PATHS.has(path) && secondsLeft(tokens.accessToken) < RENEW_BEFORE_SECONDS) {
+    await refreshOnce(() =>
+      apiRequest("/api/auth/refresh", { method: "POST", body: JSON.stringify({ refreshToken: tokens.refreshToken }) }, true)
+    ).catch(() => null); // if it fails, the request below is sent anyway and the normal "expired" handling takes over
+    tokens = getStoredTokens() ?? tokens;
+  }
+
   const isFormData = options.body instanceof FormData;
 
   const headers = {
@@ -107,16 +121,21 @@ async function apiRequest(path, options = {}, _isRetry = false) {
   }
 
   if (res.status === 401 && !_isRetry && !NO_REFRESH_RETRY_PATHS.has(path)) {
-    const refreshed = await apiRequest(
-      "/api/auth/refresh",
-      { method: "POST", body: JSON.stringify({ refreshToken: tokens?.refreshToken }) },
-      true
+    // every request that fails at the same moment shares ONE renewal (the refresh token works only once; see lib/refreshGate.js)
+    const refreshed = await refreshOnce(() =>
+      apiRequest("/api/auth/refresh", { method: "POST", body: JSON.stringify({ refreshToken: tokens?.refreshToken }) }, true)
     ).catch(() => null);
 
     if (refreshed) {
       return apiRequest(path, options, true);
     }
-    clearStoredTokens();
+    // Signed out only if nothing newer was stored while this request was failing: another request may already have
+    // renewed the session, and wiping that would log the student out for nothing.
+    if (getStoredTokens()?.refreshToken === tokens?.refreshToken) {
+      clearStoredTokens();
+    } else {
+      return apiRequest(path, options, true);
+    }
   }
 
   if (!res.ok) {

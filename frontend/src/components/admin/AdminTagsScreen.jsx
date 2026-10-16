@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import { Printer, RefreshCcw } from "lucide-react";
 import { api } from "../../lib/api";
 
-const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
+const cardClass = "rounded-xl border border-white/10 bg-slate-900 p-4";
 const pretty = (c) => `${c.slice(0, 4)}-${c.slice(4)}`;
 
 // Print rules: when printing, hide the whole app and show only the sheet of stickers.
@@ -88,9 +88,9 @@ export default function AdminTagsScreen() {
               ["Active", summary.counts.active],
               ["Paused", summary.counts.paused],
             ].map(([label, n]) => (
-              <div key={label} className="rounded-lg bg-slate-800/70 py-2">
+              <div key={label} className="rounded-lg bg-slate-800 py-2">
                 <p className="text-lg font-extrabold text-slate-50">{n}</p>
-                <p className="text-[11px] text-slate-400">{label}</p>
+                <p className="text-xs text-slate-400">{label}</p>
               </div>
             ))}
           </div>
@@ -106,10 +106,10 @@ export default function AdminTagsScreen() {
               max={200}
               value={count}
               onChange={(e) => setCount(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+              className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
             />
           </div>
-          <button type="submit" disabled={busy} className="rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-4 py-2.5 text-sm font-bold text-amber-950 disabled:opacity-60">
+          <button type="submit" disabled={busy} className="rounded-lg bg-amber-400 px-4 py-2.5 text-sm font-bold text-amber-950 disabled:opacity-60">
             {busy ? "Making..." : "Make tags"}
           </button>
         </form>
@@ -134,7 +134,7 @@ export default function AdminTagsScreen() {
           <button
             type="button"
             onClick={() => window.print()}
-            className="flex items-center justify-center gap-2 rounded-lg bg-brand-gradient px-4 py-3 text-sm font-bold text-white shadow-md shadow-brand-blue/20"
+            className="flex items-center justify-center gap-2 rounded-lg bg-brand-btn px-4 py-3 text-sm font-bold text-white"
           >
             <Printer className="h-4 w-4" /> Print {codes.length} stickers
           </button>

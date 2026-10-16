@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Gift, X, ShieldCheck, CircleHelp, Sparkles } from "lucide-react";
+import { Gift, X, ShieldCheck, CircleHelp, Info } from "lucide-react";
 import { REWARD_AMOUNTS, formatNaira } from "../../lib/rewards";
 import NotificationsStep from "../notifications/NotificationsStep";
 
@@ -66,16 +66,16 @@ export default function RewardsGuide({ open, onClose, startTab = "lost" }) {
   // and clip a full-screen sheet drawn inside it.
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" role="presentation">
-      <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 bg-black/70" />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="rewards-guide-title"
-        className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-y-auto rounded-t-3xl border border-white/10 bg-slate-900 p-5 shadow-2xl sm:rounded-3xl"
+        className="relative flex max-h-sheet w-full max-w-md flex-col overflow-y-auto rounded-t-2xl border border-white/10 bg-slate-900 p-5 sm:rounded-xl"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/25 to-amber-400/5 ring-1 ring-inset ring-amber-400/30">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400/25 ring-1 ring-inset ring-amber-400/30">
               <Gift className="h-6 w-6 text-amber-300" />
             </div>
             <div>
@@ -97,7 +97,7 @@ export default function RewardsGuide({ open, onClose, startTab = "lost" }) {
 
         <NotificationsStep />
 
-        <div className="mt-4 grid grid-cols-2 gap-1.5 rounded-xl bg-slate-800/70 p-1" role="tablist" aria-label="Choose your situation">
+        <div className="mt-4 grid grid-cols-2 gap-1.5 rounded-xl bg-slate-800 p-1" role="tablist" aria-label="Choose your situation">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -128,9 +128,9 @@ export default function RewardsGuide({ open, onClose, startTab = "lost" }) {
           ))}
         </ol>
 
-        <div className="mt-4 rounded-xl border border-white/10 bg-slate-800/50 p-3 text-xs text-slate-300">
+        <div className="mt-4 rounded-xl border border-white/10 bg-slate-800 p-3 text-xs text-slate-300">
           <p className="flex items-center gap-1.5 font-semibold text-slate-100">
-            <Sparkles className="h-3.5 w-3.5 text-amber-300" /> Good to know
+            <Info className="h-3.5 w-3.5 text-amber-300" aria-hidden="true" /> Good to know
           </p>
           <ul className="mt-1.5 list-disc space-y-1 pl-4">
             <li>Only the person who got their item back can give a reward, and only after they confirm the return.</li>
@@ -153,7 +153,7 @@ export default function RewardsGuide({ open, onClose, startTab = "lost" }) {
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 min-h-11 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-4 text-sm font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98]"
+          className="mt-4 min-h-11 rounded-xl bg-amber-400 px-4 text-sm font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98]"
         >
           Got it
         </button>
@@ -207,7 +207,7 @@ export function RewardsIntroCard() {
   }
 
   return (
-    <div className="relative animate-fade-up rounded-2xl border border-amber-400/25 bg-gradient-to-br from-amber-400/10 to-transparent p-4" style={{ "--delay": "0.2s" }}>
+    <div className="relative animate-fade-up rounded-xl border border-amber-400/25 bg-slate-900 p-4" style={{ "--delay": "0.2s" }}>
       <button
         type="button"
         onClick={dismiss}
@@ -230,7 +230,7 @@ export function RewardsIntroCard() {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="mt-2.5 min-h-10 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3.5 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95"
+            className="mt-2.5 min-h-10 rounded-lg bg-amber-400 px-3.5 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-95"
           >
             See how it works
           </button>

@@ -4,9 +4,9 @@ import { api } from "../../lib/api";
 import TagChat from "./TagChat";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
-const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
+const cardClass = "rounded-xl border border-white/10 bg-slate-900 p-4";
 
 const POLL_MS = 6000;
 const prettyCode = (c) => (c && c.length === 8 ? `${c.slice(0, 4)}-${c.slice(4)}` : c);
@@ -72,7 +72,7 @@ function TagCard({ tag, onChanged, onOpenChat }) {
               }}
             >
               <input aria-label="What is this tag on?" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={60} className={inputClass} placeholder="e.g. Blue backpack" />
-              <button type="submit" disabled={busy} className="rounded-lg bg-brand-gradient px-3 text-xs font-bold text-white">Save</button>
+              <button type="submit" disabled={busy} className="rounded-lg bg-brand-btn px-3 text-xs font-bold text-white">Save</button>
             </form>
           ) : (
             <p className="truncate font-bold text-slate-50">{tag.label || "Unnamed tag"}</p>
@@ -80,7 +80,7 @@ function TagCard({ tag, onChanged, onOpenChat }) {
           <p className="mt-0.5 font-mono text-xs text-slate-400">{prettyCode(tag.code)}</p>
         </div>
         <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
             paused ? "bg-slate-700 text-slate-300" : "bg-emerald-500/15 text-emerald-300 ring-1 ring-inset ring-emerald-500/30"
           }`}
         >
@@ -93,7 +93,7 @@ function TagCard({ tag, onChanged, onOpenChat }) {
           <MessageSquare className="h-3.5 w-3.5" />
           {open ? "Hide chats" : `Chats (${tag.chatCount})`}
           {!open && tag.unreadCount > 0 && (
-            <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{tag.unreadCount} new</span>
+            <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">{tag.unreadCount} new</span>
           )}
         </button>
         <button type="button" disabled={busy} onClick={() => setRenaming((r) => !r)} className="min-h-9 text-xs font-medium text-slate-300 underline underline-offset-2 hover:text-slate-50">
@@ -135,16 +135,16 @@ function TagCard({ tag, onChanged, onOpenChat }) {
                 key={t.id}
                 type="button"
                 onClick={() => onOpenChat(tag, t.id)}
-                className="flex w-full items-center gap-3 rounded-lg bg-slate-800/70 p-3 text-left transition hover:bg-slate-800"
+                className="flex w-full items-center gap-3 rounded-lg bg-slate-800 p-3 text-left transition hover:bg-slate-800"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <p className="truncate text-sm font-semibold text-slate-50">{t.finderName || "Someone who found it"}</p>
-                    <p className="shrink-0 text-[11px] text-slate-400">{timeAgo(t.lastMessageAt)}</p>
+                    <p className="shrink-0 text-xs text-slate-400">{timeAgo(t.lastMessageAt)}</p>
                   </div>
                   <p className="mt-0.5 truncate text-xs text-slate-300">{t.preview || "Shared their contact"}</p>
                 </div>
-                {t.unreadCount > 0 && <span className="shrink-0 rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{t.unreadCount} new</span>}
+                {t.unreadCount > 0 && <span className="shrink-0 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">{t.unreadCount} new</span>}
                 <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" />
               </button>
             ))
@@ -305,11 +305,11 @@ export default function TagsScreen({ onBack, initialCode = "" }) {
         <div>
           <label htmlFor="tag-label" className={labelClass}>What is it stuck on? <span className="font-normal text-slate-500">(optional)</span></label>
           <input id="tag-label" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={60} placeholder="e.g. Blue backpack" className={inputClass} />
-          <p className="mt-1 text-[11px] text-slate-500">Finders will see this, so don't put your name or number in it.</p>
+          <p className="mt-1 text-xs text-slate-500">Finders will see this, so don't put your name or number in it.</p>
         </div>
         {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
         {justActivated && <p role="status" className="text-sm text-emerald-300">Tag activated. Anyone who scans it can now reach you.</p>}
-        <button type="submit" disabled={claiming || !code.trim()} className="rounded-lg bg-brand-gradient px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 disabled:opacity-50">
+        <button type="submit" disabled={claiming || !code.trim()} className="rounded-lg bg-brand-btn px-4 py-2.5 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50">
           {claiming ? "Activating..." : "Activate tag"}
         </button>
       </form>

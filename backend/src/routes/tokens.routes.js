@@ -51,9 +51,14 @@ router.get("/cashout-requests", requireAuth, (req, res) => {
 
 const cashoutSchema = z.object({
   tier: z.union([z.literal(50), z.literal(100)]),
-  bankName: z.string().trim().min(1, "Bank name is required."),
-  accountNumber: z.string().trim().min(1, "Account number is required."),
-  accountName: z.string().trim().min(1, "Account name is required."),
+  // these are shown to the admin and kept for the payout, so they are checked like the boost payment details are
+  bankName: z.string().trim().min(1, "Bank name is required.").max(60, "That bank name is too long."),
+  accountNumber: z
+    .string()
+    .trim()
+    .transform((s) => s.replace(/\s+/g, ""))
+    .refine((s) => /^[0-9]{6,20}$/.test(s), "The account number should be digits only (usually 10)."),
+  accountName: z.string().trim().min(1, "Account name is required.").max(80, "That account name is too long."),
 });
 
 router.post("/cashout", requireAuth, (req, res, next) => {
@@ -77,10 +82,14 @@ router.post("/cashout", requireAuth, (req, res, next) => {
          VALUES (?, ?, ?, ?, ?, ?, ?)`
       ).run(cashoutId, req.user.id, tier, amountNaira, bankName, accountNumber, accountName);
 
-      db.prepare("UPDATE users SET tokens = tokens - ?, updated_at = datetime('now') WHERE id = ?").run(
-        tier,
-        req.user.id
-      );
+      // taking the tokens is what checks the balance (never below zero), inside the same step that saves the request, so two
+      // cash-outs started together can never both be paid from the same tokens
+      const taken = db
+        .prepare("UPDATE users SET tokens = tokens - ?, updated_at = datetime('now') WHERE id = ? AND tokens >= ?")
+        .run(tier, req.user.id, tier);
+      if (Number(taken.changes) !== 1) {
+        throw Object.assign(new Error(`You need at least ${tier} tokens to cash out this tier.`), { status: 400 }); // undoes the whole step
+      }
 
       const ledgerId = crypto.randomUUID();
       db.prepare(

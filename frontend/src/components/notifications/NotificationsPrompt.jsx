@@ -46,7 +46,7 @@ export default function NotificationsPrompt() {
   if (!visible) return null;
 
   return (
-    <div className="mb-4 rounded-xl border border-brand-teal/30 bg-brand-teal/10 p-4 backdrop-blur">
+    <div className="mb-4 rounded-xl border border-brand-teal/30 bg-brand-teal/10 p-4">
       <div className="flex items-start gap-3">
         <Bell className="mt-0.5 h-5 w-5 shrink-0 text-brand-teal" />
         <div className="flex-1">
@@ -72,15 +72,15 @@ export default function NotificationsPrompt() {
               Get notified the moment someone reports something lost or found on campus.
             </p>
           )}
-          <div className="mt-2 flex gap-3">
+          <div className="-ml-2 mt-1 flex gap-1">
             <button
               onClick={handleEnable}
               disabled={status === "requesting"}
-              className="text-xs font-semibold text-brand-teal hover:underline disabled:opacity-60"
+              className="px-2 text-xs font-semibold text-brand-teal hover:underline disabled:opacity-60"
             >
               {status === "requesting" ? "Requesting..." : "Enable"}
             </button>
-            <button onClick={dismiss} className="text-xs font-medium text-slate-300 hover:underline">
+            <button onClick={dismiss} className="px-2 text-xs font-medium text-slate-300 hover:underline">
               Not now
             </button>
           </div>

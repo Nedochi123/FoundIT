@@ -1,5 +1,6 @@
 const webpush = require("web-push");
 const db = require("../../db");
+const { validEndpoint } = require("./pushEndpoint");
 
 const configured = !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
 
@@ -12,7 +13,9 @@ if (configured) {
 }
 
 // `extra` carries optional display hints for the service worker (icon, urgent) next to the text.
-async function sendToSubscriptions(subs, title, body, url, extra = {}) {
+async function sendToSubscriptions(allSubs, title, body, url, extra = {}) {
+  // belt and braces: an address saved before the check existed is skipped, never requested (see utils/pushEndpoint.js)
+  const subs = allSubs.filter((sub) => validEndpoint(sub.endpoint));
   const payload = JSON.stringify({ title, body, url, ...extra });
 
   const results = await Promise.allSettled(

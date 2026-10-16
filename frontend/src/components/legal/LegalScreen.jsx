@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 
-const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
+const cardClass = "rounded-xl border border-white/10 bg-slate-900 p-4";
 
 function Section({ title, children }) {
   return (

@@ -1,10 +1,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { cspPlugin } from "./csp-plugin.js";
 
 export default defineConfig({
   plugins: [
     react(),
+    cspPlugin(), // the page's Content-Security-Policy (production builds)
     VitePWA({
       registerType: "autoUpdate",
       // injectManifest (not Pup Facts' generateSW) because Web Push
