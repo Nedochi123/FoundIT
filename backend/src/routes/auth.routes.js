@@ -69,11 +69,12 @@ function issueSession(res, user) {
 }
 
 const signupSchema = z.object({
-  name: z.string().trim().min(1, "Name is required."),
+  name: z.string().trim().min(1, "Name is required.").max(80, "Name is too long."),
   email: z
     .string()
     .trim()
     .toLowerCase()
+    .max(254, "Enter a valid email address.")
     .email("Enter a valid email address.")
     .refine(
       (email) => email.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`) || isAdminEmail(email),
@@ -133,7 +134,7 @@ router.post("/signup", authLimiter, async (req, res, next) => {
 });
 
 const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
+  email: z.string().trim().toLowerCase().max(254).email(),
   password: z.string().min(1).max(200),
 });
 

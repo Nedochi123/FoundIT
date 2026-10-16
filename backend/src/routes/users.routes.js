@@ -9,7 +9,7 @@ const { THEMES, DOODLES } = require("../utils/themes");
 const router = express.Router();
 
 const updateSchema = z.object({
-  name: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(1).max(80, "Name is too long.").optional(),
   idNumber: idNumberSchema,
   theme: z.enum(THEMES, { message: "Pick one of the available colors." }).optional(),
   doodle: z.enum(DOODLES, { message: "Pick one of the available doodle styles." }).optional(),

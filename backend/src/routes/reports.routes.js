@@ -8,7 +8,7 @@ const router = express.Router();
 
 const createSchema = z.object({
   targetType: z.enum(["found_item", "lost_item", "user"]),
-  targetId: z.string().min(1),
+  targetId: z.string().min(1).max(64),
   reason: z.enum(["inappropriate", "spam", "scam", "harassment", "other"]),
   note: z.string().trim().max(500).optional(),
 });

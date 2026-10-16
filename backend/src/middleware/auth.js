@@ -28,11 +28,12 @@ function requireAuth(req, res, next) {
     // revokes the deleting session's own tokens directly. The DB lookup
     // is a local SQLite query, not a network round trip, so this is cheap.
     const row = db.prepare("SELECT suspended_at, deleted_at FROM users WHERE id = ?").get(payload.sub);
-    if (row?.suspended_at) {
-      return res.status(403).json({ error: "This account has been suspended." });
-    }
-    if (row?.deleted_at) {
+    // no row at all means the account is gone from the database: a still-valid token must not keep working
+    if (!row || row.deleted_at) {
       return res.status(401).json({ error: "This account no longer exists." });
+    }
+    if (row.suspended_at) {
+      return res.status(403).json({ error: "This account has been suspended." });
     }
 
     req.user = { id: payload.sub, email: payload.email, name: payload.name };

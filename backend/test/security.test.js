@@ -108,7 +108,8 @@ test("a server error never shows its details", async () => {
   };
   let r;
   try {
-    r = await call(null, "GET", "/api/found-items");
+    // a public page that reads the database (the gallery now needs a sign-in, and that check also reads it)
+    r = await call(null, "GET", "/api/tags/public/ABCD1234");
   } finally {
     db.prepare = real;
   }

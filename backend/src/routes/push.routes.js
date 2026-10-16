@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const db = require("../../db");
 const { requireAuth } = require("../middleware/auth");
 const { vapidPublicKey } = require("../utils/push");
+const { cleanSubscription } = require("../utils/pushEndpoint");
 
 const router = express.Router();
 
@@ -11,10 +12,12 @@ router.get("/vapid-public-key", (req, res) => {
 });
 
 router.post("/subscribe", requireAuth, (req, res) => {
-  const { endpoint, keys } = req.body || {};
-  if (!endpoint || !keys?.p256dh || !keys?.auth) {
+  // only a real push service's address is accepted: the server sends requests to it later (see utils/pushEndpoint.js)
+  const subscription = cleanSubscription(req.body);
+  if (!subscription) {
     return res.status(400).json({ error: "A valid push subscription is required." });
   }
+  const { endpoint, keys } = subscription;
 
   // Upsert on endpoint: the same browser/device can legitimately
   // re-subscribe (reinstalled PWA, re-prompted, logged into a different

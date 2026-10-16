@@ -48,7 +48,8 @@ function serialize(row, posterName) {
   };
 }
 
-router.get("/", (req, res) => {
+// Only signed-in students may browse the gallery: it shows photos, places and the names of the students who posted.
+router.get("/", requireAuth, (req, res) => {
   // "reunited" is its own branch (not just another status value) since
   // it orders by return_confirmed_at, not created_at -- the Wall of
   // Reunions cares about when the return happened, not when the item

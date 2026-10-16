@@ -89,7 +89,7 @@ router.get("/public/:code", (req, res) => {
 });
 
 const startSchema = textSchema.extend({
-  website: z.string().optional(), // hidden field: only bots fill it in
+  website: z.string().max(200).optional(), // hidden field: only bots fill it in
 });
 
 // The finder's first message opens a chat and hands back a secret token; their browser keeps it and sends
@@ -263,7 +263,7 @@ router.get("/", requireAuth, (req, res) => {
 });
 
 const claimSchema = z.object({
-  code: z.string().trim().min(1, "Enter the code printed on the sticker."),
+  code: z.string().trim().min(1, "Enter the code printed on the sticker.").max(40),
   label: z.string().trim().max(60).optional(),
 });
 
