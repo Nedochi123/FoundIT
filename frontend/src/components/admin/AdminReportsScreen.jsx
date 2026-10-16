@@ -89,7 +89,7 @@ export default function AdminReportsScreen() {
       ) : (
         <div className="flex flex-col gap-3">
           {reports.map((r) => (
-            <div key={r.id} className="rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20">
+            <div key={r.id} className="rounded-xl border border-white/10 bg-slate-900 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-xs text-slate-400">
@@ -104,7 +104,7 @@ export default function AdminReportsScreen() {
 
               {r.note && <p className="mt-2 text-sm text-slate-300">"{r.note}"</p>}
 
-              <div className="mt-3 flex items-center gap-3 rounded-lg border border-white/5 bg-slate-800/40 p-2.5">
+              <div className="mt-3 flex items-center gap-3 rounded-lg border border-white/5 bg-slate-800 p-2.5">
                 {r.target.deleted ? (
                   <p className="text-sm text-slate-400">This {r.targetType === "user" ? "account" : "post"} no longer exists.</p>
                 ) : r.targetType === "user" ? (

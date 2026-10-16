@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api } from "../../lib/api";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-amber-400/60 focus:border-amber-400";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-amber-400/60 focus:border-amber-400";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 
 export default function CashoutForm({ tier, maxNaira, onCancel, onDone }) {
@@ -29,7 +29,7 @@ export default function CashoutForm({ tier, maxNaira, onCancel, onDone }) {
 
   if (success) {
     return (
-      <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-5 text-center">
+      <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 p-5 text-center">
         <p className="text-sm font-semibold text-slate-50">Request submitted</p>
         <p className="mt-1 text-xs text-slate-200">
           Your ₦{maxNaira.toLocaleString()} cash-out request is in — the team will pay it out to the account you
@@ -48,7 +48,7 @@ export default function CashoutForm({ tier, maxNaira, onCancel, onDone }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-2xl border border-amber-400/30 bg-slate-900/70 p-5"
+      className="flex flex-col gap-3 rounded-xl border border-amber-400/30 bg-slate-900 p-5"
     >
       <p className="text-sm font-semibold text-slate-50">
         Cash out {tier} tokens for ₦{maxNaira.toLocaleString()}
@@ -104,7 +104,7 @@ export default function CashoutForm({ tier, maxNaira, onCancel, onDone }) {
         <button
           type="submit"
           disabled={submitting}
-          className="flex-1 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 py-2.5 text-sm font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98] disabled:opacity-60"
+          className="flex-1 rounded-lg bg-amber-400 py-2.5 text-sm font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98] disabled:opacity-60"
         >
           {submitting ? "Submitting..." : "Confirm cash-out"}
         </button>

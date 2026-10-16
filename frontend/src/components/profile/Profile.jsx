@@ -31,9 +31,9 @@ function PreferenceToggle({ label, checked, onChange }) {
 }
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
-const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
+const cardClass = "rounded-xl border border-white/10 bg-slate-900 p-4";
 
 export default function Profile({ onNavigate }) {
   const { user, updateProfile, logout } = useAuth();
@@ -166,7 +166,7 @@ export default function Profile({ onNavigate }) {
               </div>
               <div className="flex flex-col gap-2">
                 {notes.map((n, i) => (
-                  <div key={i} className="rounded-lg bg-slate-800/50 px-3 py-2">
+                  <div key={i} className="rounded-lg bg-slate-800 px-3 py-2">
                     <p className="text-sm text-slate-200">"{n.note}"</p>
                     <p className="mt-0.5 text-xs text-slate-400">— {n.fromName}</p>
                   </div>
@@ -238,7 +238,7 @@ export default function Profile({ onNavigate }) {
             </p>
             <button
               onClick={handleEnableNotifications}
-              className="self-start rounded-lg bg-brand-gradient px-4 py-2 text-sm font-semibold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98]"
+              className="self-start rounded-lg bg-brand-btn px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98]"
             >
               Try again
             </button>
@@ -249,7 +249,7 @@ export default function Profile({ onNavigate }) {
           <button
             onClick={handleEnableNotifications}
             disabled={notifStatus === "requesting"}
-            className="rounded-lg bg-brand-gradient px-4 py-2 text-sm font-semibold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+            className="rounded-lg bg-brand-btn px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
           >
             {notifStatus === "requesting" ? "Requesting..." : "Enable notifications"}
           </button>
@@ -291,7 +291,7 @@ export default function Profile({ onNavigate }) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-lg bg-brand-gradient py-2.5 font-semibold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+          className="rounded-lg bg-brand-btn py-2.5 font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
         >
           {saving ? "Saving..." : "Save changes"}
         </button>

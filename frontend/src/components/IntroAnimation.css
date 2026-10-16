@@ -5,54 +5,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* A deep, layered dark background rather than a flat color — a soft
-     radial glow behind the action, fading out to near-black at the
-     edges, so the scene reads as a lit stage rather than a plain panel. */
-  background: radial-gradient(
-    circle at 50% 42%,
-    var(--intro-top, #1c2b52) 0%,
-    var(--intro-mid, #0d1326) 55%,
-    var(--intro-bottom, #05070d) 100%
-  );
+  /* One flat color from the student's chosen look: the runner and the logo are the scene, so the stage stays plain. */
+  background: var(--intro-bg, #0d1326);
   overflow: hidden;
   animation: intro-fade-out 0.5s ease 2.2s forwards;
-}
-
-/* A few faint drifting glow blobs for depth/texture behind the stage —
-   subtle, not a light show, just enough to keep the dark background
-   from feeling like a flat void. */
-.intro-overlay::before,
-.intro-overlay::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.35;
-  pointer-events: none;
-}
-.intro-overlay::before {
-  width: 320px;
-  height: 320px;
-  background: var(--intro-glow-one, #2f4bb3);
-  top: 8%;
-  left: 12%;
-  animation: intro-glow-drift 6s ease-in-out infinite alternate;
-}
-.intro-overlay::after {
-  width: 260px;
-  height: 260px;
-  background: var(--intro-glow-two, #4c3a8f);
-  bottom: 6%;
-  right: 10%;
-  animation: intro-glow-drift 7s ease-in-out infinite alternate-reverse;
-}
-@keyframes intro-glow-drift {
-  from {
-    transform: translate(0, 0) scale(1);
-  }
-  to {
-    transform: translate(20px, -16px) scale(1.15);
-  }
 }
 
 .intro-stage {
@@ -76,8 +32,7 @@
   justify-content: center;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 14px 38px rgb(var(--intro-shadow-one, 29 78 216) / 0.55),
-    0 0 60px rgb(var(--intro-shadow-two, 59 96 230) / 0.4);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
   animation: logo-bump 0.18s ease 0.4s 1;
 }
 
@@ -341,9 +296,7 @@
    figure with no movement at all, rather than a slowed-down version of
    the same motion sequence. */
 .intro-reduced .intro-character,
-.intro-reduced .intro-logo,
-.intro-reduced .intro-overlay::before,
-.intro-reduced .intro-overlay::after {
+.intro-reduced .intro-logo {
   animation: none !important;
 }
 .intro-reduced .intro-character {

@@ -7,22 +7,14 @@
 
 body {
   margin: 0;
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-family: "Public Sans", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* A calm, static version of the intro's navy palette, with a faint
-     brand-teal/blue tint low in the frame — the intro's animated glow
-     blobs are a one-time "hero" moment and would be visual noise on
-     every other screen, but a hint of the brand color keeps the app
-     from reading as generic dark-mode grey. */
-  /* Every color below comes from the student's chosen look (src/themes.css). Layers, top to bottom: two
-     soft colored lights, the page gradient, and an optional pattern (the camo theme's camouflage). The
-     Default look has no lights and no pattern, so it is just the gradient, as it always was. */
+  /* One flat page color from the student's chosen look (src/themes.css), with an optional pattern under it (the camo
+     look's camouflage shows through because that look's color is translucent). No gradients, lights or blurred shapes:
+     the app is a utility people use in a hurry, so the page stays out of the way. */
   background-color: rgb(var(--slate-950));
-  background-image: radial-gradient(ellipse 900px 500px at 100% 0%, var(--glow-two) 0%, transparent 55%),
-    radial-gradient(ellipse 900px 500px at 15% 115%, var(--glow-one) 0%, transparent 60%),
-    radial-gradient(circle at 50% -10%, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bottom) 100%),
-    var(--bg-pattern);
-  background-size: auto, auto, auto, var(--bg-pattern-size);
+  background-image: linear-gradient(var(--bg), var(--bg)), var(--bg-pattern);
+  background-size: auto, var(--bg-pattern-size);
   background-attachment: fixed;
   color: rgb(var(--body-text));
   min-height: 100vh;
@@ -32,42 +24,9 @@ h1, h2, h3 {
   letter-spacing: -0.01em;
 }
 
-/* Static glow blobs behind every screen — a quiet echo of the intro
-   animation's energy so the app never reads as flat, static dark-mode
-   grey. Deliberately NOT animated: a large filter:blur() element is
-   expensive to composite on mobile GPUs, and animating its transform
-   forces that blur to recompute every frame, forever, on every screen
-   — a real, continuous perf cost for a decoration nobody consciously
-   watches move. Fixed + very low opacity so it never competes with
-   foreground content either way. */
-.bg-glow {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-.bg-glow::before,
-.bg-glow::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.16;
-}
-.bg-glow::before {
-  width: 380px;
-  height: 380px;
-  background: var(--blob-one);
-  top: -6%;
-  right: -10%;
-}
-.bg-glow::after {
-  width: 420px;
-  height: 420px;
-  background: var(--blob-two);
-  bottom: -10%;
-  left: -12%;
+/* Codes and times are set like a printed label: a tag code (FND-7K3Q), a time, a quantity. */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 @keyframes fade-up {

@@ -14,7 +14,7 @@ export default function CategoryPicker({ value, onChange }) {
             className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
               active
                 ? "bg-brand-teal/15 text-brand-teal ring-1 ring-brand-teal/40"
-                : "bg-slate-800/60 text-slate-300 hover:bg-slate-800"
+                : "bg-slate-800 text-slate-300 hover:bg-slate-800"
             }`}
           >
             <Icon className="h-3.5 w-3.5" />

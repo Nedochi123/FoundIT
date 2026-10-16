@@ -17,7 +17,7 @@ export default function NavBar({ view, onNavigate, unreadCount = 0 }) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-bar-bottom/80 backdrop-blur-md"
+      className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-bar-bottom/80"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       <div className="mx-auto flex max-w-md gap-1 px-2 py-2">

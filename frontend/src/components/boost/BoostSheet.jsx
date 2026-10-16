@@ -6,11 +6,11 @@ import { formatNaira } from "../../lib/rewards";
 import { formatWhen, timeLeft } from "../../lib/boosts";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 
 function CopyRow({ label, value, copied, onCopy, mono }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-800/70 px-3 py-2.5">
+    <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-800 px-3 py-2.5">
       <div className="min-w-0">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
         <p className={`break-words font-bold text-slate-50 ${mono ? "font-mono tracking-wider" : ""}`}>{value}</p>
@@ -97,16 +97,16 @@ export default function BoostSheet({ item, onClose, onChanged }) {
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" role="presentation">
-      <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 bg-black/70" />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="boost-title"
-        className="relative grid max-h-[92vh] w-full max-w-md content-start gap-4 overflow-y-auto rounded-t-3xl border border-white/10 bg-slate-900 p-5 shadow-2xl sm:rounded-3xl"
+        className="relative grid max-h-[92vh] w-full max-w-md content-start gap-4 overflow-y-auto rounded-t-2xl border border-white/10 bg-slate-900 p-5 sm:rounded-xl"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/25 to-amber-400/5 ring-1 ring-inset ring-amber-400/30">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400/25 ring-1 ring-inset ring-amber-400/30">
               <Rocket className="h-6 w-6 text-amber-300" />
             </div>
             <div>
@@ -119,7 +119,7 @@ export default function BoostSheet({ item, onClose, onChanged }) {
           </button>
         </div>
 
-        <p className="line-clamp-2 rounded-lg bg-slate-800/60 px-3 py-2 text-sm text-slate-200">{item.description}</p>
+        <p className="line-clamp-2 rounded-lg bg-slate-800 px-3 py-2 text-sm text-slate-200">{item.description}</p>
 
         {loading ? (
           <p className="flex items-center gap-2 text-sm text-slate-300"><Loader2 className="h-4 w-4 animate-spin" /> Loading...</p>
@@ -159,7 +159,7 @@ export default function BoostSheet({ item, onClose, onChanged }) {
                   setBoost(created);
                 })
               }
-              className="min-h-12 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 px-4 text-sm font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98] disabled:opacity-60"
+              className="min-h-12 rounded-xl bg-amber-400 px-4 text-sm font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98] disabled:opacity-60"
             >
               {busy ? "One moment..." : chosen ? `Continue to pay ${formatNaira(chosen.amount)}` : "Continue"}
             </button>
@@ -179,7 +179,7 @@ export default function BoostSheet({ item, onClose, onChanged }) {
                 <CopyRow label="Put this in the transfer description" value={boost.reference} mono copied={copied === "ref"} onCopy={() => copy("ref", boost.reference)} />
               </div>
             ) : (
-              <p className="rounded-lg bg-slate-800/70 px-3 py-2 text-sm text-slate-300">The payment details aren't available right now. Please try again shortly.</p>
+              <p className="rounded-lg bg-slate-800 px-3 py-2 text-sm text-slate-300">The payment details aren't available right now. Please try again shortly.</p>
             )}
             <div>
               <label htmlFor="boost-note" className="mb-1 block text-sm font-medium text-slate-300">
@@ -191,7 +191,7 @@ export default function BoostSheet({ item, onClose, onChanged }) {
               type="button"
               disabled={busy}
               onClick={() => run(async () => setBoost((await api.claimBoostPaid(boost.id, note.trim())).boost))}
-              className="min-h-12 rounded-xl bg-brand-gradient px-4 text-sm font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+              className="min-h-12 rounded-xl bg-brand-btn px-4 text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
             >
               {busy ? "One moment..." : "I've paid"}
             </button>
@@ -216,7 +216,7 @@ export default function BoostSheet({ item, onClose, onChanged }) {
         ) : state === "payment_claimed" ? (
           <div className="flex flex-col items-center gap-2 py-3 text-center">
             <Clock className="h-9 w-9 text-amber-300" />
-            <p className="text-lg font-extrabold text-slate-50">Thanks! We're checking your payment</p>
+            <p className="text-lg font-extrabold text-slate-50">Thanks. We are checking your payment</p>
             <p className="text-sm text-slate-300">
               As soon as it's confirmed, your post goes to the top and everyone on campus gets an alert. You'll get a notification too.
             </p>

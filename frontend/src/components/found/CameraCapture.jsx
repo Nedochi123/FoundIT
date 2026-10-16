@@ -45,7 +45,7 @@ export default function CameraCapture({ onCapture }) {
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-[#ffffffF2] px-3 py-2 text-xs font-semibold text-[#334155] shadow"
+            className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-[#ffffffF2] px-3 py-2 text-xs font-semibold text-[#334155]"
           >
             <RotateCcw className="h-3.5 w-3.5" /> Retake
           </button>
@@ -55,7 +55,7 @@ export default function CameraCapture({ onCapture }) {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={processing}
-          className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-600 bg-slate-900/40 py-10 text-slate-300 transition hover:border-brand-teal hover:text-brand-teal disabled:opacity-60"
+          className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-600 bg-slate-900 py-10 text-slate-300 transition hover:border-brand-teal hover:text-brand-teal disabled:opacity-60"
         >
           <Camera className="h-8 w-8" strokeWidth={1.8} />
           <span className="font-medium">{processing ? "Processing..." : "Take Photo"}</span>

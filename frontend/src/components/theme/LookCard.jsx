@@ -43,7 +43,7 @@ export default function LookCard() {
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur">
+    <div className="rounded-xl border border-white/10 bg-slate-900 p-4">
       <div className="mb-3.5 flex items-center gap-2">
         <Palette className="h-4 w-4 text-brand-teal" />
         <p className="text-sm font-bold text-slate-50">App look</p>
@@ -55,7 +55,7 @@ export default function LookCard() {
           type="button"
           onClick={handleSave}
           disabled={!dirty || status === "saving"}
-          className="rounded-lg bg-brand-gradient px-4 py-2 text-sm font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+          className="rounded-lg bg-brand-btn px-4 py-2 text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
         >
           {status === "saving" ? "Saving..." : "Save my look"}
         </button>
@@ -74,7 +74,7 @@ export default function LookCard() {
       >
         <Play className="h-4 w-4" /> Watch the welcome animation in these colors
       </button>
-      {/* drawn at the top of the page: a card with a blur would otherwise trap a full-screen overlay */}
+      {/* drawn at the top of the page: a transformed or animated card would otherwise trap a full-screen overlay */}
       {playingIntro && createPortal(<IntroAnimation onDone={stopIntro} />, document.body)}
     </div>
   );

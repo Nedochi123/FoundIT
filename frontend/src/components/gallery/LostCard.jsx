@@ -20,12 +20,12 @@ export default function LostCard({ item, currentUserId, boostEnabled, onBoost, o
 
   return (
     <div
-      className={`rounded-xl border p-3.5 shadow-lg shadow-black/20 transition ${
+      className={`rounded-xl border p-3.5 transition ${
         urgent
-          ? "border-red-500/60 bg-gradient-to-br from-red-500/15 to-transparent"
+          ? "border-red-500/60 bg-slate-900"
           : boosted
-            ? "border-amber-400/50 bg-gradient-to-br from-amber-400/10 to-transparent"
-            : "border-white/10 bg-slate-900/85"
+            ? "border-amber-400/50 bg-slate-900"
+            : "border-white/10 bg-slate-900"
       }`}
     >
       {urgent && (
@@ -73,7 +73,7 @@ export default function LostCard({ item, currentUserId, boostEnabled, onBoost, o
               <button
                 type="button"
                 onClick={() => onBoost(item)}
-                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98]"
+                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-amber-400 px-3 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98]"
               >
                 <Rocket className="h-4 w-4" /> Boost this post
               </button>
@@ -82,7 +82,7 @@ export default function LostCard({ item, currentUserId, boostEnabled, onBoost, o
               <button
                 type="button"
                 onClick={() => onBoost(item)}
-                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 px-3 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98]"
+                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-amber-400 px-3 text-xs font-bold text-amber-950 transition hover:brightness-105 active:scale-[0.98]"
               >
                 <Rocket className="h-4 w-4" /> Finish paying for your boost
               </button>
@@ -110,7 +110,7 @@ export default function LostCard({ item, currentUserId, boostEnabled, onBoost, o
             <button
               type="button"
               onClick={onFound}
-              className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-gradient px-3 text-xs font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98]"
+              className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-btn px-3 text-xs font-bold text-white transition hover:brightness-110 active:scale-[0.98]"
             >
               I found this
             </button>

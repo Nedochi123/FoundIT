@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Ban, Check } from "lucide-react";
-import { THEMES, DOODLES, DEFAULT_THEME, DEFAULT_DOODLE, getTheme } from "../../lib/themes";
+import { THEMES, DOODLES, DEFAULT_THEME, DEFAULT_DOODLE, buttonColor, getTheme } from "../../lib/themes";
 import { DOODLE_ICON } from "./doodles";
 import { useTheme } from "./ThemeProvider";
 
@@ -43,14 +43,14 @@ export default function ThemePicker({ value, onChange, autoSuggest = true }) {
                 className="group flex flex-col items-center gap-1.5 rounded-xl py-1 transition active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal/60"
               >
                 <span
-                  className={`relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl ring-2 ring-offset-2 ring-offset-slate-900 transition ${
+                  className={`relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl ring-2 ring-offset-2 ring-offset-slate-900 transition ${
                     selected ? "scale-105 ring-brand-teal" : "ring-white/10 group-hover:ring-white/30"
                   }`}
                   style={{ background: t.swatchBg }}
                 >
                   <span
-                    className="flex h-7 w-7 items-center justify-center rounded-full shadow-md shadow-black/30"
-                    style={{ background: `linear-gradient(135deg, ${t.brand.a}, ${t.brand.b})` }}
+                    className="flex h-7 w-7 items-center justify-center rounded-full"
+                    style={{ background: buttonColor(t) }}
                   >
                     {selected && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
                   </span>

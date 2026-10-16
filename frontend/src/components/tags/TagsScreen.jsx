@@ -4,9 +4,9 @@ import { api } from "../../lib/api";
 import TagChat from "./TagChat";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
-const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
+const cardClass = "rounded-xl border border-white/10 bg-slate-900 p-4";
 
 const POLL_MS = 6000;
 const prettyCode = (c) => (c && c.length === 8 ? `${c.slice(0, 4)}-${c.slice(4)}` : c);
@@ -72,7 +72,7 @@ function TagCard({ tag, onChanged, onOpenChat }) {
               }}
             >
               <input aria-label="What is this tag on?" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={60} className={inputClass} placeholder="e.g. Blue backpack" />
-              <button type="submit" disabled={busy} className="rounded-lg bg-brand-gradient px-3 text-xs font-bold text-white">Save</button>
+              <button type="submit" disabled={busy} className="rounded-lg bg-brand-btn px-3 text-xs font-bold text-white">Save</button>
             </form>
           ) : (
             <p className="truncate font-bold text-slate-50">{tag.label || "Unnamed tag"}</p>
@@ -135,7 +135,7 @@ function TagCard({ tag, onChanged, onOpenChat }) {
                 key={t.id}
                 type="button"
                 onClick={() => onOpenChat(tag, t.id)}
-                className="flex w-full items-center gap-3 rounded-lg bg-slate-800/70 p-3 text-left transition hover:bg-slate-800"
+                className="flex w-full items-center gap-3 rounded-lg bg-slate-800 p-3 text-left transition hover:bg-slate-800"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
@@ -309,7 +309,7 @@ export default function TagsScreen({ onBack, initialCode = "" }) {
         </div>
         {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
         {justActivated && <p role="status" className="text-sm text-emerald-300">Tag activated. Anyone who scans it can now reach you.</p>}
-        <button type="submit" disabled={claiming || !code.trim()} className="rounded-lg bg-brand-gradient px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 disabled:opacity-50">
+        <button type="submit" disabled={claiming || !code.trim()} className="rounded-lg bg-brand-btn px-4 py-2.5 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50">
           {claiming ? "Activating..." : "Activate tag"}
         </button>
       </form>

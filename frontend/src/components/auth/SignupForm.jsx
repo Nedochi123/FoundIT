@@ -5,7 +5,7 @@ import ThemePicker from "../theme/ThemePicker";
 import PasswordInput from "./PasswordInput";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 const hintClass = "mt-1 text-xs text-slate-400";
 
@@ -135,7 +135,7 @@ export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
       <button
         type="submit"
         disabled={submitting || !agreed}
-        className="mt-1 w-full rounded-lg bg-brand-gradient py-2.5 font-semibold text-white shadow-lg shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+        className="mt-1 w-full rounded-lg bg-brand-btn py-2.5 font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
       >
         {submitting ? "Creating account..." : "Create account"}
       </button>

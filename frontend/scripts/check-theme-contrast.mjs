@@ -44,17 +44,16 @@ const SEMANTIC = [
 ];
 
 let failed = false;
-console.log("theme        | button text a/b | accent text | heading | secondary | hint | error/warning/success text");
+console.log("theme        | button text | accent text | heading | secondary | hint | error/warning/success text");
 for (const t of THEMES) {
   const v = varsOf(t.id);
   const light = t.neutral?.tone === "light";
   const white = [255, 255, 255];
   const base = triplet(v["slate-950"]);
-  const mid = over(t.bg.mid, base);
-  const surfaces = [triplet(v["slate-900"]), over(t.bg.top, mid), mid, over(t.bg.bottom, mid)];
+  const page = over(t.bg, base); // the one flat page color
+  const surfaces = [triplet(v["slate-900"]), page];
   const rows = {
-    btnA: ratio(white, hex(v["brand-a"])),
-    btnB: ratio(white, hex(v["brand-b"])),
+    button: ratio(white, triplet(v["brand-btn"])), // white text on the flat button fill
     accent: worst(triplet(v["brand-teal"]), surfaces),
     heading: worst(triplet(v["slate-50"]), surfaces),
     secondary: worst(triplet(v["slate-300"]), surfaces),
@@ -65,10 +64,10 @@ for (const t of THEMES) {
   const bad = [...Object.entries(rows), ...semantic].filter(([, val]) => val < need).map(([k]) => k);
   const fmt = (n) => n.toFixed(1).padStart(4);
   console.log(
-    `${t.id.padEnd(12)} | ${fmt(rows.btnA)} / ${fmt(rows.btnB)}   | ${fmt(rows.accent)}        | ${fmt(rows.heading)}    | ${fmt(rows.secondary)}      | ${fmt(rows.hint)} | ${semantic.map(([, n]) => fmt(n)).join(" ")}${bad.length ? `   <-- below ${need}: ${bad.join(", ")}` : ""}`
+    `${t.id.padEnd(12)} | ${fmt(rows.button)}        | ${fmt(rows.accent)}        | ${fmt(rows.heading)}    | ${fmt(rows.secondary)}      | ${fmt(rows.hint)} | ${semantic.map(([, n]) => fmt(n)).join(" ")}${bad.length ? `   <-- below ${need}: ${bad.join(", ")}` : ""}`
   );
-  // Default is the baseline (it already shipped); every other theme must reach WCAG AA for text
-  if (bad.length && t.id !== "classic") failed = true;
+  // every look, the Default included, must reach WCAG AA for text
+  if (bad.length) failed = true;
 }
 if (failed) {
   console.error("\nSome themes have text below the 4.5:1 contrast ratio. Adjust their colors in src/lib/themes.js.");

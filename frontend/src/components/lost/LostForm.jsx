@@ -6,7 +6,7 @@ import CategoryPicker from "../shared/CategoryPicker";
 import LocationChips from "../shared/LocationChips";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 
 export default function LostForm({ onNavigate }) {
@@ -74,7 +74,7 @@ export default function LostForm({ onNavigate }) {
       <button
         type="button"
         onClick={() => onNavigate("urgent")}
-        className="flex items-center gap-3 rounded-2xl border border-red-500/40 bg-red-500/10 p-3.5 text-left transition hover:border-red-400/70 active:scale-[0.98]"
+        className="flex items-center gap-3 rounded-xl border border-red-500/40 bg-red-500/10 p-3.5 text-left transition hover:border-red-400/70 active:scale-[0.98]"
       >
         <TriangleAlert className="h-6 w-6 shrink-0 text-red-400" aria-hidden="true" />
         <span className="text-sm text-slate-200">
@@ -85,7 +85,7 @@ export default function LostForm({ onNavigate }) {
       <button
         type="button"
         onClick={() => onNavigate("gallery")}
-        className="rounded-2xl border border-dashed border-slate-600 p-4 text-center text-sm font-semibold text-slate-300 transition hover:border-brand-teal hover:text-brand-teal active:scale-[0.98]"
+        className="rounded-xl border border-dashed border-slate-600 p-4 text-center text-sm font-semibold text-slate-300 transition hover:border-brand-teal hover:text-brand-teal active:scale-[0.98]"
       >
         Browse everything found so far →
       </button>
@@ -154,7 +154,7 @@ export default function LostForm({ onNavigate }) {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-1 w-full rounded-lg bg-gradient-to-r from-red-600 to-rose-600 py-3 font-semibold text-white shadow-lg shadow-red-950/40 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+          className="mt-1 w-full rounded-lg bg-red-600 py-3 font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
         >
           {submitting ? "Searching..." : "Search"}
         </button>

@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { THEMES } from "../src/lib/themes.js";
+import { THEMES, buttonColor } from "../src/lib/themes.js";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -89,6 +89,9 @@ function themeVars(t) {
   const lines = [];
   const slate = slateScale(t.neutral);
   for (const [step, rgb] of Object.entries(slate)) lines.push(`--slate-${step}: ${rgb};`);
+  // the flat fill of every button (see buttonColor in src/lib/themes.js)
+  lines.push(`--brand-btn: ${triplet(buttonColor(t))};`);
+  // the logo and app icon are artwork with their own two-color gradient: only they (and the icon generator) use these two
   lines.push(`--brand-a: ${t.brand.a};`);
   lines.push(`--brand-b: ${t.brand.b};`);
   lines.push(`--brand-teal: ${triplet(t.brand.text)};`);
@@ -104,20 +107,8 @@ const light = t.neutral?.tone === "light";
   lines.push(`--bar-bottom: ${bar.bottom};`);
   lines.push(`--logo-check: ${t.logoCheck || "#3fe08b"};`); // the check mark inside the icon
   // the welcome animation (src/components/IntroAnimation.css)
-  lines.push(`--intro-top: ${t.intro.top};`);
-  lines.push(`--intro-mid: ${t.intro.mid};`);
-  lines.push(`--intro-bottom: ${t.intro.bottom};`);
-  lines.push(`--intro-glow-one: ${t.intro.glowOne};`);
-  lines.push(`--intro-glow-two: ${t.intro.glowTwo};`);
-  lines.push(`--intro-shadow-one: ${t.intro.shadowOne};`);
-  lines.push(`--intro-shadow-two: ${t.intro.shadowTwo};`);
-  lines.push(`--bg-top: ${t.bg.top};`);
-  lines.push(`--bg-mid: ${t.bg.mid};`);
-  lines.push(`--bg-bottom: ${t.bg.bottom};`);
-  lines.push(`--glow-one: ${t.glow.one};`);
-  lines.push(`--glow-two: ${t.glow.two};`);
-  lines.push(`--blob-one: ${t.blobs.one};`);
-  lines.push(`--blob-two: ${t.blobs.two};`);
+  lines.push(`--intro-bg: ${t.intro};`);
+  lines.push(`--bg: ${t.bg};`);
   lines.push(`--doodle: ${t.doodle};`);
   // the page's default text color (what text with no color class of its own gets)
   lines.push(`--body-text: ${light ? slate[100] : "229 231 235"};`);
@@ -125,9 +116,6 @@ const light = t.neutral?.tone === "light";
     lines.push("color-scheme: light;");
     // white borders/tints (made for dark backgrounds) become ink-colored ones
     lines.push(`--overlay: ${slate[50]};`);
-    // the big gold gradient number on the Tokens screen, deep amber so it reads on a pale page
-    lines.push("--tokens-from: 180 83 9;");
-    lines.push("--tokens-to: 146 64 14;");
     for (const [family, rgb] of Object.entries(LIGHT_TEXT_COLORS)) lines.push(`--t-${family}: ${rgb};`);
   } else {
     // a dark theme can lighten a status text color where its backgrounds need it (see textColors in themes.js)

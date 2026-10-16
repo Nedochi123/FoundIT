@@ -7,7 +7,7 @@ import CategoryPicker from "../shared/CategoryPicker";
 import LocationChips from "../shared/LocationChips";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
+  "w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 
 export default function FoundForm({ onNavigate }) {
@@ -132,7 +132,7 @@ export default function FoundForm({ onNavigate }) {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-1 w-full rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 py-3 font-semibold text-white shadow-lg shadow-emerald-950/40 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+          className="mt-1 w-full rounded-lg bg-emerald-600 py-3 font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
         >
           {submitting ? "Posting..." : "Post to Gallery"}
         </button>

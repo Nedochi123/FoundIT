@@ -81,7 +81,7 @@ export default function AdminCashoutScreen() {
       ) : (
         <div className="flex flex-col gap-3">
           {requests.map((r) => (
-            <div key={r.id} className="rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20">
+            <div key={r.id} className="rounded-xl border border-white/10 bg-slate-900 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate font-semibold text-slate-50">{r.userName}</p>

@@ -50,8 +50,8 @@ export default function EmailVerifyHandler() {
   if (status === "idle") return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-slate-950/95 px-4 py-10 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-slate-900/90 p-6 text-center shadow-2xl shadow-black/40">
+    <div className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-slate-950/95 px-4 py-10">
+      <div className="w-full max-w-sm rounded-xl border border-white/10 bg-slate-900 p-6 text-center">
         {status === "verifying" && <p className="text-sm text-slate-300">Verifying your email...</p>}
 
         {status === "success" && (
@@ -61,7 +61,7 @@ export default function EmailVerifyHandler() {
             <p className="mt-1 text-sm text-slate-300">Thanks — your FoundIT account is confirmed.</p>
             <button
               onClick={() => setStatus("idle")}
-              className="mt-5 w-full rounded-lg bg-brand-gradient py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-blue/20 transition hover:brightness-110 active:scale-[0.98]"
+              className="mt-5 w-full rounded-lg bg-brand-btn py-2.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98]"
             >
               Continue
             </button>

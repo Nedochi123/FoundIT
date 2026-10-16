@@ -23,15 +23,10 @@ test("every theme has all the parts the app reads", () => {
     assert.ok(t.swatchBg, `${where} has a swatch`);
     assert.ok(DOODLE_IDS.includes(t.suggestedDoodle), `${where} suggests a doodle that exists`);
     for (const key of ["a", "b", "text", "shadow"]) assert.match(t.brand[key], COLOR, `${where} brand.${key}`);
-    for (const key of ["top", "mid", "bottom"]) {
-      assert.match(t.bg[key], COLOR, `${where} bg.${key}`);
-      assert.match(t.intro[key], COLOR, `${where} intro.${key}`);
-    }
-    for (const key of ["glowOne", "glowTwo"]) assert.match(t.intro[key], COLOR, `${where} intro.${key}`);
-    for (const key of ["one", "two"]) {
-      assert.match(t.glow[key], COLOR, `${where} glow.${key}`);
-      assert.match(t.blobs[key], COLOR, `${where} blobs.${key}`);
-    }
+    assert.match(t.bg, COLOR, `${where} bg (the one flat page color)`);
+    assert.match(t.intro, COLOR, `${where} intro (the one flat color behind the welcome animation)`);
+    // the page is flat: no glows, blobs or page gradient are defined any more (they would silently do nothing)
+    for (const key of ["glow", "blobs"]) assert.equal(t[key], undefined, `${where} still defines ${key}`);
     if (t.neutral) assert.ok(t.neutral.hue >= 0 && t.neutral.hue <= 360 && t.neutral.sat >= 0, `${where} neutral`);
   }
 });

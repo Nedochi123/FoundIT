@@ -5,7 +5,7 @@
  * <html data-theme> (see index.css), so it also works on pages outside the theme provider, such as a finder's
  * tag page, and there is no flash of the wrong one.
  *
- * Pass the size and rounding as className, e.g. "h-7 w-7 rounded-[8px] shadow-md". Pass label if the icon
+ * Pass the size and rounding as className, e.g. "h-7 w-7 rounded-[8px]". Pass label if the icon
  * is the only thing naming the app there; otherwise it is decorative.
  */
 export default function Logo({ className = "", label }) {
@@ -13,7 +13,7 @@ export default function Logo({ className = "", label }) {
     <>
       <img src="/brand/foundit-icon.png" alt={label || ""} className={`logo-classic ${className}`} />
       <span
-        className={`logo-themed relative overflow-hidden bg-brand-gradient ${className}`}
+        className={`logo-themed relative overflow-hidden bg-logo-gradient ${className}`}
         {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": "true" })}
       >
         <svg viewBox="0 0 360 360" className="absolute inset-0 h-full w-full" fill="none" strokeLinecap="round" strokeLinejoin="round">
