@@ -1,0 +1,89 @@
+// Who may join which school, and what a school's ID numbers look like, now come from one list (src/config/schools.js)
+// instead of being written into the sign-up code. These tests pin the rules for the school that is live today
+// (Nile) so that moving them into the list cannot loosen them, and check the list itself.
+const test = require("node:test");
+const assert = require("node:assert/strict");
+
+const { SCHOOLS, DEFAULT_SCHOOL_ID, getSchool, allowedEmailDomain, emailBelongsTo, schoolForEmail } = require("../src/config/schools");
+const { idNumberSchema, idNumberSchemaFor } = require("../src/utils/idNumber");
+const { welcomeEmail } = require("../src/utils/email");
+
+const ok = (schema, v) => schema.safeParse(v).success;
+
+test("the list is well-formed: unique ids and names, the default school is open, and an open school has an email ending", () => {
+  assert.equal(new Set(SCHOOLS.map((s) => s.id)).size, SCHOOLS.length);
+  assert.equal(new Set(SCHOOLS.map((s) => s.name)).size, SCHOOLS.length);
+  assert.ok(getSchool(DEFAULT_SCHOOL_ID).enabled, "the default school is open");
+  for (const s of SCHOOLS) {
+    if (s.enabled) assert.ok(s.emailDomain, `${s.name} is open, so it needs an email ending`);
+    assert.ok(s.idPattern instanceof RegExp && s.idMessage);
+    assert.match(s.id, /^[a-z]+$/);
+  }
+});
+
+test("Nile's rules are unchanged: a nileuniversity.edu.ng email, and an ID of exactly 9 digits", () => {
+  const nile = getSchool("nile");
+  assert.equal(nile.name, "Nile University");
+  assert.equal(allowedEmailDomain(nile), "nileuniversity.edu.ng");
+  assert.ok(emailBelongsTo(nile, "123456789@nileuniversity.edu.ng"));
+  assert.ok(emailBelongsTo(nile, "Ada@NileUniversity.edu.ng"), "capital letters do not matter");
+  assert.ok(ok(idNumberSchema, "123456789"));
+  assert.ok(ok(idNumberSchema, undefined), "the ID number is optional");
+  for (const bad of ["12345678", "1234567890", "12345678a", "123 456 789", "BU/22/001", ""]) assert.ok(!ok(idNumberSchema, bad), `rejects ${JSON.stringify(bad)}`);
+  assert.equal(idNumberSchemaFor("nile").safeParse("12345678").error.issues[0].message, "ID number must be exactly 9 digits, e.g. 123456789.");
+});
+
+test("an email only belongs to a school if it ends with exactly @ + that school's ending (look-alikes are refused)", () => {
+  const nile = getSchool("nile");
+  for (const bad of [
+    "a@evilnileuniversity.edu.ng",
+    "a@nileuniversity.edu.ng.evil.com",
+    "a@nileuniversity.edu.ng@evil.com",
+    "a@mail.nileuniversity.edu.ng",
+    "nileuniversity.edu.ng",
+    "a@bazeuniversity.edu.ng",
+    "",
+  ]) assert.ok(!emailBelongsTo(nile, bad), `refuses ${JSON.stringify(bad)}`);
+});
+
+test("the ALLOWED_EMAIL_DOMAIN setting still decides the default school's ending (it is set on the live server) and no other school's", () => {
+  const before = process.env.ALLOWED_EMAIL_DOMAIN;
+  try {
+    process.env.ALLOWED_EMAIL_DOMAIN = "Example.EDU.ng";
+    assert.equal(allowedEmailDomain(getSchool("nile")), "example.edu.ng");
+    assert.equal(allowedEmailDomain(getSchool("baze")), "bazeuniversity.edu.ng", "another school keeps its own ending");
+    delete process.env.ALLOWED_EMAIL_DOMAIN;
+    assert.equal(allowedEmailDomain(getSchool("nile")), "nileuniversity.edu.ng");
+  } finally {
+    if (before === undefined) delete process.env.ALLOWED_EMAIL_DOMAIN;
+    else process.env.ALLOWED_EMAIL_DOMAIN = before;
+  }
+});
+
+test("only an OPEN school accepts people: a closed school's email, or an unknown one, belongs to nobody yet", () => {
+  assert.equal(schoolForEmail("a@nileuniversity.edu.ng")?.id, "nile");
+  assert.equal(schoolForEmail("a@bazeuniversity.edu.ng"), null, "Baze is not open yet");
+  assert.equal(schoolForEmail("a@gmail.com"), null);
+  assert.equal(schoolForEmail(""), null);
+  // a school with no confirmed ending can never match (an empty ending must not match every address)
+  const cosmo = getSchool("cosmopolitan");
+  assert.equal(cosmo.emailDomain, null);
+  assert.ok(!emailBelongsTo(cosmo, "a@anything.com"));
+  assert.ok(!emailBelongsTo(cosmo, "a@"));
+});
+
+test("a school whose ID format is not known yet accepts sensible IDs (letters, digits, / and -) and nothing else", () => {
+  const baze = idNumberSchemaFor("baze");
+  for (const good of ["BU/22/CSC/001", "22-1234", "20231234", "abcd"]) assert.ok(ok(baze, good), `accepts ${good}`);
+  for (const bad of ["ab", "a".repeat(21), "has space", "<script>", "12;34", "é1234"]) assert.ok(!ok(baze, bad), `rejects ${JSON.stringify(bad)}`);
+  assert.ok(ok(baze, undefined));
+  // an unknown school id falls back to the default school's rules, never to "anything goes"
+  assert.ok(!ok(idNumberSchemaFor("nowhere"), "BU/22/001"));
+  assert.ok(ok(idNumberSchemaFor("nowhere"), "123456789"));
+});
+
+test("the welcome email names the school it is for, and says Nile for the default", () => {
+  assert.match(welcomeEmail("Ada", null), /FoundIT is Nile University's campus lost &amp; found\./);
+  assert.match(welcomeEmail("Ada", null, "Baze University"), /FoundIT is Baze University's campus lost &amp; found\./);
+  assert.ok(!/Nile/.test(welcomeEmail("Ada", null, "Baze University")), "no other school's name leaks in");
+});

@@ -3,6 +3,8 @@ import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../theme/ThemeProvider";
 import ThemePicker from "../theme/ThemePicker";
 import PasswordInput from "./PasswordInput";
+import { useSchool } from "../school/SchoolProvider";
+import { emailExample, idInputProps, idHint } from "../../lib/schools";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -11,6 +13,7 @@ const hintClass = "mt-1 text-xs text-slate-400";
 
 export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
   const { signup } = useAuth();
+  const { school } = useSchool();
   const { theme, doodle, preview } = useTheme();
   const [look, setLook] = useState({ theme, doodle });
   const [name, setName] = useState("");
@@ -58,7 +61,7 @@ export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
       </div>
       <div>
         <label htmlFor="signup-email" className={labelClass}>
-          Nile University email
+          {school.name} email
         </label>
         <input
           id="signup-email"
@@ -67,7 +70,7 @@ export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={inputClass}
-          placeholder="yourIDnumber@nileuniversity.edu.ng"
+          placeholder={emailExample(school)}
         />
         <p className={hintClass}>Open to students, lecturers, and staff.</p>
       </div>
@@ -78,17 +81,13 @@ export default function SignupForm({ onSwitchToLogin, onShowLegal }) {
         <input
           id="signup-idnumber"
           type="text"
-          inputMode="numeric"
-          maxLength={9}
+          {...idInputProps(school)}
           value={idNumber}
           onChange={(e) => setIdNumber(e.target.value)}
           className={inputClass}
-          placeholder="123456789"
-          pattern="\d{9}"
-          title="Format: 9 digits, e.g. 123456789"
         />
         <p className={hintClass}>
-          Format: 9 digits, e.g. 123456789. You'll only need to enter this once — we'll ask when you first report a
+          {idHint(school)}. You'll only need to enter this once — we'll ask when you first report a
           found item if you skip it now.
         </p>
       </div>

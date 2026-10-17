@@ -3,6 +3,7 @@ import { PackageCheck, CircleCheck, TriangleAlert, Loader2, MessagesSquare } fro
 import { api } from "../../lib/api";
 import TagChat from "./TagChat";
 import Logo from "../theme/Logo";
+import { getSchool, handInTo } from "../../lib/schools";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -52,6 +53,7 @@ function Shell({ children }) {
  */
 export default function TagScan({ code }) {
   const [info, setInfo] = useState(null); // { status, label }
+  const school = getSchool(info?.school); // a finder has no account: the tag itself says which school it belongs to
   const [loadError, setLoadError] = useState("");
   const [token, setToken] = useState(() => readToken(code));
   const [chat, setChat] = useState(null); // { messages, open } once the finder has a chat
@@ -242,7 +244,7 @@ export default function TagScan({ code }) {
             {unknown
               ? "The code may be damaged or mistyped."
               : "The owner has paused it or no longer uses it."}{" "}
-            If you found something that isn't yours, please hand it in to campus security.
+            If you found something that isn't yours, please hand it in to {handInTo(school)}.
           </p>
         </div>
       </Shell>

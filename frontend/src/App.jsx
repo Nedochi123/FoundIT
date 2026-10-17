@@ -17,6 +17,7 @@ import NotificationsPrompt from "./components/notifications/NotificationsPrompt"
 import TokensScreen from "./components/tokens/TokensScreen";
 import LegalScreen from "./components/legal/LegalScreen";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
+import { SchoolProvider } from "./components/school/SchoolProvider";
 import WelcomeAfterSignup from "./components/WelcomeAfterSignup";
 import TagScan from "./components/tags/TagScan";
 import TagsScreen from "./components/tags/TagsScreen";
@@ -160,16 +161,18 @@ function MainApp() {
   }
 
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        {showIntro && <IntroAnimation onDone={handleIntroDone} />}
-        <EmailVerifyHandler />
-        <AuthGate>
-          <LocationGate>
-            <Screens />
-          </LocationGate>
-        </AuthGate>
-      </ThemeProvider>
-    </AuthProvider>
+    <SchoolProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          {showIntro && <IntroAnimation onDone={handleIntroDone} />}
+          <EmailVerifyHandler />
+          <AuthGate>
+            <LocationGate>
+              <Screens />
+            </LocationGate>
+          </AuthGate>
+        </ThemeProvider>
+      </AuthProvider>
+    </SchoolProvider>
   );
 }

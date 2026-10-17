@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
@@ -6,6 +6,9 @@ import ForgotPasswordForm from "./ForgotPasswordForm";
 import ResetPasswordForm from "./ResetPasswordForm";
 import LegalScreen from "../legal/LegalScreen";
 import Logo from "../theme/Logo";
+import Welcome from "./Welcome";
+import { useSchool } from "../school/SchoolProvider";
+import { DEFAULT_SCHOOL_ID } from "../../lib/schools";
 
 function getResetTokenFromUrl() {
   return new URLSearchParams(window.location.search).get("resetToken");
@@ -13,9 +16,16 @@ function getResetTokenFromUrl() {
 
 export default function AuthGate({ children }) {
   const { user, loading } = useAuth();
+  const { school, chosen, choose, forget } = useSchool();
   const [resetToken, setResetToken] = useState(getResetTokenFromUrl);
   const [mode, setMode] = useState(resetToken ? "reset" : "login");
   const [showLegal, setShowLegal] = useState(false);
+
+  // Someone already signed in has, by definition, picked a school: remember it, so that after they log out they land on
+  // their school's sign-in and not the Welcome page again.
+  useEffect(() => {
+    if (user && !chosen) choose(DEFAULT_SCHOOL_ID);
+  }, [user, chosen, choose]);
 
   if (showLegal) {
     return (
@@ -67,6 +77,9 @@ export default function AuthGate({ children }) {
 
   if (user) return children;
 
+  // First visit on this device: everyone starts by picking their school.
+  if (!chosen) return <Welcome onShowLegal={() => setShowLegal(true)} />;
+
   return (
     <div className="flex min-h-app items-center justify-center px-4 py-10">
       <div className="bg-glow" aria-hidden="true" />
@@ -82,7 +95,7 @@ export default function AuthGate({ children }) {
           </div>
           <div className="flex flex-col items-center gap-1.5">
             <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Nile University
+              {school.name}
             </span>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">
               Found<span className="text-brand-teal">IT</span>
@@ -104,6 +117,9 @@ export default function AuthGate({ children }) {
           className="mt-4 w-full text-center text-xs text-slate-400 underline hover:text-slate-200"
         >
           Privacy &amp; Terms
+        </button>
+        <button type="button" onClick={forget} className="mt-1 w-full text-center text-xs text-slate-400 underline hover:text-slate-200">
+          Not your school? Change school
         </button>
       </div>
     </div>

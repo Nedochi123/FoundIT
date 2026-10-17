@@ -16,6 +16,7 @@ const {
 const { sendEmail, welcomeEmail, passwordResetEmail, verifyEmailStandaloneEmail } = require("../utils/email");
 const { requireAuth } = require("../middleware/auth");
 const { idNumberSchema } = require("../utils/idNumber");
+const { getSchool, DEFAULT_SCHOOL_ID, allowedEmailDomain } = require("../config/schools");
 const { isAdminEmail } = require("../utils/admin");
 const { retireTagsOf } = require("../utils/tags");
 const { publicUser } = require("../utils/publicUser");
@@ -23,7 +24,9 @@ const { THEMES, DOODLES, DEFAULT_THEME, DEFAULT_DOODLE } = require("../utils/the
 
 const router = express.Router();
 
-const ALLOWED_EMAIL_DOMAIN = (process.env.ALLOWED_EMAIL_DOMAIN || "nileuniversity.edu.ng").toLowerCase();
+// Until a request says which school it is for, sign-ups are for the default school (see config/schools.js).
+const SCHOOL = getSchool(DEFAULT_SCHOOL_ID);
+const ALLOWED_EMAIL_DOMAIN = allowedEmailDomain(SCHOOL);
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 const isProd = process.env.NODE_ENV === "production";
 
@@ -121,7 +124,7 @@ router.post("/signup", authLimiter, async (req, res, next) => {
     sendEmail({
       to: email,
       subject: "Welcome to FoundIT",
-      html: welcomeEmail(name, verifyUrl),
+      html: welcomeEmail(name, verifyUrl, SCHOOL.name),
       devLogLabel: `Verify URL: ${verifyUrl}`,
     }).catch((err) => console.error("Welcome email failed:", err));
 

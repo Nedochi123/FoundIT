@@ -12,7 +12,7 @@ const TOKEN_STORAGE_KEY = "foundit_auth_tokens";
 // A cached copy of the last-known user, purely for optimistic startup
 // rendering — every network round-trip on this connection costs a fixed
 // few hundred ms regardless of app code (Railway's region is far from
-// Nile University), so on a returning visit the UI renders instantly
+// the campuses), so on a returning visit the UI renders instantly
 // from this cache instead of showing a blocking "Loading..." screen
 // while /api/auth/me confirms the session in the background. It is
 // never treated as authoritative — a failed background refresh still
