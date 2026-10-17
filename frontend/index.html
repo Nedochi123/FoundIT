@@ -77,7 +77,25 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- What a search engine (or a slow connection) reads before the app loads. React replaces everything inside #root as
+         soon as it starts, so a student only ever sees this for a moment. Keep it true to what the app does (frontend/test/crawlable.test.mjs). -->
+    <div id="root">
+      <main style="max-width: 32rem; margin: 0 auto; padding: 3rem 1.25rem; line-height: 1.6">
+        <h1 style="font-size: 1.5rem; margin: 0 0 0.75rem">FoundIT: lost and found for Nile University</h1>
+        <p style="margin: 0 0 1rem">
+          FoundIT helps Nile University students, lecturers and staff get lost belongings back. Report something you lost, post something you
+          found with a photo, and the owner is told. Finders earn tokens when a return is confirmed, and owners can say thank you with a reward
+          that is agreed privately in the chat.
+        </p>
+        <ul style="margin: 0 0 1rem; padding-left: 1.25rem">
+          <li>A gallery of found items and a board of lost items, with notifications</li>
+          <li>A private chat between the owner and the finder</li>
+          <li>QR &quot;Return me&quot; tags you can stick on your laptop, bag or keys</li>
+          <li>Free to use with your Nile University email</li>
+        </ul>
+        <p style="margin: 0">Log in or create an account to report or find an item.</p>
+      </main>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
