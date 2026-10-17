@@ -5,7 +5,9 @@
 // Adding a university means adding one entry here and one on the website. Its students and items live in that
 // school's own database (a later step); until a school is `enabled`, nobody can sign up to it.
 //
-// emailDomain: what a school email must end with (null until it is confirmed with a real student email).
+// emailDomain: what a school email must end with. Each is the school's own domain, checked to exist and to receive
+//              mail (nileuniversity.edu.ng, bazeuniversity.edu.ng, cosmopolitan.edu.ng, philomath.edu.ng, veritas.edu.ng);
+//              null would mean "not known yet", and a school with no ending can never match anyone.
 // idPattern:   the format of that school's ID numbers. This only checks the number is well-formed. It cannot
 //              confirm that it belongs to a real, enrolled student (FoundIT cannot see a school's records): the
 //              real gate is the school email address plus the verification link sent to it.
@@ -29,9 +31,9 @@ const SCHOOLS = [
     enabled: true,
   },
   { id: "baze", name: "Baze University", emailDomain: "bazeuniversity.edu.ng", ...LENIENT_ID, enabled: false },
-  { id: "cosmopolitan", name: "Cosmopolitan University", emailDomain: null, ...LENIENT_ID, enabled: false },
-  { id: "philomath", name: "Philomath University", emailDomain: null, ...LENIENT_ID, enabled: false },
-  { id: "veritas", name: "Veritas University", emailDomain: null, ...LENIENT_ID, enabled: false },
+  { id: "cosmopolitan", name: "Cosmopolitan University", emailDomain: "cosmopolitan.edu.ng", ...LENIENT_ID, enabled: false },
+  { id: "philomath", name: "Philomath University", emailDomain: "philomath.edu.ng", ...LENIENT_ID, enabled: false },
+  { id: "veritas", name: "Veritas University", emailDomain: "veritas.edu.ng", ...LENIENT_ID, enabled: false },
 ];
 
 /** The school with this id, or the default school for anything unknown. */

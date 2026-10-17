@@ -4,7 +4,8 @@
 //
 // enabled:      the school's section is live. A school that is not enabled still shows on the Welcome page, marked
 //               "opening soon", so students can see it is coming.
-// emailDomain:  what a student's school email ends with (null until it is confirmed with a real student email).
+// emailDomain:  what a student's school email ends with: the school's own domain, checked to exist and to receive mail.
+//               (null would mean "not known yet": the sign-up box then shows "Your school email" and nothing is invented.)
 // logo:         the school's official badge (its crest or seal), a 256x256 PNG in public/schools/, taken from the
 //               school's own website. If the file is missing the Welcome page draws a colored initial instead
 //               (SchoolMark), so a missing logo never leaves a hole.
@@ -39,7 +40,7 @@ export const SCHOOLS = [
     id: "cosmopolitan",
     name: "Cosmopolitan University",
     short: "Cosmopolitan",
-    emailDomain: null,
+    emailDomain: "cosmopolitan.edu.ng",
     logo: "/schools/cosmopolitan.png",
     mark: "C",
     color: "#a18b5c",
@@ -50,7 +51,7 @@ export const SCHOOLS = [
     id: "philomath",
     name: "Philomath University",
     short: "Philomath",
-    emailDomain: null,
+    emailDomain: "philomath.edu.ng",
     logo: "/schools/philomath.png",
     badge: "#000c42", // Philomath's official crest is the white version, so its badge is the school's navy instead of white
     mark: "P",
@@ -62,7 +63,7 @@ export const SCHOOLS = [
     id: "veritas",
     name: "Veritas University",
     short: "Veritas",
-    emailDomain: null,
+    emailDomain: "veritas.edu.ng",
     logo: "/schools/veritas.png",
     mark: "V",
     color: "#095d3f",

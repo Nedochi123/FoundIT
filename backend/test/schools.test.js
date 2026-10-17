@@ -65,11 +65,31 @@ test("only an OPEN school accepts people: a closed school's email, or an unknown
   assert.equal(schoolForEmail("a@bazeuniversity.edu.ng"), null, "Baze is not open yet");
   assert.equal(schoolForEmail("a@gmail.com"), null);
   assert.equal(schoolForEmail(""), null);
-  // a school with no confirmed ending can never match (an empty ending must not match every address)
-  const cosmo = getSchool("cosmopolitan");
-  assert.equal(cosmo.emailDomain, null);
-  assert.ok(!emailBelongsTo(cosmo, "a@anything.com"));
-  assert.ok(!emailBelongsTo(cosmo, "a@"));
+  // a school with no ending known yet can never match (an empty ending must not match every address)
+  const unknown = { id: "later", name: "Later University", emailDomain: null, enabled: true };
+  assert.ok(!emailBelongsTo(unknown, "a@anything.com"));
+  assert.ok(!emailBelongsTo(unknown, "a@"));
+  assert.ok(!emailBelongsTo(unknown, ""));
+});
+
+test("each school's email ending is its own real domain (checked in DNS on 2026-10-17: all five exist and receive mail)", () => {
+  const endings = Object.fromEntries(SCHOOLS.map((s) => [s.id, s.emailDomain]));
+  assert.deepEqual(endings, {
+    nile: "nileuniversity.edu.ng",
+    baze: "bazeuniversity.edu.ng",
+    cosmopolitan: "cosmopolitan.edu.ng",
+    philomath: "philomath.edu.ng",
+    veritas: "veritas.edu.ng",
+  });
+  assert.equal(new Set(Object.values(endings)).size, SCHOOLS.length, "no two schools share an ending");
+  for (const d of Object.values(endings)) assert.match(d, /^[a-z]+\.edu\.ng$/);
+  // the made-up spellings (cosmopolitanuniversity.edu.ng and so on) do not exist, so they must never be accepted
+  for (const s of SCHOOLS) assert.ok(!emailBelongsTo(s, `a@${s.id}university.edu.ng`) || s.id === "nile" || s.id === "baze");
+  // a student of one school is never taken for another school's student
+  assert.ok(emailBelongsTo(getSchool("veritas"), "ada@veritas.edu.ng"));
+  assert.ok(!emailBelongsTo(getSchool("veritas"), "ada@philomath.edu.ng"));
+  assert.ok(!emailBelongsTo(getSchool("philomath"), "ada@veritas.edu.ng"));
+  assert.ok(!emailBelongsTo(getSchool("cosmopolitan"), "ada@cosmopolitanuniversity.edu.ng"));
 });
 
 test("a school whose ID format is not known yet accepts sensible IDs (letters, digits, / and -) and nothing else", () => {

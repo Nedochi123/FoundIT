@@ -73,7 +73,10 @@ test("a screen can always ask for a school: unknown or missing ids give the defa
 test("what screens say about a school comes from its entry: email example, and who to hand a found item to", () => {
   assert.equal(emailExample(getSchool("nile")), "yourIDnumber@nileuniversity.edu.ng");
   assert.equal(emailExample(getSchool("baze")), "yourIDnumber@bazeuniversity.edu.ng");
-  assert.equal(emailExample(getSchool("veritas")), "Your school email", "no ending is invented for a school that is not confirmed");
+  assert.equal(emailExample(getSchool("veritas")), "yourIDnumber@veritas.edu.ng");
+  assert.equal(emailExample(getSchool("cosmopolitan")), "yourIDnumber@cosmopolitan.edu.ng");
+  assert.equal(emailExample(getSchool("philomath")), "yourIDnumber@philomath.edu.ng");
+  assert.equal(emailExample({ emailDomain: null }), "Your school email", "no ending is invented for a school that has none yet");
   assert.equal(handInTo(getSchool("nile")), "Nile University campus security");
   assert.equal(handInTo(getSchool("philomath")), "Philomath University campus security");
 });
