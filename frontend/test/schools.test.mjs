@@ -4,7 +4,7 @@
 // server's list agree.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
 import { createRequire } from "node:module";
 import {
@@ -183,4 +183,32 @@ test("the website's list of schools and the server's list agree", () => {
   const nile = SCHOOLS.find((s) => s.id === "nile");
   assert.equal(`^${nile.idFormat.pattern}$`, server.getSchool("nile").idPattern.source.replace(/^\^?/, "^").replace(/\$?$/, "$"));
   assert.equal(idFormat(nile).maxLength, 9);
+});
+
+test("every school has its official badge: a real 256x256 PNG in public/schools, small enough to load quickly", () => {
+  for (const s of SCHOOLS) {
+    const file = join(ROOT, "public", s.logo.slice(1));
+    assert.ok(existsSync(file), `${s.name}'s logo file is missing: ${s.logo}`);
+    const bytes = readFileSync(file);
+    assert.deepEqual([...bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10], `${s.logo} is a PNG (rendered to pixels, so it cannot carry a script)`);
+    assert.equal(bytes.readUInt32BE(16), 256, "256 wide");
+    assert.equal(bytes.readUInt32BE(20), 256, "256 tall");
+    assert.ok(bytes.length < 80_000, `${s.logo} is ${bytes.length} bytes; keep each badge small`);
+  }
+});
+
+test("the logos are not downloaded with the app: they load on the Welcome page, not on every install", () => {
+  assert.ok(read("vite.config.js").includes('"schools/**"'), "schools/** is in the service worker's ignore list");
+});
+
+test("a school whose official logo is white sits on its own dark badge, so it can be seen", () => {
+  const lum = (hex) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  for (const s of SCHOOLS) if (s.badge) assert.match(s.badge, /^#[0-9a-f]{6}$/i);
+  const philomath = getSchool("philomath");
+  assert.ok(lum(philomath.badge) < 0.02, "a white crest needs a dark badge");
+  assert.ok((1.05) / (lum(philomath.badge) + 0.05) > 7, "white on Philomath's badge is easy to read");
+  assert.ok(read("src/components/school/SchoolMark.jsx").includes("school.badge ? { background: school.badge }"), "the badge color is applied");
 });

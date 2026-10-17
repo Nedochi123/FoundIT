@@ -12,7 +12,7 @@ export default function SchoolMark({ school, size = 40, className = "", style })
   return (
     <span
       className={`school-badge ${className}`}
-      style={{ width: size, height: size, padding: Math.round(size * 0.12), ...style }}
+      style={{ width: size, height: size, padding: Math.round(size * 0.12), ...(school.badge ? { background: school.badge } : {}), ...style }}
       aria-hidden="true"
     >
       {school.logo && !broken ? (

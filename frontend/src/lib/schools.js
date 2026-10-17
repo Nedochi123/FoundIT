@@ -5,8 +5,10 @@
 // enabled:      the school's section is live. A school that is not enabled still shows on the Welcome page, marked
 //               "opening soon", so students can see it is coming.
 // emailDomain:  what a student's school email ends with (null until it is confirmed with a real student email).
-// logo:         the school's logo, in public/schools/. If the file is missing the Welcome page draws a colored
-//               initial instead (SchoolMark), so a missing logo never leaves a hole.
+// logo:         the school's official badge (its crest or seal), a 256x256 PNG in public/schools/, taken from the
+//               school's own website. If the file is missing the Welcome page draws a colored initial instead
+//               (SchoolMark), so a missing logo never leaves a hole.
+// badge:        the color behind the logo. White unless the official logo is itself white (Philomath).
 // color/markText: the school's own color (taken from its website) and the text color that reads on it.
 
 export const SCHOOLS = [
@@ -50,6 +52,7 @@ export const SCHOOLS = [
     short: "Philomath",
     emailDomain: null,
     logo: "/schools/philomath.png",
+    badge: "#000c42", // Philomath's official crest is the white version, so its badge is the school's navy instead of white
     mark: "P",
     color: "#1d3f7c",
     markText: "#ffffff",
