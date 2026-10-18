@@ -431,3 +431,44 @@
   --bg-pattern: none;
   --bg-pattern-size: auto;
 }
+
+/* Baze */
+:root[data-theme="baze"] {
+  --slate-50: 250 250 250;
+  --slate-100: 245 245 245;
+  --slate-200: 232 232 232;
+  --slate-300: 214 214 215;
+  --slate-400: 165 165 167;
+  --slate-500: 119 119 121;
+  --slate-600: 88 88 90;
+  --slate-700: 68 68 70;
+  --slate-800: 43 43 44;
+  --slate-900: 27 27 29;
+  --slate-950: 12 12 13;
+  --brand-a: #52525b;
+  --brand-b: #2563eb;
+  --brand-teal: 147 197 253;
+  --brand-blue: 37 99 235;
+  --brand-solid: 82 82 91;
+  --bar-top: 10 10 10;
+  --bar-bottom: 19 19 20;
+  --logo-check: #dbeafe;
+  --intro-top: #1f1f24;
+  --intro-mid: #111113;
+  --intro-bottom: #050506;
+  --intro-glow-one: #3f3f46;
+  --intro-glow-two: #1d4ed8;
+  --intro-shadow-one: 63 63 70;
+  --intro-shadow-two: 37 99 235;
+  --bg-top: #1c1c21;
+  --bg-mid: #111113;
+  --bg-bottom: #050506;
+  --glow-one: rgba(161, 161, 170, 0.05);
+  --glow-two: rgba(37, 99, 235, 0.06);
+  --blob-one: #3f3f46;
+  --blob-two: #1e3a8a;
+  --doodle: #a1a1aa;
+  --body-text: 229 231 235;
+  --bg-pattern: none;
+  --bg-pattern-size: auto;
+}

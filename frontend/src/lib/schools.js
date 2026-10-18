@@ -10,6 +10,9 @@
 //               school's own website. If the file is missing the Welcome page draws a colored initial instead
 //               (SchoolMark), so a missing logo never leaves a hole.
 // badge:        the color behind the logo. White unless the official logo is itself white (Philomath).
+// theme:        the school's own app colors (an id in lib/themes.js), shown to its students until they pick another.
+//               No theme = the original FoundIT look.
+// emailLocal:   what comes before the @ in an example email (default "yourIDnumber").
 // color/markText: the school's own color (taken from its website) and the text color that reads on it.
 
 export const SCHOOLS = [
@@ -30,11 +33,14 @@ export const SCHOOLS = [
     name: "Baze University",
     short: "Baze",
     emailDomain: "bazeuniversity.edu.ng",
+    emailLocal: "surname12345", // a Baze student email is the surname followed by the ID number
+    idFormat: { pattern: "\\d{4,8}", maxLength: 8, inputMode: "numeric", example: "12345", hint: "digits only, e.g. 12345" },
+    theme: "baze", // Baze's own colors (lib/themes.js): what a Baze student sees until they pick another
     logo: "/schools/baze.png",
     mark: "B",
     color: "#9c9fa6",
     markText: "#17181b",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "cosmopolitan",
@@ -120,7 +126,7 @@ export function isOpen(school) {
 
 /** A sample school email for a placeholder, e.g. "yourIDnumber@nileuniversity.edu.ng". */
 export function emailExample(school) {
-  return school?.emailDomain ? `yourIDnumber@${school.emailDomain}` : "Your school email";
+  return school?.emailDomain ? `${school.emailLocal || "yourIDnumber"}@${school.emailDomain}` : "Your school email";
 }
 
 /**

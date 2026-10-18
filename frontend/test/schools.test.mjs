@@ -72,7 +72,7 @@ test("a screen can always ask for a school: unknown or missing ids give the defa
 
 test("what screens say about a school comes from its entry: email example, and who to hand a found item to", () => {
   assert.equal(emailExample(getSchool("nile")), "yourIDnumber@nileuniversity.edu.ng");
-  assert.equal(emailExample(getSchool("baze")), "yourIDnumber@bazeuniversity.edu.ng");
+  assert.equal(emailExample(getSchool("baze")), "surname12345@bazeuniversity.edu.ng", "a Baze email is the surname followed by the ID number");
   assert.equal(emailExample(getSchool("veritas")), "yourIDnumber@veritas.edu.ng");
   assert.equal(emailExample(getSchool("cosmopolitan")), "yourIDnumber@cosmopolitan.edu.ng");
   assert.equal(emailExample(getSchool("philomath")), "yourIDnumber@philomath.edu.ng");
@@ -85,7 +85,10 @@ test("ID number boxes follow the school: Nile is 9 digits, a school with no know
   const nile = idInputProps(getSchool("nile"));
   assert.deepEqual(nile, { inputMode: "numeric", maxLength: 9, placeholder: "123456789", pattern: "\\d{9}", title: "Format: 9 digits, e.g. 123456789" });
   assert.equal(idHint(getSchool("nile")), "Format: 9 digits, e.g. 123456789");
-  const other = idInputProps(getSchool("baze"));
+  const baze = idInputProps(getSchool("baze"));
+  assert.deepEqual(baze, { inputMode: "numeric", maxLength: 8, placeholder: "12345", pattern: "\\d{4,8}", title: "Format: digits only, e.g. 12345" });
+  assert.ok(new RegExp(`^${baze.pattern}$`).test("12345") && !new RegExp(`^${baze.pattern}$`).test("BU/22/001"));
+  const other = idInputProps(getSchool("cosmopolitan"));
   assert.equal(other.inputMode, "text");
   assert.equal(other.maxLength, 20);
   assert.ok(new RegExp(`^${other.pattern}$`).test("BU/22/CSC/001"));
@@ -101,7 +104,8 @@ test("a device remembers its school, but only an OPEN one, and ignores junk", ()
     forgetSchoolId();
     assert.equal(readChosenSchoolId(), null);
   });
-  withStorage({ foundit_school: "baze" }, () => assert.equal(readChosenSchoolId(), null, "a school that is not open cannot be the saved one"));
+  withStorage({ foundit_school: "baze" }, () => assert.equal(readChosenSchoolId(), "baze", "Baze is open"));
+  withStorage({ foundit_school: "veritas" }, () => assert.equal(readChosenSchoolId(), null, "a school that is not open cannot be the saved one"));
   withStorage({ foundit_school: "<img onerror=x>" }, () => assert.equal(readChosenSchoolId(), null));
   // storage that throws (private browsing) must not break the page
   globalThis.localStorage = {
@@ -245,8 +249,27 @@ test("a link from an email opens in its own school: ?school= is read only if it 
     }
   };
   assert.equal(at("?verifyToken=abc&school=nile", readSchoolFromUrl), "nile");
-  assert.equal(at("?verifyToken=abc&school=baze", readSchoolFromUrl), null, "Baze is not open yet");
+  assert.equal(at("?verifyToken=abc&school=baze", readSchoolFromUrl), "baze");
+  assert.equal(at("?verifyToken=abc&school=veritas", readSchoolFromUrl), null, "Veritas is not open yet");
   assert.equal(at("?school=hogwarts", readSchoolFromUrl), null);
   assert.equal(at("", readSchoolFromUrl), null);
   assert.equal(readSchoolFromUrl(), null, "no window (or a blocked one) is not an error");
+});
+
+test("Baze has its own colors: offered only to Baze students, shown to them by default, and readable", async () => {
+  const { THEMES, getTheme } = await import("../src/lib/themes.js");
+  const baze = getSchool("baze");
+  assert.equal(baze.enabled, true);
+  assert.equal(baze.theme, "baze");
+  assert.equal(getTheme("baze").id, "baze", "the school's colors exist");
+  assert.equal(getTheme("baze").school, "baze");
+  for (const s of SCHOOLS) if (s.theme) assert.ok(THEMES.some((t) => t.id === s.theme), s.id);
+  assert.equal(getSchool("nile").theme, undefined, "Nile keeps the original FoundIT look");
+  const picker = read("src/components/theme/ThemePicker.jsx");
+  assert.match(picker, /THEMES\.filter\(\(t\) => !t\.school \|\| t\.school === school\.id\)/, "another school's colors are not offered");
+  const provider = read("src/components/theme/ThemeProvider.jsx");
+  assert.match(provider, /if \(savedTheme \|\| !chosen\) return;/, "a signed-in student's saved look always wins");
+  assert.match(provider, /theme: school\.theme \|\| DEFAULT_THEME/);
+  assert.match(read("src/themes.css"), /\[data-theme="baze"\]/, "its CSS is generated");
+  assert.match(read("public/manifests/baze.json"), /"theme_color"/, "and its Home Screen icon");
 });

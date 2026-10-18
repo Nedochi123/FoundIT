@@ -177,6 +177,23 @@ export const THEMES = [
     doodle: "#7c3aed",
     swatchBg: "linear-gradient(135deg, #f8f3ff, #d8c8f7)",
   },
+  // A school's own colors (school: only that school's students are offered it; see lib/schools.js).
+  {
+    id: "baze",
+    school: "baze",
+    chrome: "#111113", // the browser/phone status-bar color
+    label: "Baze",
+    logoCheck: "#dbeafe",
+    intro: { top: "#1f1f24", mid: "#111113", bottom: "#050506", glowOne: "#3f3f46", glowTwo: "#1d4ed8", shadowOne: "63 63 70", shadowTwo: "37 99 235" },
+    suggestedDoodle: "none",
+    neutral: { hue: 240, sat: 0.05 },
+    brand: { a: "#52525b", b: "#2563eb", text: "#93c5fd", shadow: "#2563eb" },
+    bg: { top: "#1c1c21", mid: "#111113", bottom: "#050506" },
+    glow: { one: "rgba(161, 161, 170, 0.05)", two: "rgba(37, 99, 235, 0.06)" },
+    blobs: { one: "#3f3f46", two: "#1e3a8a" },
+    doodle: "#a1a1aa",
+    swatchBg: "linear-gradient(135deg, #2a2a30, #050506)",
+  },
 ];
 
 export const THEME_IDS = THEMES.map((t) => t.id);

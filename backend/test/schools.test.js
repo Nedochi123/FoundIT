@@ -62,7 +62,8 @@ test("the ALLOWED_EMAIL_DOMAIN setting still decides the default school's ending
 
 test("only an OPEN school accepts people: a closed school's email, or an unknown one, belongs to nobody yet", () => {
   assert.equal(schoolForEmail("a@nileuniversity.edu.ng")?.id, "nile");
-  assert.equal(schoolForEmail("a@bazeuniversity.edu.ng"), null, "Baze is not open yet");
+  assert.equal(schoolForEmail("a@bazeuniversity.edu.ng")?.id, "baze", "Baze is open");
+  assert.equal(schoolForEmail("a@veritas.edu.ng"), null, "Veritas is not open yet");
   assert.equal(schoolForEmail("a@gmail.com"), null);
   assert.equal(schoolForEmail(""), null);
   // a school with no ending known yet can never match (an empty ending must not match every address)
@@ -93,13 +94,25 @@ test("each school's email ending is its own real domain (checked in DNS on 2026-
 });
 
 test("a school whose ID format is not known yet accepts sensible IDs (letters, digits, / and -) and nothing else", () => {
-  const baze = idNumberSchemaFor("baze");
-  for (const good of ["BU/22/CSC/001", "22-1234", "20231234", "abcd"]) assert.ok(ok(baze, good), `accepts ${good}`);
-  for (const bad of ["ab", "a".repeat(21), "has space", "<script>", "12;34", "é1234"]) assert.ok(!ok(baze, bad), `rejects ${JSON.stringify(bad)}`);
-  assert.ok(ok(baze, undefined));
+  const cosmo = idNumberSchemaFor("cosmopolitan");
+  for (const good of ["BU/22/CSC/001", "22-1234", "20231234", "abcd"]) assert.ok(ok(cosmo, good), `accepts ${good}`);
+  for (const bad of ["ab", "a".repeat(21), "has space", "<script>", "12;34", "é1234"]) assert.ok(!ok(cosmo, bad), `rejects ${JSON.stringify(bad)}`);
+  assert.ok(ok(cosmo, undefined));
   // an unknown school id falls back to the default school's rules, never to "anything goes"
   assert.ok(!ok(idNumberSchemaFor("nowhere"), "BU/22/001"));
   assert.ok(ok(idNumberSchemaFor("nowhere"), "123456789"));
+});
+
+test("Baze is open, and its ID numbers are digits (a Baze email is the surname followed by the ID number)", () => {
+  const baze = getSchool("baze");
+  assert.equal(baze.enabled, true);
+  assert.ok(emailBelongsTo(baze, "surname12345@bazeuniversity.edu.ng"));
+  const ids = idNumberSchemaFor("baze");
+  for (const good of ["12345", "1234", "12345678"]) assert.ok(ok(ids, good), `accepts ${good}`);
+  for (const bad of ["123", "123456789", "BU/22/001", "12a45", "12 345", ""]) assert.ok(!ok(ids, bad), `rejects ${JSON.stringify(bad)}`);
+  assert.equal(ids.safeParse("BU/22/001").error.issues[0].message, "Baze ID number must be digits only, e.g. 12345.");
+  // the other three are still closed
+  for (const id of ["cosmopolitan", "philomath", "veritas"]) assert.equal(getSchool(id).enabled, false, id);
 });
 
 test("the welcome email names the school it is for, and says Nile for the default", () => {

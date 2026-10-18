@@ -30,7 +30,16 @@ const SCHOOLS = [
     idMessage: "ID number must be exactly 9 digits, e.g. 123456789.",
     enabled: true,
   },
-  { id: "baze", name: "Baze University", emailDomain: "bazeuniversity.edu.ng", ...LENIENT_ID, enabled: false },
+  {
+    id: "baze",
+    name: "Baze University",
+    emailDomain: "bazeuniversity.edu.ng",
+    // Baze ID numbers are digits (a student email is the surname followed by the ID number). Known so far: 5 digits;
+    // 4 to 8 are accepted so a longer or shorter number in another year is not locked out.
+    idPattern: /^\d{4,8}$/,
+    idMessage: "Baze ID number must be digits only, e.g. 12345.",
+    enabled: true,
+  },
   { id: "cosmopolitan", name: "Cosmopolitan University", emailDomain: "cosmopolitan.edu.ng", ...LENIENT_ID, enabled: false },
   { id: "philomath", name: "Philomath University", emailDomain: "philomath.edu.ng", ...LENIENT_ID, enabled: false },
   { id: "veritas", name: "Veritas University", emailDomain: "veritas.edu.ng", ...LENIENT_ID, enabled: false },

@@ -3,6 +3,7 @@ import { Ban, Check } from "lucide-react";
 import { THEMES, DOODLES, DEFAULT_THEME, DEFAULT_DOODLE, getTheme } from "../../lib/themes";
 import { DOODLE_ICON } from "./doodles";
 import { useTheme } from "./ThemeProvider";
+import { useSchool } from "../school/SchoolProvider";
 
 /**
  * Pick an app color and a style of floating doodles. Controlled: value is { theme, doodle } and onChange gets
@@ -12,6 +13,9 @@ import { useTheme } from "./ThemeProvider";
  */
 export default function ThemePicker({ value, onChange, autoSuggest = true }) {
   const { still, setStill } = useTheme();
+  const { school } = useSchool();
+  // every color, plus this student's school's own colors (another school's are not offered)
+  const themes = THEMES.filter((t) => !t.school || t.school === school.id);
   const pickedDoodle = useRef(!autoSuggest);
 
   function pickTheme(id) {
@@ -31,7 +35,7 @@ export default function ThemePicker({ value, onChange, autoSuggest = true }) {
       <div>
         <p id="look-color-label" className="mb-2 text-sm font-medium text-slate-300">App color</p>
         <div role="radiogroup" aria-labelledby="look-color-label" className="grid grid-cols-4 gap-x-1 gap-y-3 min-[360px]:grid-cols-5">
-          {THEMES.map((t) => {
+          {themes.map((t) => {
             const selected = value.theme === t.id;
             return (
               <button

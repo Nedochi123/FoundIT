@@ -107,8 +107,11 @@ test("ID numbers follow the school's format", async () => {
   const nileBad = await signup("nile", `n-${uid()}@nileuniversity.edu.ng`, { idNumber: "BU/22/CSC/001" });
   assert.equal(nileBad.status, 400);
   assert.match(nileBad.body.error, /9 digits/);
-  const bazeOk = await signup("baze", `b-${uid()}@bazeuniversity.edu.ng`, { idNumber: "BU/22/CSC/001" });
+  const bazeOk = await signup("baze", `b-${uid()}@bazeuniversity.edu.ng`, { idNumber: "20231" });
   assert.equal(bazeOk.status, 201, JSON.stringify(bazeOk.body));
+  const bazeLetters = await signup("baze", `b-${uid()}@bazeuniversity.edu.ng`, { idNumber: "BU/22/CSC/001" });
+  assert.equal(bazeLetters.status, 400);
+  assert.match(bazeLetters.body.error, /Baze ID number must be digits only/);
   const bazeBad = await signup("baze", `b-${uid()}@bazeuniversity.edu.ng`, { idNumber: "<b>" });
   assert.equal(bazeBad.status, 400);
 });

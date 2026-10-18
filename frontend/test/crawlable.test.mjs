@@ -3,6 +3,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { SCHOOLS } from "../src/lib/schools.js";
 
 const read = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const html = read("index.html");
@@ -11,11 +12,11 @@ const text = root.replace(/<[^>]+>/g, " ").replace(/&quot;/g, '"').replace(/\s+/
 
 test("the page says what FoundIT is before any JavaScript runs: one heading and real sentences inside #root", () => {
   assert.equal((root.match(/<h1\b/g) || []).length, 1, "exactly one main heading");
-  assert.match(root, /<h1[^>]*>[^<]*FoundIT[^<]*lost and found[^<]*Nile University/i);
+  assert.match(root, /<h1[^>]*>[^<]*FoundIT[^<]*lost and found/i);
   assert.ok(text.split(" ").length >= 60, "enough plain text for a search engine to understand the page");
   assert.match(text, /lost/i);
   assert.match(text, /found/i);
-  assert.match(text, /Nile University/);
+  for (const s of SCHOOLS.filter((x) => x.enabled)) assert.ok(text.includes(s.name), `the page names every open school: ${s.name}`);
 });
 
 test("the text is true to the app: only things FoundIT really has are promised", () => {
@@ -28,8 +29,10 @@ test("the text is true to the app: only things FoundIT really has are promised",
 });
 
 test("the heading, description and page title agree about what the app is", () => {
-  assert.match(html, /<title>FoundIT[^<]*Nile University[^<]*<\/title>/);
-  assert.match(html, /<meta\s+name="description"\s+content="[^"]*Nile University/);
+  assert.match(html, /<title>FoundIT — Campus Lost &amp; Found<\/title>/, "the tab title fits every school");
+  const description = html.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] || "";
+  for (const s of SCHOOLS.filter((x) => x.enabled)) assert.ok(description.includes(s.name), `the description names ${s.name}`);
+  for (const s of SCHOOLS.filter((x) => !x.enabled)) assert.ok(!html.includes(s.name), `a school that is not open is not advertised: ${s.name}`);
   assert.match(html, /<link rel="canonical" href="https:\/\/founditapp\.nedochipublications\.com\/" \/>/);
 });
 
