@@ -1,3 +1,5 @@
+import { useSchool } from "../school/SchoolProvider";
+import { idInputProps, idHint } from "../../lib/schools";
 import { useState } from "react";
 import { ArrowLeft, TriangleAlert } from "lucide-react";
 import { api } from "../../lib/api";
@@ -11,6 +13,7 @@ const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 
 export default function LostForm({ onNavigate }) {
   const { user } = useAuth();
+  const { school } = useSchool();
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
@@ -134,18 +137,14 @@ export default function LostForm({ onNavigate }) {
             <input
               id="lost-idnumber"
               type="text"
-              inputMode="numeric"
-              maxLength={9}
+              {...idInputProps(school)}
               required
               value={idNumber}
               onChange={(e) => setIdNumber(e.target.value)}
               className={inputClass}
-              placeholder="123456789"
-              pattern="\d{9}"
-              title="Format: 9 digits, e.g. 123456789"
             />
             <p className="mt-1 text-xs text-slate-400">
-              Format: 9 digits, e.g. 123456789. We'll remember this — you won't be asked again.
+              {idHint(school)}. We'll remember this — you won't be asked again.
             </p>
           </div>
         )}

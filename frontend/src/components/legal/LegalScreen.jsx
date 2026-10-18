@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { useSchool } from "../school/SchoolProvider";
 
 const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
 
@@ -16,6 +17,7 @@ function Section({ title, children }) {
 // this alongside any change to what data is collected or how the
 // token/cash-out system works.
 export default function LegalScreen({ onBack }) {
+  const { school } = useSchool();
   return (
     <div className="flex flex-col gap-5">
       <button
@@ -33,8 +35,8 @@ export default function LegalScreen({ onBack }) {
       <div className={`flex flex-col gap-5 ${cardClass}`}>
         <Section title="What FoundIT is">
           <p>
-            FoundIT is a lost-and-found service for the Nile University community, built and run by
-            Nedochi Publications. It is not an official Nile University system.
+            FoundIT is a lost-and-found service for the {school.name} community, built and run by
+            Nedochi Publications. It is not an official {school.name} system.
           </p>
         </Section>
 

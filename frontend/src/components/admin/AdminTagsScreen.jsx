@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Printer, RefreshCcw } from "lucide-react";
 import { api } from "../../lib/api";
+import { useSchool } from "../school/SchoolProvider";
+import { tagUrl } from "../../lib/schools";
 
 const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
 const pretty = (c) => `${c.slice(0, 4)}-${c.slice(4)}`;
@@ -17,7 +19,7 @@ const PRINT_CSS = `
 }
 `;
 
-function Sticker({ code, qr }) {
+function Sticker({ code, qr, school }) {
   return (
     <div
       className="tag-sticker flex flex-col items-center justify-between border border-dashed border-slate-400 bg-white text-center text-black"
@@ -27,7 +29,7 @@ function Sticker({ code, qr }) {
       {qr ? <img src={qr} alt={`QR code ${code}`} style={{ width: "32mm", height: "32mm" }} /> : <div style={{ width: "32mm", height: "32mm" }} />}
       <div style={{ lineHeight: 1.15 }}>
         <p style={{ fontSize: "6.5pt", fontWeight: 700 }}>Scan to message my owner</p>
-        <p style={{ fontSize: "6pt" }}>FoundIT · Nile University</p>
+        <p style={{ fontSize: "6pt" }}>FoundIT · {school.name}</p>
         <p style={{ fontSize: "6.5pt", fontFamily: "monospace", marginTop: "0.5mm" }}>{pretty(code)}</p>
       </div>
     </div>
@@ -36,6 +38,7 @@ function Sticker({ code, qr }) {
 
 /** Admin: make new tag codes and print them as a sheet of QR stickers. */
 export default function AdminTagsScreen() {
+  const { school } = useSchool();
   const [summary, setSummary] = useState(null);
   const [count, setCount] = useState(24);
   const [busy, setBusy] = useState(false);
@@ -53,7 +56,7 @@ export default function AdminTagsScreen() {
   useEffect(() => {
     let alive = true;
     Promise.all(
-      codes.map((c) => QRCode.toDataURL(`${origin}/t/${c}`, { margin: 1, width: 360, errorCorrectionLevel: "M" }).then((url) => [c, url]))
+      codes.map((c) => QRCode.toDataURL(tagUrl(origin, c, school), { margin: 1, width: 360, errorCorrectionLevel: "M" }).then((url) => [c, url]))
     ).then((pairs) => alive && setQrs(Object.fromEntries(pairs)));
     return () => {
       alive = false;
@@ -140,7 +143,7 @@ export default function AdminTagsScreen() {
           </button>
           <div id="tag-sheet" className="flex flex-wrap gap-[2mm] overflow-x-auto bg-[#e2e8f0] p-2">
             {codes.map((c) => (
-              <Sticker key={c} code={c} qr={qrs[c]} />
+              <Sticker key={c} code={c} qr={qrs[c]} school={school} />
             ))}
           </div>
         </div>

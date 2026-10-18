@@ -6,7 +6,7 @@ const configured = !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_
 
 if (configured) {
   webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || "mailto:admin@nileuniversity.edu.ng",
+    process.env.VAPID_SUBJECT || "mailto:nedochipublications@gmail.com",
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );

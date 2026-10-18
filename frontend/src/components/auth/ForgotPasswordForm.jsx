@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { api } from "../../lib/api";
+import { useSchool } from "../school/SchoolProvider";
+import { emailExample } from "../../lib/schools";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
 const labelClass = "block text-sm font-medium text-slate-300 mb-1";
 
 export default function ForgotPasswordForm({ onSwitchToLogin }) {
+  const { school } = useSchool();
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
@@ -47,7 +50,7 @@ export default function ForgotPasswordForm({ onSwitchToLogin }) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div>
         <p className="mb-3 text-sm text-slate-300">
-          Enter your Nile University email and we'll send you a link to reset your password.
+          Enter your {school.name} email and we'll send you a link to reset your password.
         </p>
         <label htmlFor="forgot-email" className={labelClass}>
           Email
@@ -59,7 +62,7 @@ export default function ForgotPasswordForm({ onSwitchToLogin }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={inputClass}
-          placeholder="yourIDnumber@nileuniversity.edu.ng"
+          placeholder={emailExample(school)}
         />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}

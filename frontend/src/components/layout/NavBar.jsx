@@ -29,7 +29,7 @@ export default function NavBar({ view, onNavigate, unreadCount = 0 }) {
               key={key}
               onClick={() => onNavigate(key)}
               className={`relative flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-semibold transition active:scale-95 ${
-                active ? `bg-white/[0.06] ${activeColor}` : "text-slate-500 hover:text-slate-300"
+                active ? `bg-white/[0.06] ${activeColor}` : "text-slate-400 hover:text-slate-200" // the hint grey: kept readable on every look by npm run themes:check
               }`}
             >
               <span className="relative">

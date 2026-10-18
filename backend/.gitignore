@@ -6,3 +6,8 @@ dev.db-wal
 dev.db-journal
 uploads/
 backups/
+# each school has its own database file beside dev.db (dev-baze.db, ...): never commit any of them
+dev-*.db
+dev-*.db-shm
+dev-*.db-wal
+dev-*.db-journal

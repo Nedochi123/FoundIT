@@ -1,3 +1,5 @@
+import { useSchool } from "../school/SchoolProvider";
+import { idInputProps, idHint } from "../../lib/schools";
 import { useEffect, useState } from "react";
 import { LogOut, Bell, MailCheck, Award, MessageSquareHeart, QrCode, ChevronRight } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -37,6 +39,7 @@ const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-
 
 export default function Profile({ onNavigate }) {
   const { user, updateProfile, logout } = useAuth();
+  const { school } = useSchool();
   const [name, setName] = useState(user?.name || "");
   const [idNumber, setIdNumber] = useState(user?.idNumber || "");
   const [saving, setSaving] = useState(false);
@@ -276,16 +279,12 @@ export default function Profile({ onNavigate }) {
           <input
             id="profile-idnumber"
             type="text"
-            inputMode="numeric"
-            maxLength={9}
+            {...idInputProps(school)}
             value={idNumber}
             onChange={(e) => setIdNumber(e.target.value)}
             className={inputClass}
-            placeholder="123456789"
-            pattern="\d{9}"
-            title="Format: 9 digits, e.g. 123456789"
           />
-          <p className="mt-1 text-xs text-slate-400">Format: 9 digits, e.g. 123456789</p>
+          <p className="mt-1 text-xs text-slate-400">{idHint(school)}</p>
         </div>
         {message && <p className="text-sm text-slate-300">{message}</p>}
         <button

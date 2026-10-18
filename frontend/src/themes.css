@@ -431,3 +431,94 @@
   --bg-pattern: none;
   --bg-pattern-size: auto;
 }
+
+/* Baze */
+:root[data-theme="baze"] {
+  --slate-50: 250 250 250;
+  --slate-100: 245 245 245;
+  --slate-200: 232 232 232;
+  --slate-300: 214 214 215;
+  --slate-400: 165 165 167;
+  --slate-500: 119 119 121;
+  --slate-600: 88 89 90;
+  --slate-700: 68 68 70;
+  --slate-800: 43 43 44;
+  --slate-900: 27 28 29;
+  --slate-950: 12 12 13;
+  --brand-a: #6b6d73;
+  --brand-b: #2563eb;
+  --brand-teal: 147 197 253;
+  --brand-blue: 37 99 235;
+  --brand-solid: 107 109 115;
+  --bar-top: 10 10 10;
+  --bar-bottom: 19 19 20;
+  --logo-check: #dbeafe;
+  --intro-top: #2b2c31;
+  --intro-mid: #1e1f23;
+  --intro-bottom: #121316;
+  --intro-glow-one: #63656a;
+  --intro-glow-two: #1d4ed8;
+  --intro-shadow-one: 99 101 106;
+  --intro-shadow-two: 37 99 235;
+  --bg-top: #2b2c31;
+  --bg-mid: #1e1f23;
+  --bg-bottom: #121316;
+  --glow-one: rgba(156, 159, 166, 0.07);
+  --glow-two: rgba(156, 159, 166, 0.04);
+  --blob-one: #63656a;
+  --blob-two: #4b4d53;
+  --doodle: #9c9fa6;
+  --body-text: 229 231 235;
+  --bg-pattern: none;
+  --bg-pattern-size: auto;
+}
+
+/* Cosmopolitan */
+:root[data-theme="cosmopolitan"] {
+  --slate-50: 18 27 48;
+  --slate-100: 22 33 59;
+  --slate-200: 30 42 72;
+  --slate-300: 40 54 88;
+  --slate-400: 59 76 114;
+  --slate-500: 84 104 150;
+  --slate-600: 142 158 194;
+  --slate-700: 183 195 225;
+  --slate-800: 219 227 245;
+  --slate-900: 242 245 253;
+  --slate-950: 250 252 254;
+  --brand-a: #1f3d7a;
+  --brand-b: #2b4c8c;
+  --brand-teal: 31 61 122;
+  --brand-blue: 31 61 122;
+  --brand-solid: 31 61 122;
+  --bar-top: 246 248 253;
+  --bar-bottom: 238 242 252;
+  --logo-check: #e0b955;
+  --intro-top: #24458a;
+  --intro-mid: #16295a;
+  --intro-bottom: #0a1430;
+  --intro-glow-one: #2f55a4;
+  --intro-glow-two: #c9a24a;
+  --intro-shadow-one: 31 61 122;
+  --intro-shadow-two: 201 162 74;
+  --bg-top: #ffffff;
+  --bg-mid: #f1f3f8;
+  --bg-bottom: #dfe5f1;
+  --glow-one: rgba(201, 162, 74, 0.16);
+  --glow-two: rgba(31, 61, 122, 0.10);
+  --blob-one: #d9b968;
+  --blob-two: #7f97c9;
+  --doodle: #1f3d7a;
+  --body-text: 22 33 59;
+  color-scheme: light;
+  --overlay: 18 27 48;
+  --tokens-from: 180 83 9;
+  --tokens-to: 146 64 14;
+  --t-red: 153 27 27;
+  --t-amber: 146 64 14;
+  --t-emerald: 6 95 70;
+  --t-cyan: 21 94 117;
+  --t-blue: 30 64 175;
+  --bg-pattern: none;
+  --bg-pattern-size: auto;
+}

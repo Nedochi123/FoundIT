@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { getTheme, normalizeLook } from "../../lib/themes";
+import { DEFAULT_THEME, getTheme, normalizeLook } from "../../lib/themes";
+import { useSchool } from "../school/SchoolProvider";
 import { applyThemedIcons, setManifestForTheme } from "../../lib/themedIcon";
 import DoodleField from "./DoodleField";
 
@@ -41,6 +42,18 @@ export function ThemeProvider({ children }) {
 
   const savedTheme = user?.theme;
   const savedDoodle = user?.doodle;
+
+  // Before signing in, the app wears the chosen school's own colors (Baze's charcoal and blue, ...); a school without
+  // its own colors keeps whatever this device last showed. Switching school switches the colors. Once signed in, the
+  // student's saved look takes over (effect below).
+  const { school, chosen } = useSchool();
+  const lastSchool = useRef(chosen ? school.id : null);
+  useEffect(() => {
+    if (savedTheme || !chosen) return;
+    const switched = lastSchool.current !== school.id;
+    lastSchool.current = school.id;
+    if (switched || school.theme) setLook((current) => normalizeLook({ ...current, theme: school.theme || DEFAULT_THEME }));
+  }, [savedTheme, chosen, school.id, school.theme]);
   useEffect(() => {
     if (savedTheme) setLook(normalizeLook({ theme: savedTheme, doodle: savedDoodle }));
   }, [savedTheme, savedDoodle]);

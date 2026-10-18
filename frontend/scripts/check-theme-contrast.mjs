@@ -53,12 +53,14 @@ for (const t of THEMES) {
   const mid = over(t.bg.mid, base);
   const surfaces = [triplet(v["slate-900"]), over(t.bg.top, mid), mid, over(t.bg.bottom, mid)];
   const rows = {
-    btnA: ratio(white, hex(v["brand-a"])),
-    btnB: ratio(white, hex(v["brand-b"])),
+    // the text on the buttons: white, or the theme's own onBrand color (a light gold button gets dark text)
+    btnA: ratio(t.onBrand ? hex(t.onBrand) : white, hex(v["brand-a"])),
+    btnB: ratio(t.onBrand ? hex(t.onBrand) : white, hex(v["brand-b"])),
     accent: worst(triplet(v["brand-teal"]), surfaces),
     heading: worst(triplet(v["slate-50"]), surfaces),
     secondary: worst(triplet(v["slate-300"]), surfaces),
-    hint: worst(triplet(v["slate-400"]), surfaces),
+    // hints, and the bottom menu's tabs (same grey), also measured on the menu bar itself
+    hint: worst(triplet(v["slate-400"]), [...surfaces, triplet(v["bar-bottom"])]),
   };
   const semantic = SEMANTIC.map(([name, darkRgb, variable]) => [name, worst(v[variable] ? triplet(v[variable]) : darkRgb, surfaces)]);
   const need = 4.5;

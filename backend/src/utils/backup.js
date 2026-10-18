@@ -8,7 +8,12 @@ const db = require("../../db");
 // same-day recovery points. It does NOT protect against total volume
 // loss, since a backup on the same volume disappears with it; an admin
 // can pull a copy off-platform via GET /api/admin/backups/:filename.
+// The default school's backups stay in backups/; every other school's go in backups/<school>/.
 const BACKUP_DIR = path.join(path.dirname(db.dbPath), "backups");
+const { DEFAULT_SCHOOL_ID } = require("../config/schools");
+function backupDir(schoolId = db.currentSchoolId()) {
+  return schoolId === DEFAULT_SCHOOL_ID ? BACKUP_DIR : path.join(BACKUP_DIR, schoolId);
+}
 const MAX_BACKUPS = 14;
 
 function backupFilename(date = new Date()) {
@@ -16,12 +21,13 @@ function backupFilename(date = new Date()) {
 }
 
 function listBackups() {
-  if (!fs.existsSync(BACKUP_DIR)) return [];
+  const dir = backupDir();
+  if (!fs.existsSync(dir)) return [];
   return fs
-    .readdirSync(BACKUP_DIR)
+    .readdirSync(dir)
     .filter((name) => name.startsWith("backup-") && name.endsWith(".db"))
     .map((name) => {
-      const stat = fs.statSync(path.join(BACKUP_DIR, name));
+      const stat = fs.statSync(path.join(dir, name));
       return { name, sizeBytes: stat.size, createdAt: stat.mtime.toISOString() };
     })
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -32,16 +38,17 @@ function listBackups() {
 // The target path can't already exist, which the timestamped filename
 // guarantees in practice.
 function runBackup() {
-  fs.mkdirSync(BACKUP_DIR, { recursive: true });
-  const filePath = path.join(BACKUP_DIR, backupFilename());
+  const dir = backupDir();
+  fs.mkdirSync(dir, { recursive: true });
+  const filePath = path.join(dir, backupFilename());
   db.exec(`VACUUM INTO '${filePath.replace(/'/g, "''")}'`);
 
   const backups = listBackups();
   for (const old of backups.slice(MAX_BACKUPS)) {
-    fs.unlinkSync(path.join(BACKUP_DIR, old.name));
+    fs.unlinkSync(path.join(dir, old.name));
   }
 
   return { file: path.basename(filePath) };
 }
 
-module.exports = { runBackup, listBackups, BACKUP_DIR };
+module.exports = { runBackup, listBackups, backupDir, BACKUP_DIR };

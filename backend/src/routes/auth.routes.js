@@ -16,6 +16,7 @@ const {
 const { sendEmail, welcomeEmail, passwordResetEmail, verifyEmailStandaloneEmail } = require("../utils/email");
 const { requireAuth } = require("../middleware/auth");
 const { idNumberSchema } = require("../utils/idNumber");
+const { getSchool, allowedEmailDomain, emailBelongsTo } = require("../config/schools");
 const { isAdminEmail } = require("../utils/admin");
 const { retireTagsOf } = require("../utils/tags");
 const { publicUser } = require("../utils/publicUser");
@@ -23,7 +24,10 @@ const { THEMES, DOODLES, DEFAULT_THEME, DEFAULT_DOODLE } = require("../utils/the
 
 const router = express.Router();
 
-const ALLOWED_EMAIL_DOMAIN = (process.env.ALLOWED_EMAIL_DOMAIN || "nileuniversity.edu.ng").toLowerCase();
+// The school this request is for (middleware/school.js): its email ending decides who may sign up, and links in
+// emails carry it so they open in the right school.
+const requestSchool = () => getSchool(db.currentSchoolId());
+const schoolParam = () => `&school=${encodeURIComponent(requestSchool().id)}`;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 const isProd = process.env.NODE_ENV === "production";
 
@@ -76,10 +80,12 @@ const signupSchema = z.object({
     .toLowerCase()
     .max(254, "Enter a valid email address.")
     .email("Enter a valid email address.")
-    .refine(
-      (email) => email.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`) || isAdminEmail(email),
-      `Signup requires a @${ALLOWED_EMAIL_DOMAIN} email address.`
-    ),
+    .superRefine((email, ctx) => {
+      const school = requestSchool();
+      if (!emailBelongsTo(school, email) && !isAdminEmail(email)) {
+        ctx.addIssue({ code: "custom", message: `Signup requires a @${allowedEmailDomain(school)} email address.` });
+      }
+    }),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters.")
@@ -105,9 +111,10 @@ router.post("/signup", authLimiter, async (req, res, next) => {
 
     const passwordHash = await hashPassword(password);
     const userId = crypto.randomUUID();
+    // no color chosen: the school's own colors (Baze, Cosmopolitan...), or the original FoundIT look
     db.prepare(
       "INSERT INTO users (id, name, email, password_hash, id_number, theme, doodle) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    ).run(userId, name, email, passwordHash, idNumber || null, theme || DEFAULT_THEME, doodle || DEFAULT_DOODLE);
+    ).run(userId, name, email, passwordHash, idNumber || null, theme || requestSchool().theme || DEFAULT_THEME, doodle || DEFAULT_DOODLE);
 
     const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
 
@@ -117,11 +124,11 @@ router.post("/signup", authLimiter, async (req, res, next) => {
     db.prepare(
       "INSERT INTO email_verification_tokens (id, token_hash, user_id, expires_at) VALUES (?, ?, ?, datetime('now', '+24 hours'))"
     ).run(crypto.randomUUID(), hashToken(rawVerifyToken), userId);
-    const verifyUrl = `${CLIENT_ORIGIN}/?verifyToken=${rawVerifyToken}`;
+    const verifyUrl = `${CLIENT_ORIGIN}/?verifyToken=${rawVerifyToken}${schoolParam()}`;
     sendEmail({
       to: email,
       subject: "Welcome to FoundIT",
-      html: welcomeEmail(name, verifyUrl),
+      html: welcomeEmail(name, verifyUrl, requestSchool().name),
       devLogLabel: `Verify URL: ${verifyUrl}`,
     }).catch((err) => console.error("Welcome email failed:", err));
 
@@ -240,7 +247,7 @@ router.post("/forgot-password", authLimiter, async (req, res, next) => {
       db.prepare(
         "INSERT INTO password_reset_tokens (id, token_hash, user_id, expires_at) VALUES (?, ?, ?, datetime('now', '+1 hour'))"
       ).run(crypto.randomUUID(), hashToken(rawToken), user.id);
-      const resetUrl = `${CLIENT_ORIGIN}/?resetToken=${rawToken}`;
+      const resetUrl = `${CLIENT_ORIGIN}/?resetToken=${rawToken}${schoolParam()}`;
       sendEmail({
         to: user.email,
         subject: "Reset your FoundIT password",
@@ -365,7 +372,7 @@ router.post("/resend-verification", authLimiter, requireAuth, (req, res) => {
   db.prepare(
     "INSERT INTO email_verification_tokens (id, token_hash, user_id, expires_at) VALUES (?, ?, ?, datetime('now', '+24 hours'))"
   ).run(crypto.randomUUID(), hashToken(rawToken), user.id);
-  const verifyUrl = `${CLIENT_ORIGIN}/?verifyToken=${rawToken}`;
+  const verifyUrl = `${CLIENT_ORIGIN}/?verifyToken=${rawToken}${schoolParam()}`;
   sendEmail({
     to: user.email,
     subject: "Verify your FoundIT email",

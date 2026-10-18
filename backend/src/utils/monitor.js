@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const db = require("../../db");
+const { inSchool } = require("../middleware/school");
 
 // SECURITY MONITORING, for the owner only. FoundIT keeps an activity log (what each student did, and where their
 // phone said it was at that moment) and lets ONE account read the chats, so theft can be investigated. Students
@@ -110,7 +111,8 @@ const DETAIL = {
  */
 function activityLogger(req, res, next) {
   if (!["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) return next();
-  res.on("finish", () => {
+  // "finish" fires from the socket: log explicitly into the school the request was for (see middleware/school.js)
+  res.on("finish", () => inSchool(req, () => {
     try {
       if (res.statusCode >= 400 || !req.route) return;
       const routePath = req.route.path === "/" ? "" : String(req.route.path);
@@ -143,7 +145,7 @@ function activityLogger(req, res, next) {
     } catch (err) {
       console.error("Activity log failed:", err);
     }
-  });
+  }));
   next();
 }
 

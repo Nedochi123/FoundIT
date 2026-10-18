@@ -1,5 +1,6 @@
 // Real email delivery, using Resend (https://resend.com) — same service
 // and pattern already used for Pup Facts and the Kimberly Vet backend.
+const { getSchool, DEFAULT_SCHOOL_ID } = require("../config/schools");
 
 function getResendClient() {
   if (!process.env.RESEND_API_KEY) return null;
@@ -49,11 +50,11 @@ function passwordResetEmail(resetUrl) {
   `;
 }
 
-function welcomeEmail(name, verifyUrl) {
+function welcomeEmail(name, verifyUrl, schoolName = getSchool(DEFAULT_SCHOOL_ID).name) {
   return `
     <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
       <h2 style="color: #1F3A5F;">Welcome to FoundIT, ${name}</h2>
-      <p>FoundIT is Nile University's campus lost &amp; found. Lost something? Post it and we'll notify everyone. Found something? Snap a photo and help it get home.</p>
+      <p>FoundIT is ${schoolName}'s campus lost &amp; found. Lost something? Post it and we'll notify everyone. Found something? Snap a photo and help it get home.</p>
       ${verifyUrl ? `
       <p>One more thing — please verify your email address so we know it's really you:</p>
       <p><a href="${verifyUrl}" style="background: #1F3A5F; color: white; padding: 12px 20px; border-radius: 24px; text-decoration: none; display: inline-block;">Verify Email</a></p>

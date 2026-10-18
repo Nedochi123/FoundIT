@@ -1,6 +1,7 @@
 const db = require("../../db");
 const { verifyAccessToken } = require("../utils/tokens");
 const { isAdminAccount } = require("../utils/admin");
+const { DEFAULT_SCHOOL_ID } = require("../config/schools");
 
 // Reads the access token from the httpOnly cookie (preferred) or an
 // Authorization: Bearer header (needed because iOS Safari's ITP can
@@ -19,6 +20,12 @@ function requireAuth(req, res, next) {
 
   try {
     const payload = verifyAccessToken(token);
+
+    // A session only works at the school it was made in. (Its account exists only in that school's database anyway; this
+    // makes it explicit. Sessions from before there were several schools carry no school: they are the default school's.)
+    if ((payload.sch || DEFAULT_SCHOOL_ID) !== db.currentSchoolId()) {
+      return res.status(401).json({ error: "Invalid or expired session." });
+    }
 
     // Checked on every request (not just login) so a suspension or
     // deletion takes effect immediately, even against an access token

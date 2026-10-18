@@ -177,6 +177,47 @@ export const THEMES = [
     doodle: "#7c3aed",
     swatchBg: "linear-gradient(135deg, #f8f3ff, #d8c8f7)",
   },
+  // A school's own colors (school: only that school's students are offered it; see lib/schools.js).
+  {
+    id: "baze",
+    school: "baze",
+    // Baze: the charcoal-and-blue look he first saw, with more grey "in the right places" (his words). Grey is the
+    // structure: the page, the cards and the grey half of the button and logo, all Baze's crest and website greys.
+    // Blue (from Baze's banner photos) is kept only where it says "tap here": the other half of the button, and links.
+    // The contrast rules are checked in test/schools.test.mjs.
+    chrome: "#1e1f23", // the browser/phone status-bar color
+    label: "Baze",
+    logoCheck: "#dbeafe",
+    intro: { top: "#2b2c31", mid: "#1e1f23", bottom: "#121316", glowOne: "#63656a", glowTwo: "#1d4ed8", shadowOne: "99 101 106", shadowTwo: "37 99 235" },
+    suggestedDoodle: "none",
+    neutral: { hue: 228, sat: 0.05 },
+    brand: { a: "#6b6d73", b: "#2563eb", text: "#93c5fd", shadow: "#2563eb" },
+    bg: { top: "#2b2c31", mid: "#1e1f23", bottom: "#121316" },
+    glow: { one: "rgba(156, 159, 166, 0.07)", two: "rgba(156, 159, 166, 0.04)" },
+    blobs: { one: "#63656a", two: "#4b4d53" }, // grey glows: the page itself stays grey
+    doodle: "#9c9fa6",
+    swatchBg: "linear-gradient(135deg, #3a3b40, #121316)",
+  },
+  {
+    id: "cosmopolitan",
+    school: "cosmopolitan",
+    // Cosmopolitan University as its student ID card looks (he sent a photo: "how their color is"): a white card with a
+    // royal navy band, a thin gold line and the navy-and-gold seal. So a LIGHT look: white-to-pale-navy page, royal navy
+    // buttons and links (white text on them), gold as the accent (the check mark in the logo, the glows). Contrast rules:
+    // test/schools.test.mjs and npm run themes:check.
+    chrome: "#e8ecf5", // the browser/phone status-bar color
+    label: "Cosmopolitan",
+    logoCheck: "#e0b955", // the check mark in the navy logo tile: the card's gold
+    intro: { top: "#24458a", mid: "#16295a", bottom: "#0a1430", glowOne: "#2f55a4", glowTwo: "#c9a24a", shadowOne: "31 61 122", shadowTwo: "201 162 74" },
+    suggestedDoodle: "none",
+    neutral: { hue: 222, sat: 1, tone: "light" },
+    brand: { a: "#1f3d7a", b: "#2b4c8c", text: "#1f3d7a", shadow: "#1f3d7a" },
+    bg: { top: "#ffffff", mid: "#f1f3f8", bottom: "#dfe5f1" },
+    glow: { one: "rgba(201, 162, 74, 0.16)", two: "rgba(31, 61, 122, 0.10)" },
+    blobs: { one: "#d9b968", two: "#7f97c9" },
+    doodle: "#1f3d7a",
+    swatchBg: "linear-gradient(160deg, #ffffff 58%, #c9a24a 58%, #c9a24a 62%, #1f3d7a 62%)",
+  },
 ];
 
 export const THEME_IDS = THEMES.map((t) => t.id);

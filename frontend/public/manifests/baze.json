@@ -1,0 +1,39 @@
+{
+  "name": "FoundIT — Campus Lost & Found",
+  "short_name": "FoundIT",
+  "description": "Lost something on campus? Found something? FoundIT reunites students, lecturers and staff at Nile University, Baze University and Cosmopolitan University with their lost belongings.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0e1a",
+  "theme_color": "#1e1f23",
+  "icons": [
+    {
+      "src": "/icons/themes/baze-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/themes/baze-256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/themes/baze-384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/themes/baze-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/themes/baze-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
