@@ -90,7 +90,7 @@ test("ID number boxes follow the school: Nile is 9 digits, a school with no know
   assert.ok(new RegExp(`^${baze.pattern}$`).test("12345") && !new RegExp(`^${baze.pattern}$`).test("BU/22/001"));
   const cosmo = idInputProps(getSchool("cosmopolitan"));
   assert.equal(cosmo.placeholder, "0123", "Cosmopolitan IDs may start with 0");
-  assert.ok(new RegExp(`^${cosmo.pattern}$`).test("0455") && !new RegExp(`^${cosmo.pattern}$`).test("CU/22/001"));
+  assert.ok(new RegExp(`^${cosmo.pattern}$`).test("0042") && !new RegExp(`^${cosmo.pattern}$`).test("CU/22/001"));
   const other = idInputProps(getSchool("philomath"));
   assert.equal(other.inputMode, "text");
   assert.equal(other.maxLength, 20);

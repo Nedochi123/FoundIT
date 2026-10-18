@@ -121,7 +121,7 @@ test("Cosmopolitan is open: its real domain only, and digits-only IDs that may s
   assert.equal(schoolForEmail("surname0123@cosmopolitan.edu.ng")?.id, "cosmopolitan");
   assert.equal(schoolForEmail("surname0123@cosmopolitanuniversity.edu.ng"), null, "that domain does not exist: nobody may join with it");
   const ids = idNumberSchemaFor("cosmopolitan");
-  for (const good of ["0455", "0123", "12345678"]) assert.ok(ok(ids, good), `accepts ${good}`);
+  for (const good of ["0042", "0123", "12345678"]) assert.ok(ok(ids, good), `accepts ${good}`);
   for (const bad of ["045", "123456789", "CU/22/001", "04a5", ""]) assert.ok(!ok(ids, bad), `rejects ${JSON.stringify(bad)}`);
   assert.equal(ids.safeParse("CU/22/001").error.issues[0].message, "Cosmopolitan ID number must be digits only, e.g. 0123.");
 });
