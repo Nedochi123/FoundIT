@@ -7,7 +7,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0a0e1a",
-  "theme_color": "#111113",
+  "theme_color": "#16171a",
   "icons": [
     {
       "src": "/icons/themes/baze-192.png",

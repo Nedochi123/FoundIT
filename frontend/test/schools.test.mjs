@@ -273,3 +273,30 @@ test("Baze has its own colors: offered only to Baze students, shown to them by d
   assert.match(read("src/themes.css"), /\[data-theme="baze"\]/, "its CSS is generated");
   assert.match(read("public/manifests/baze.json"), /"theme_color"/, "and its Home Screen icon");
 });
+
+test("Baze's greys have good contrast: its buttons stand out from the card and page, and their white text is readable", async () => {
+  const { getTheme } = await import("../src/lib/themes.js");
+  const t = getTheme("baze");
+  const lum = (hex) => {
+    const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (x, y) => {
+    const [a, b] = [lum(x), lum(y)].sort((p, q) => q - p);
+    return (a + 0.05) / (b + 0.05);
+  };
+  const css = read("src/themes.css");
+  const block = css.slice(css.indexOf('[data-theme="baze"]'));
+  const slate900 = block.match(/--slate-900:\s*([0-9 ]+);/)[1].trim().split(/\s+/).map((n) => Number(n).toString(16).padStart(2, "0")).join("");
+  const card = "#" + slate900;
+  for (const end of [t.brand.a, t.brand.b]) {
+    assert.ok(ratio(end, card) >= 3, `button ${end} vs card ${card}: ${ratio(end, card).toFixed(2)}`);
+    assert.ok(ratio(end, t.bg.mid) >= 3, `button ${end} vs page ${t.bg.mid}: ${ratio(end, t.bg.mid).toFixed(2)}`);
+    assert.ok(ratio("#ffffff", end) >= 4.5, `white on button ${end}: ${ratio("#ffffff", end).toFixed(2)}`);
+  }
+  assert.ok(ratio(t.brand.text, t.bg.mid) >= 7, "links and the IT in FoundIT are near-white");
+  for (const hex of [t.brand.a, t.brand.b, t.bg.mid, t.bg.top, t.bg.bottom]) {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    assert.ok(Math.max(r, g, b) - Math.min(r, g, b) <= 12, `${hex} is a grey (no other color in Baze's look)`);
+  }
+});
