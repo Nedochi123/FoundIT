@@ -274,7 +274,7 @@ test("Baze has its own colors: offered only to Baze students, shown to them by d
   assert.match(read("public/manifests/baze.json"), /"theme_color"/, "and its Home Screen icon");
 });
 
-test("Baze's greys have good contrast: its buttons stand out from the card and page, and their white text is readable", async () => {
+test("Baze: grey structure with blue only for buttons and links, and good contrast: buttons stand out and their white text is readable", async () => {
   const { getTheme } = await import("../src/lib/themes.js");
   const t = getTheme("baze");
   const lum = (hex) => {
@@ -295,8 +295,11 @@ test("Baze's greys have good contrast: its buttons stand out from the card and p
     assert.ok(ratio("#ffffff", end) >= 4.5, `white on button ${end}: ${ratio("#ffffff", end).toFixed(2)}`);
   }
   assert.ok(ratio(t.brand.text, t.bg.mid) >= 7, "links and the IT in FoundIT are near-white");
-  for (const hex of [t.brand.a, t.brand.b, t.bg.mid, t.bg.top, t.bg.bottom]) {
+  // grey is the structure (the page and the grey half of the button and logo); blue is only for "tap here"
+  const isGrey = (hex) => {
     const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-    assert.ok(Math.max(r, g, b) - Math.min(r, g, b) <= 12, `${hex} is a grey (no other color in Baze's look)`);
-  }
+    return Math.max(r, g, b) - Math.min(r, g, b) <= 12;
+  };
+  for (const hex of [t.brand.a, t.bg.mid, t.bg.top, t.bg.bottom, t.chrome]) assert.ok(isGrey(hex), `${hex} is one of Baze's greys`);
+  assert.ok(!isGrey(t.brand.b) && !isGrey(t.brand.text), "the button's other half and the links stay blue, so they read as tappable");
 });

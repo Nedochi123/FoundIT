@@ -181,21 +181,22 @@ export const THEMES = [
   {
     id: "baze",
     school: "baze",
-    // Baze's greys (its crest and website: charcoal, mid grey #63656a, light grey #9c9fa6) and nothing else. He asked
-    // for "more of grey", then "good contrast": a dark charcoal page so the lighter grey buttons and logo stand out
-    // (at least 3:1 against the page, test/schools.test.mjs), white text on them (4.5:1+), near-white links.
-    chrome: "#16171a", // the browser/phone status-bar color
+    // Baze: the charcoal-and-blue look he first saw, with more grey "in the right places" (his words). Grey is the
+    // structure: the page, the cards and the grey half of the button and logo, all Baze's crest and website greys.
+    // Blue (from Baze's banner photos) is kept only where it says "tap here": the other half of the button, and links.
+    // The contrast rules are checked in test/schools.test.mjs.
+    chrome: "#1e1f23", // the browser/phone status-bar color
     label: "Baze",
-    logoCheck: "#ffffff",
-    intro: { top: "#2c2d31", mid: "#16171a", bottom: "#0c0c0e", glowOne: "#63656a", glowTwo: "#9c9fa6", shadowOne: "99 101 106", shadowTwo: "156 159 166" },
+    logoCheck: "#dbeafe",
+    intro: { top: "#2b2c31", mid: "#1e1f23", bottom: "#121316", glowOne: "#63656a", glowTwo: "#1d4ed8", shadowOne: "99 101 106", shadowTwo: "37 99 235" },
     suggestedDoodle: "none",
-    neutral: { hue: 228, sat: 0.04 },
-    brand: { a: "#74767c", b: "#696b71", text: "#e4e4e7", shadow: "#9c9fa6" }, // white text 4.6/5.4; 3:1+ against the card and the page
-    bg: { top: "#222327", mid: "#16171a", bottom: "#0c0c0e" },
-    glow: { one: "rgba(156, 159, 166, 0.07)", two: "rgba(255, 255, 255, 0.035)" },
-    blobs: { one: "#63656a", two: "#9c9fa6" },
+    neutral: { hue: 228, sat: 0.05 },
+    brand: { a: "#6b6d73", b: "#2563eb", text: "#93c5fd", shadow: "#2563eb" },
+    bg: { top: "#2b2c31", mid: "#1e1f23", bottom: "#121316" },
+    glow: { one: "rgba(156, 159, 166, 0.07)", two: "rgba(156, 159, 166, 0.04)" },
+    blobs: { one: "#63656a", two: "#4b4d53" }, // grey glows: the page itself stays grey
     doodle: "#9c9fa6",
-    swatchBg: "linear-gradient(135deg, #3a3b40, #0c0c0e)",
+    swatchBg: "linear-gradient(135deg, #3a3b40, #121316)",
   },
 ];
 
