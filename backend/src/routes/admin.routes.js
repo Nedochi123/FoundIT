@@ -3,7 +3,7 @@ const path = require("node:path");
 const { z } = require("zod");
 const db = require("../../db");
 const { requireAuth, requireAdmin } = require("../middleware/auth");
-const { runBackup, listBackups, BACKUP_DIR } = require("../utils/backup");
+const { runBackup, listBackups, backupDir } = require("../utils/backup");
 const { revokeAllRefreshTokensForUser } = require("../utils/tokens");
 const { recordCashoutPaid } = require("../utils/revenue");
 
@@ -36,7 +36,7 @@ router.get("/backups/:filename", (req, res) => {
   if (!BACKUP_FILENAME_PATTERN.test(req.params.filename)) {
     return res.status(400).json({ error: "Invalid backup filename." });
   }
-  res.download(path.join(BACKUP_DIR, req.params.filename), (err) => {
+  res.download(path.join(backupDir(), req.params.filename), (err) => {
     if (err && !res.headersSent) res.status(404).json({ error: "Backup not found." });
   });
 });

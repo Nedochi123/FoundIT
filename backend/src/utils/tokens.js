@@ -22,7 +22,8 @@ const REFRESH_TOKEN_TTL_DAYS = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 30);
 
 function signAccessToken(user) {
   return jwt.sign(
-    { sub: user.id, email: user.email, name: user.name },
+    // sch: the school the session belongs to (middleware/auth.js refuses it at any other school)
+    { sub: user.id, email: user.email, name: user.name, sch: db.currentSchoolId() },
     process.env.JWT_ACCESS_SECRET,
     { algorithm: "HS256", expiresIn: ACCESS_TOKEN_TTL }
   );

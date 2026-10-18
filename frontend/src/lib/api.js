@@ -5,6 +5,18 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000
 import { geoHeaderValue } from "./geo";
 import { createRefreshGate } from "./refreshGate";
 import { RENEW_BEFORE_SECONDS, secondsLeft } from "./tokenExpiry";
+import { DEFAULT_SCHOOL_ID, getSchool } from "./schools";
+
+// Which school every request is for. Each school has its own database on the server, and this header is how the server
+// knows which one to use (backend/src/middleware/school.js). SchoolProvider keeps it in step with the school the
+// student picked; a finder's QR-tag page sets it from the sticker's link.
+let requestSchoolId = DEFAULT_SCHOOL_ID;
+export function setApiSchool(id) {
+  requestSchoolId = getSchool(id).id;
+}
+export function apiSchool() {
+  return requestSchoolId;
+}
 
 const refreshOnce = createRefreshGate();
 
@@ -94,6 +106,7 @@ async function apiRequest(path, options = {}, _isRetry = false) {
   const isFormData = options.body instanceof FormData;
 
   const headers = {
+    "X-School": requestSchoolId,
     ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(tokens?.accessToken ? { Authorization: `Bearer ${tokens.accessToken}` } : {}),
     // where the phone is, sent with anything that changes something (the owner's security log; see lib/geo.js)

@@ -3,6 +3,7 @@ import QRCode from "qrcode";
 import { Printer, RefreshCcw } from "lucide-react";
 import { api } from "../../lib/api";
 import { useSchool } from "../school/SchoolProvider";
+import { tagUrl } from "../../lib/schools";
 
 const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
 const pretty = (c) => `${c.slice(0, 4)}-${c.slice(4)}`;
@@ -55,7 +56,7 @@ export default function AdminTagsScreen() {
   useEffect(() => {
     let alive = true;
     Promise.all(
-      codes.map((c) => QRCode.toDataURL(`${origin}/t/${c}`, { margin: 1, width: 360, errorCorrectionLevel: "M" }).then((url) => [c, url]))
+      codes.map((c) => QRCode.toDataURL(tagUrl(origin, c, school), { margin: 1, width: 360, errorCorrectionLevel: "M" }).then((url) => [c, url]))
     ).then((pairs) => alive && setQrs(Object.fromEntries(pairs)));
     return () => {
       alive = false;

@@ -215,3 +215,38 @@ test("a school whose official logo is white sits on its own dark badge, so it ca
   assert.ok((1.05) / (lum(philomath.badge) + 0.05) > 7, "white on Philomath's badge is easy to read");
   assert.ok(read("src/components/school/SchoolMark.jsx").includes("school.badge ? { background: school.badge }"), "the badge color is applied");
 });
+
+test("every request names its school, so the server uses that school's own database", async () => {
+  const api = read("src/lib/api.js");
+  assert.match(api, /"X-School": requestSchoolId,/, "the header is on every request");
+  assert.match(api, /requestSchoolId = getSchool\(id\)\.id;/, "an unknown school can never be sent: it becomes the default");
+  const provider = read("src/components/school/SchoolProvider.jsx");
+  assert.match(provider, /setApiSchool\(id \|\| DEFAULT_SCHOOL_ID\); \/\/ before any screen sends its first request/);
+  assert.match(provider, /setApiSchool\(next\);/, "switching school takes effect at once");
+  assert.match(read("src/components/tags/TagScan.jsx"), /setApiSchool\(s\.id\);/, "a finder's page asks the sticker's school");
+});
+
+test("a QR sticker names its school, except the default school's, whose printed stickers keep working unchanged", async () => {
+  const { tagUrl } = await import("../src/lib/schools.js");
+  assert.equal(tagUrl("https://app.example", "ABCD1234", getSchool("nile")), "https://app.example/t/ABCD1234");
+  assert.equal(tagUrl("https://app.example", "ABCD1234", getSchool("baze")), "https://app.example/t/ABCD1234?school=baze");
+  assert.equal(tagUrl("https://app.example", "ABCD1234", undefined), "https://app.example/t/ABCD1234");
+  assert.match(read("src/components/admin/AdminTagsScreen.jsx"), /QRCode\.toDataURL\(tagUrl\(origin, c, school\)/);
+});
+
+test("a link from an email opens in its own school: ?school= is read only if it is a known, open school", async () => {
+  const { readSchoolFromUrl } = await import("../src/lib/schools.js");
+  const at = (search, fn) => {
+    globalThis.window = { location: { search } };
+    try {
+      return fn();
+    } finally {
+      delete globalThis.window;
+    }
+  };
+  assert.equal(at("?verifyToken=abc&school=nile", readSchoolFromUrl), "nile");
+  assert.equal(at("?verifyToken=abc&school=baze", readSchoolFromUrl), null, "Baze is not open yet");
+  assert.equal(at("?school=hogwarts", readSchoolFromUrl), null);
+  assert.equal(at("", readSchoolFromUrl), null);
+  assert.equal(readSchoolFromUrl(), null, "no window (or a blocked one) is not an error");
+});

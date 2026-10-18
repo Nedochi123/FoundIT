@@ -4,6 +4,17 @@ import { api } from "../../lib/api";
 import TagChat from "./TagChat";
 import Logo from "../theme/Logo";
 import { getSchool, handInTo } from "../../lib/schools";
+import { setApiSchool } from "../../lib/api";
+
+// The school the scanned sticker belongs to: its link says ?school=... (stickers printed before there were several
+// schools say nothing, and those are all the default school's).
+function stickerSchool() {
+  try {
+    return getSchool(new URLSearchParams(window.location.search).get("school"));
+  } catch {
+    return getSchool();
+  }
+}
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -53,7 +64,11 @@ function Shell({ children }) {
  */
 export default function TagScan({ code }) {
   const [info, setInfo] = useState(null); // { status, label }
-  const school = getSchool(info?.school); // a finder has no account: the tag itself says which school it belongs to
+  const [school] = useState(() => {
+    const s = stickerSchool(); // a finder has no account: the sticker says which school the tag belongs to
+    setApiSchool(s.id); // before the first request, so the tag is looked up in that school's database
+    return s;
+  });
   const [loadError, setLoadError] = useState("");
   const [token, setToken] = useState(() => readToken(code));
   const [chat, setChat] = useState(null); // { messages, open } once the finder has a chat

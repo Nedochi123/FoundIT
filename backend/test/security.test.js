@@ -102,8 +102,9 @@ test("the guard, on its own", () => {
 
 // ---------------------------------------------------------------------------------------------- what errors show
 test("a server error never shows its details", async () => {
-  const real = db.prepare;
-  db.prepare = () => {
+  // `db` is a switch to the request's school's database (db/index.js): break the real one, the default school's
+  const handle = db.schoolDb();
+  handle.prepare = () => {
     throw new Error("SQLITE_ERROR at /data/secret-place/dev.db no such table users");
   };
   let r;
@@ -111,7 +112,7 @@ test("a server error never shows its details", async () => {
     // a public page that reads the database (the gallery now needs a sign-in, and that check also reads it)
     r = await call(null, "GET", "/api/tags/public/ABCD1234");
   } finally {
-    db.prepare = real;
+    delete handle.prepare;
   }
   assert.equal(r.status, 500);
   assert.ok(!/SQLITE|secret-place|dev\.db|no such table/.test(JSON.stringify(r.body)), JSON.stringify(r.body));

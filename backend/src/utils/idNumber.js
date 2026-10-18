@@ -1,5 +1,6 @@
 const { z } = require("zod");
-const { getSchool, DEFAULT_SCHOOL_ID } = require("../config/schools");
+const db = require("../../db");
+const { getSchool } = require("../config/schools");
 
 // Each school has its own ID number format (see config/schools.js).
 // This only checks the format is well-formed. It does not (and cannot, without access to the school's registrar
@@ -10,8 +11,16 @@ function idNumberSchemaFor(schoolOrId) {
   return z.string().trim().regex(school.idPattern, school.idMessage).optional();
 }
 
-// Until the server knows a request's school, everything is the default school's.
-const ID_NUMBER_PATTERN = getSchool(DEFAULT_SCHOOL_ID).idPattern;
-const idNumberSchema = idNumberSchemaFor(DEFAULT_SCHOOL_ID);
+// The ID number of whichever school the request is for (checked when the request is read, not when the server starts).
+const idNumberSchema = z
+  .string()
+  .trim()
+  .superRefine((value, ctx) => {
+    const school = getSchool(db.currentSchoolId());
+    if (!school.idPattern.test(value)) ctx.addIssue({ code: "custom", message: school.idMessage });
+  })
+  .optional();
+
+const ID_NUMBER_PATTERN = getSchool().idPattern; // the default school's
 
 module.exports = { idNumberSchema, idNumberSchemaFor, ID_NUMBER_PATTERN };

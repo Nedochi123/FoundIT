@@ -19,24 +19,31 @@ installShutdown(server, { onClose: () => db.close() });
 
 // A failed backup logs but never crashes the process -- missing one
 // day's snapshot shouldn't take the whole app down.
+// Every daily job runs once per school, inside that school's database. One school failing never stops the others.
+function eachSchool(label, job) {
+  db.forEachSchool((school) => {
+    try {
+      job(school);
+    } catch (err) {
+      console.error(`${label} failed for ${school.name}:`, err);
+    }
+  });
+}
+
 function backupOnSchedule() {
-  try {
+  eachSchool("Database backup", (school) => {
     const { file } = runBackup();
-    console.log(`Database backup written: ${file}`);
-  } catch (err) {
-    console.error("Database backup failed:", err);
-  }
+    console.log(`Database backup written for ${school.name}: ${file}`);
+  });
 }
 
 function expireItemsOnSchedule() {
-  try {
+  eachSchool("Item auto-expiry", (school) => {
     const { lostExpired, foundExpired } = expireStaleItems();
     if (lostExpired || foundExpired) {
-      console.log(`Auto-expired ${lostExpired} lost item(s), ${foundExpired} found item(s)`);
+      console.log(`Auto-expired ${lostExpired} lost item(s), ${foundExpired} found item(s) at ${school.name}`);
     }
-  } catch (err) {
-    console.error("Item auto-expiry failed:", err);
-  }
+  });
 }
 
 // Delayed by 2 minutes past boot so a deploy's own startup work isn't
@@ -53,12 +60,10 @@ setTimeout(() => {
 
 // The activity log (and the locations in it) is only kept for RETENTION_DAYS.
 function purgeActivityOnSchedule() {
-  try {
+  eachSchool("Activity purge", (school) => {
     const { activity } = purgeOldActivity();
-    if (activity) console.log(`Deleted ${activity} activity row(s) older than ${RETENTION_DAYS} days`);
-  } catch (err) {
-    console.error("Activity purge failed:", err);
-  }
+    if (activity) console.log(`Deleted ${activity} activity row(s) older than ${RETENTION_DAYS} days at ${school.name}`);
+  });
 }
 setTimeout(() => {
   purgeActivityOnSchedule();

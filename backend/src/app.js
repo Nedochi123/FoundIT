@@ -22,6 +22,8 @@ const monitorRoutes = require("./routes/monitor.routes");
 const supportRoutes = require("./routes/support.routes");
 const { activityLogger } = require("./utils/monitor");
 const { originGuard } = require("./middleware/originGuard");
+const { schoolContext } = require("./middleware/school");
+const { SCHOOLS } = require("./config/schools");
 
 const app = express();
 
@@ -60,10 +62,17 @@ app.use(
 // No other website may make a signed-in browser change anything (see middleware/originGuard.js).
 app.use(originGuard(allowedOrigins));
 
+// Which school each request is for: everything after this reads and writes that school's own database (see
+// middleware/school.js). It comes after the body is read, so the whole request runs inside the school.
+app.use("/api", schoolContext);
+
 // records what students do (and where their phone said it was) for the owner's security view; see utils/monitor.js
 app.use(activityLogger);
 
 app.get("/api/health", (req, res) => res.json({ ok: true, service: "foundit-backend" }));
+
+// The schools and whether each is open (public: the same names the Welcome page shows). The owner page uses it.
+app.get("/api/schools", (req, res) => res.json({ schools: SCHOOLS.map((s) => ({ id: s.id, name: s.name, open: Boolean(s.enabled) })) }));
 
 // Uploaded found-item photos — served from a different origin than the
 // frontend in dev (and often in production too), so helmet's default

@@ -70,12 +70,21 @@ function saveTokens(tokens) {
 }
 let session = loadTokens(); // { accessToken, refreshToken, email } while signed in
 
+// Each school has its own database, so the owner signs in to ONE school at a time and everything shown is that
+// school's. The school travels with every request as X-School (see middleware/school.js on the server).
+const DEFAULT_SCHOOL = "nile";
+const schoolOf = () => session?.school || DEFAULT_SCHOOL;
+
 // credentials: "omit" keeps this page apart from the app: it never sends or stores the app's cookies.
-async function send(path, { method = "GET", body, token } = {}) {
+async function send(path, { method = "GET", body, token, school } = {}) {
   const res = await fetch(path, {
     method,
     credentials: "omit",
-    headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    headers: {
+      "X-School": school || schoolOf(),
+      ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: body ? JSON.stringify(body) : undefined,
   });
   let data = null;
@@ -120,9 +129,10 @@ async function sendJson(path, body, method = "POST") {
 
 async function signOut(message) {
   const refreshToken = session?.refreshToken;
+  const school = schoolOf(); // the sign-in lives in this school's database, so it is ended there
   session = null;
   saveTokens(null);
-  if (refreshToken) await send("/api/auth/logout", { method: "POST", body: { refreshToken } }).catch(() => {});
+  if (refreshToken) await send("/api/auth/logout", { method: "POST", body: { refreshToken }, school }).catch(() => {});
   showLogin(message);
 }
 
@@ -133,6 +143,16 @@ function showLogin(message) {
   const password = el("input", { id: "password", type: "password", autocomplete: "current-password", required: true });
   const error = el("p", { className: "error", role: "alert", text: message || "" });
   const button = el("button", { className: "primary", type: "submit", text: "Sign in" });
+  // which school to look at: only open schools can be signed in to; the list comes from the server
+  const school = el("select", { id: "school" }, el("option", { value: DEFAULT_SCHOOL, text: "Nile University" }));
+  send("/api/schools", { school: DEFAULT_SCHOOL })
+    .then((r) => {
+      const open = (r.data?.schools || []).filter((s) => s.open);
+      if (!open.length) return;
+      clear(school);
+      for (const s of open) school.append(el("option", { value: s.id, text: s.name }));
+    })
+    .catch(() => {});
 
   const form = el(
     "form",
@@ -144,18 +164,18 @@ function showLogin(message) {
         button.disabled = true;
         button.textContent = "Signing in...";
         try {
-          const r = await send("/api/auth/login", { method: "POST", body: { email: email.value, password: password.value } });
+          const r = await send("/api/auth/login", { method: "POST", body: { email: email.value, password: password.value }, school: school.value });
           if (!r.ok) {
             error.textContent = r.data?.error || "Couldn't sign in.";
             return;
           }
           if (!r.data.user?.isMonitor) {
             // a real account, but not the owner's: sign it straight back out so it isn't left signed in
-            await send("/api/auth/logout", { method: "POST", body: { refreshToken: r.data.refreshToken } }).catch(() => {});
+            await send("/api/auth/logout", { method: "POST", body: { refreshToken: r.data.refreshToken }, school: school.value }).catch(() => {});
             error.textContent = `${r.data.user?.email || "That account"} is not the owner account. Sign in with the owner's email.`;
             return;
           }
-          session = { accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, email: r.data.user.email };
+          session = { accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, email: r.data.user.email, school: school.value, schoolName: school.selectedOptions[0]?.textContent || school.value };
           saveTokens(session);
           password.value = "";
           showMain();
@@ -169,6 +189,8 @@ function showLogin(message) {
     },
     el("h1", { text: "FoundIT owner view" }),
     el("p", { className: "muted", text: "Private. Sign in with the owner account." }),
+    el("label", { for: "school", text: "School" }),
+    school,
     el("label", { for: "email", text: "Email" }),
     email,
     el("label", { for: "password", text: "Password" }),
@@ -231,7 +253,7 @@ function showMain() {
       el(
         "div",
         { className: "who" },
-        `Signed in as ${session.email} `,
+        `${session.schoolName || "Nile University"} · signed in as ${session.email} `,
         el("button", { type: "button", text: "Sign out", onclick: () => signOut() })
       )
     ),

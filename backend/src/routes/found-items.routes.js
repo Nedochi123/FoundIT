@@ -5,6 +5,8 @@ const path = require("path");
 const multer = require("multer");
 const { z } = require("zod");
 const db = require("../../db");
+const { inSchool } = require("../middleware/school");
+const { DEFAULT_SCHOOL_ID } = require("../config/schools");
 const { requireAuth, requireOwnedFoundItem } = require("../middleware/auth");
 const { postItemLimiter } = require("../middleware/rateLimiters");
 const { broadcastPush } = require("../utils/push");
@@ -18,11 +20,19 @@ const UPLOAD_ROOT = process.env.UPLOAD_ROOT || path.join(__dirname, "..", "..", 
 const UPLOAD_DIR = path.join(UPLOAD_ROOT, "found-items");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
+// Each school's photos go in their own folder: the default school keeps found-items/, the others use found-items/<school>/.
+const photoFolder = (schoolId) => (schoolId === DEFAULT_SCHOOL_ID ? "" : `${schoolId}/`);
+function uploadDirFor(req) {
+  const dir = path.join(UPLOAD_DIR, photoFolder(req.school?.id || DEFAULT_SCHOOL_ID));
+  fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
 const ALLOWED_MIME_TYPES = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp" };
 
 const upload = multer({
   storage: multer.diskStorage({
-    destination: UPLOAD_DIR,
+    destination: (req, file, cb) => cb(null, uploadDirFor(req)),
     filename: (req, file, cb) => cb(null, `${crypto.randomUUID()}${ALLOWED_MIME_TYPES[file.mimetype]}`),
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
@@ -86,7 +96,10 @@ const createSchema = z.object({
   idNumber: idNumberSchema,
 });
 
-router.post("/", requireAuth, postItemLimiter, upload.single("photo"), (req, res, next) => {
+// multer calls back from a stream event: carry on explicitly inside the request's school (see middleware/school.js)
+const uploadPhoto = (req, res, next) => upload.single("photo")(req, res, (err) => inSchool(req, () => next(err)));
+
+router.post("/", requireAuth, postItemLimiter, uploadPhoto, (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "A photo of the found item is required." });
@@ -113,7 +126,7 @@ router.post("/", requireAuth, postItemLimiter, upload.single("photo"), (req, res
     }
 
     const id = crypto.randomUUID();
-    const photoUrl = `/uploads/found-items/${req.file.filename}`;
+    const photoUrl = `/uploads/found-items/${photoFolder(req.school?.id || DEFAULT_SCHOOL_ID)}${req.file.filename}`;
     db.prepare(
       "INSERT INTO found_items (id, poster_id, photo_url, description, location, category) VALUES (?, ?, ?, ?, ?, ?)"
     ).run(id, req.user.id, photoUrl, description || null, location || null, itemCategory || null);

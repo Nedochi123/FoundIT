@@ -123,9 +123,33 @@ export function emailExample(school) {
   return school?.emailDomain ? `yourIDnumber@${school.emailDomain}` : "Your school email";
 }
 
+/**
+ * The address in a QR sticker's code. The default school's stickers stay exactly as they always were (/t/CODE), so every
+ * sticker already printed keeps working; other schools' say which school they belong to (/t/CODE?school=baze).
+ */
+export function tagUrl(origin, code, school) {
+  const named = school && school.id !== DEFAULT_SCHOOL_ID ? `?school=${encodeURIComponent(school.id)}` : "";
+  return `${origin}/t/${code}${named}`;
+}
+
 /** Who to hand a found item to when the owner can't be reached: always named with the school. */
 export function handInTo(school) {
   return `${school.name} campus security`;
+}
+
+/**
+ * The school named in the page address (?school=...), if it is a known, open school. Links in FoundIT's emails (verify
+ * your email, reset your password) and QR stickers of schools other than the default carry it, so they open in the
+ * right school even on a phone that has never picked one.
+ */
+export function readSchoolFromUrl() {
+  try {
+    const id = new URLSearchParams(window.location.search).get("school");
+    const school = SCHOOLS.find((s) => s.id === id);
+    return school && isOpen(school) ? school.id : null;
+  } catch {
+    return null;
+  }
 }
 
 /** The school this device chose last, or null if none (or the saved value is not an open school). */
