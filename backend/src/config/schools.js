@@ -46,9 +46,10 @@ const SCHOOLS = [
     // its real domain (Google mail). cosmopolitanuniversity.edu.ng does not exist, so it is not accepted: nobody could
     // receive the verification email there, and anyone could invent an address at it.
     emailDomain: "cosmopolitan.edu.ng",
-    // ID numbers are digits, and may start with 0 (e.g. 0042); a student email is the surname followed by the ID number
-    idPattern: /^\d{4,8}$/,
-    idMessage: "Cosmopolitan ID number must be digits only, e.g. 0123.",
+    // The ID card shows the full code: 2 digits and a letter, two letter codes, then the number (25C-ABC-DEF-0123); a student
+    // email is the surname followed by that last number. Either the full code or just the number is accepted.
+    idPattern: /^(?:\d{2}[A-Za-z]-[A-Za-z]{2,4}-[A-Za-z]{2,4}-\d{3,5}|\d{4,8})$/,
+    idMessage: "Cosmopolitan ID number: as on your ID card (e.g. 25C-ABC-DEF-0123), or just its last digits (e.g. 0123).",
     enabled: true,
   },
   { id: "philomath", name: "Philomath University", emailDomain: "philomath.edu.ng", ...LENIENT_ID, enabled: false },

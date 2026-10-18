@@ -201,23 +201,22 @@ export const THEMES = [
   {
     id: "cosmopolitan",
     school: "cosmopolitan",
-    // Cosmopolitan University in the exact colors of its own website and seal (cosmopolitan.edu.ng): teal-navy #082c3c,
-    // dark slate #141b22, the khaki gold #a18b5c of its buttons and the seal's gold #d4af37. White text on that khaki gold
-    // would be too faint (3.3:1), so its buttons carry the website's dark slate as their text (onBrand, 5:1+). Navy is the
-    // structure; gold is for "tap here". Contrast rules: test/schools.test.mjs and npm run themes:check.
-    chrome: "#082c3c", // the browser/phone status-bar color
+    // Cosmopolitan University as its student ID card looks (he sent a photo: "how their color is"): a white card with a
+    // royal navy band, a thin gold line and the navy-and-gold seal. So a LIGHT look: white-to-pale-navy page, royal navy
+    // buttons and links (white text on them), gold as the accent (the check mark in the logo, the glows). Contrast rules:
+    // test/schools.test.mjs and npm run themes:check.
+    chrome: "#e8ecf5", // the browser/phone status-bar color
     label: "Cosmopolitan",
-    logoCheck: "#082c3c", // the check mark in the gold logo tile: navy, like the seal
-    intro: { top: "#0d3547", mid: "#082c3c", bottom: "#141b22", glowOne: "#0e5a73", glowTwo: "#a18b5c", shadowOne: "14 90 115", shadowTwo: "161 139 92" },
+    logoCheck: "#e0b955", // the check mark in the navy logo tile: the card's gold
+    intro: { top: "#24458a", mid: "#16295a", bottom: "#0a1430", glowOne: "#2f55a4", glowTwo: "#c9a24a", shadowOne: "31 61 122", shadowTwo: "201 162 74" },
     suggestedDoodle: "none",
-    neutral: { hue: 198, sat: 0.35 },
-    brand: { a: "#a18b5c", b: "#b39a63", text: "#d4af37", shadow: "#a18b5c" },
-    onBrand: "#141b22", // text on its gold buttons: the website's dark slate
-    bg: { top: "#0d3547", mid: "#082c3c", bottom: "#141b22" },
-    glow: { one: "rgba(161, 139, 92, 0.06)", two: "rgba(14, 116, 144, 0.06)" },
-    blobs: { one: "#0e4a60", two: "#a18b5c" },
-    doodle: "#d4af37",
-    swatchBg: "linear-gradient(135deg, #0d3547 55%, #a18b5c 56%)",
+    neutral: { hue: 222, sat: 1, tone: "light" },
+    brand: { a: "#1f3d7a", b: "#2b4c8c", text: "#1f3d7a", shadow: "#1f3d7a" },
+    bg: { top: "#ffffff", mid: "#f1f3f8", bottom: "#dfe5f1" },
+    glow: { one: "rgba(201, 162, 74, 0.16)", two: "rgba(31, 61, 122, 0.10)" },
+    blobs: { one: "#d9b968", two: "#7f97c9" },
+    doodle: "#1f3d7a",
+    swatchBg: "linear-gradient(160deg, #ffffff 58%, #c9a24a 58%, #c9a24a 62%, #1f3d7a 62%)",
   },
 ];
 

@@ -48,7 +48,8 @@ export const SCHOOLS = [
     short: "Cosmopolitan",
     emailDomain: "cosmopolitan.edu.ng",
     emailLocal: "surname0123", // a Cosmopolitan student email is the surname followed by the ID number
-    idFormat: { pattern: "\\d{4,8}", maxLength: 8, inputMode: "numeric", example: "0123", hint: "digits only, e.g. 0123" },
+    // as on the ID card (25C-ABC-DEF-0123), or just the number at its end (0123)
+    idFormat: { pattern: "\\d{2}[A-Za-z]-[A-Za-z]{2,4}-[A-Za-z]{2,4}-\\d{3,5}|\\d{4,8}", maxLength: 20, inputMode: "text", example: "25C-ABC-DEF-0123", hint: "as on your ID card, e.g. 25C-ABC-DEF-0123, or just 0123" },
     theme: "cosmopolitan", // its own colors (lib/themes.js): deep teal-navy and gold
     logo: "/schools/cosmopolitan.png",
     mark: "C",

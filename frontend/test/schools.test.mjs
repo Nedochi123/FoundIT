@@ -89,8 +89,10 @@ test("ID number boxes follow the school: Nile is 9 digits, a school with no know
   assert.deepEqual(baze, { inputMode: "numeric", maxLength: 8, placeholder: "12345", pattern: "\\d{4,8}", title: "Format: digits only, e.g. 12345" });
   assert.ok(new RegExp(`^${baze.pattern}$`).test("12345") && !new RegExp(`^${baze.pattern}$`).test("BU/22/001"));
   const cosmo = idInputProps(getSchool("cosmopolitan"));
-  assert.equal(cosmo.placeholder, "0123", "Cosmopolitan IDs may start with 0");
-  assert.ok(new RegExp(`^${cosmo.pattern}$`).test("0042") && !new RegExp(`^${cosmo.pattern}$`).test("CU/22/001"));
+  assert.equal(cosmo.placeholder, "25C-ABC-DEF-0123", "Cosmopolitan IDs as on the card");
+  const cosmoRe = new RegExp(`^(?:${cosmo.pattern})$`);
+  assert.ok(cosmoRe.test("25C-ABC-DEF-0123") && cosmoRe.test("0042") && !cosmoRe.test("CU/22/001") && !cosmoRe.test("25C-ABC-DEF"));
+  assert.equal(cosmo.inputMode, "text", "the card code has letters");
   const other = idInputProps(getSchool("philomath"));
   assert.equal(other.inputMode, "text");
   assert.equal(other.maxLength, 20);
