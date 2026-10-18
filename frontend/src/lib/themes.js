@@ -201,22 +201,23 @@ export const THEMES = [
   {
     id: "cosmopolitan",
     school: "cosmopolitan",
-    // Cosmopolitan University: the deep teal-navy and gold of its seal and website ("CUA, To the Summit"). Chosen with
-    // the UI/UX Pro Max color search ("institutional navy + dark gold accent"). The navy is the structure; gold is for
-    // "tap here" (buttons, links). The gold buttons are a deep gold so their white text stays readable; the links are
-    // the seal's bright gold. Contrast rules: test/schools.test.mjs.
+    // Cosmopolitan University in the exact colors of its own website and seal (cosmopolitan.edu.ng): teal-navy #082c3c,
+    // dark slate #141b22, the khaki gold #a18b5c of its buttons and the seal's gold #d4af37. White text on that khaki gold
+    // would be too faint (3.3:1), so its buttons carry the website's dark slate as their text (onBrand, 5:1+). Navy is the
+    // structure; gold is for "tap here". Contrast rules: test/schools.test.mjs and npm run themes:check.
     chrome: "#082c3c", // the browser/phone status-bar color
     label: "Cosmopolitan",
-    logoCheck: "#fde68a",
-    intro: { top: "#0f3a4c", mid: "#082c3c", bottom: "#04161f", glowOne: "#0e5a73", glowTwo: "#a16207", shadowOne: "14 90 115", shadowTwo: "161 98 7" },
+    logoCheck: "#082c3c", // the check mark in the gold logo tile: navy, like the seal
+    intro: { top: "#0d3547", mid: "#082c3c", bottom: "#141b22", glowOne: "#0e5a73", glowTwo: "#a18b5c", shadowOne: "14 90 115", shadowTwo: "161 139 92" },
     suggestedDoodle: "none",
     neutral: { hue: 198, sat: 0.35 },
-    brand: { a: "#a6650a", b: "#9c6a10", text: "#d4af37", shadow: "#a18b5c" }, // deep gold: white text 4.7:1, 3:1+ against page and card
-    bg: { top: "#0c3445", mid: "#082c3c", bottom: "#04161f" },
-    glow: { one: "rgba(212, 175, 55, 0.05)", two: "rgba(14, 116, 144, 0.06)" },
-    blobs: { one: "#0e5a73", two: "#7a5a1e" },
+    brand: { a: "#a18b5c", b: "#b39a63", text: "#d4af37", shadow: "#a18b5c" },
+    onBrand: "#141b22", // text on its gold buttons: the website's dark slate
+    bg: { top: "#0d3547", mid: "#082c3c", bottom: "#141b22" },
+    glow: { one: "rgba(161, 139, 92, 0.06)", two: "rgba(14, 116, 144, 0.06)" },
+    blobs: { one: "#0e4a60", two: "#a18b5c" },
     doodle: "#d4af37",
-    swatchBg: "linear-gradient(135deg, #0f3a4c, #04161f)",
+    swatchBg: "linear-gradient(135deg, #0d3547 55%, #a18b5c 56%)",
   },
 ];
 

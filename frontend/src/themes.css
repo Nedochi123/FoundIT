@@ -486,30 +486,33 @@
   --slate-800: 38 45 48;
   --slate-900: 23 30 33;
   --slate-950: 9 14 16;
-  --brand-a: #a6650a;
-  --brand-b: #9c6a10;
+  --brand-a: #a18b5c;
+  --brand-b: #b39a63;
   --brand-teal: 212 175 55;
   --brand-blue: 161 139 92;
-  --brand-solid: 166 101 10;
+  --brand-solid: 161 139 92;
   --bar-top: 9 11 12;
   --bar-bottom: 16 20 22;
-  --logo-check: #fde68a;
-  --intro-top: #0f3a4c;
+  --logo-check: #082c3c;
+  --intro-top: #0d3547;
   --intro-mid: #082c3c;
-  --intro-bottom: #04161f;
+  --intro-bottom: #141b22;
   --intro-glow-one: #0e5a73;
-  --intro-glow-two: #a16207;
+  --intro-glow-two: #a18b5c;
   --intro-shadow-one: 14 90 115;
-  --intro-shadow-two: 161 98 7;
-  --bg-top: #0c3445;
+  --intro-shadow-two: 161 139 92;
+  --bg-top: #0d3547;
   --bg-mid: #082c3c;
-  --bg-bottom: #04161f;
-  --glow-one: rgba(212, 175, 55, 0.05);
+  --bg-bottom: #141b22;
+  --glow-one: rgba(161, 139, 92, 0.06);
   --glow-two: rgba(14, 116, 144, 0.06);
-  --blob-one: #0e5a73;
-  --blob-two: #7a5a1e;
+  --blob-one: #0e4a60;
+  --blob-two: #a18b5c;
   --doodle: #d4af37;
   --body-text: 229 231 235;
   --bg-pattern: none;
   --bg-pattern-size: auto;
+}
+:root[data-theme="cosmopolitan"] .bg-brand-gradient {
+  color: #141b22;
 }

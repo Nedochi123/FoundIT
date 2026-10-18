@@ -329,7 +329,10 @@ test("every school's own colors have good contrast: buttons stand out from the c
     for (const end of [t.brand.a, t.brand.b]) {
       assert.ok(ratio(end, card) >= 3, `${school.id}: button ${end} vs card ${card}`);
       assert.ok(ratio(end, t.bg.mid) >= 3, `${school.id}: button ${end} vs page`);
-      assert.ok(ratio("#ffffff", end) >= 4.5, `${school.id}: white on button ${end}`);
+      const onBrand = t.onBrand || "#ffffff";
+      // a light button really gets its dark text: every gradient button says "text-white", which this rule overrides
+      if (t.onBrand) assert.ok(css.replace(/\r\n/g, "\n").includes(`:root[data-theme="${t.id}"] .bg-brand-gradient {\n  color: ${t.onBrand};`), `${school.id}: dark button text is generated`);
+      assert.ok(ratio(onBrand, end) >= 4.5, `${school.id}: text ${onBrand} on button ${end}`);
     }
     assert.ok(ratio(t.brand.text, t.bg.mid) >= 4.5, `${school.id}: links`);
     assert.ok(read(`public/manifests/${t.id}.json`).includes('"theme_color"'), `${school.id}: Home Screen icon`);
