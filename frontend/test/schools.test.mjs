@@ -74,7 +74,7 @@ test("what screens say about a school comes from its entry: email example, and w
   assert.equal(emailExample(getSchool("nile")), "yourIDnumber@nileuniversity.edu.ng");
   assert.equal(emailExample(getSchool("baze")), "surname12345@bazeuniversity.edu.ng", "a Baze email is the surname followed by the ID number");
   assert.equal(emailExample(getSchool("veritas")), "yourIDnumber@veritas.edu.ng");
-  assert.equal(emailExample(getSchool("cosmopolitan")), "yourIDnumber@cosmopolitan.edu.ng");
+  assert.equal(emailExample(getSchool("cosmopolitan")), "surname0123@cosmopolitan.edu.ng");
   assert.equal(emailExample(getSchool("philomath")), "yourIDnumber@philomath.edu.ng");
   assert.equal(emailExample({ emailDomain: null }), "Your school email", "no ending is invented for a school that has none yet");
   assert.equal(handInTo(getSchool("nile")), "Nile University campus security");
@@ -88,7 +88,10 @@ test("ID number boxes follow the school: Nile is 9 digits, a school with no know
   const baze = idInputProps(getSchool("baze"));
   assert.deepEqual(baze, { inputMode: "numeric", maxLength: 8, placeholder: "12345", pattern: "\\d{4,8}", title: "Format: digits only, e.g. 12345" });
   assert.ok(new RegExp(`^${baze.pattern}$`).test("12345") && !new RegExp(`^${baze.pattern}$`).test("BU/22/001"));
-  const other = idInputProps(getSchool("cosmopolitan"));
+  const cosmo = idInputProps(getSchool("cosmopolitan"));
+  assert.equal(cosmo.placeholder, "0123", "Cosmopolitan IDs may start with 0");
+  assert.ok(new RegExp(`^${cosmo.pattern}$`).test("0455") && !new RegExp(`^${cosmo.pattern}$`).test("CU/22/001"));
+  const other = idInputProps(getSchool("philomath"));
   assert.equal(other.inputMode, "text");
   assert.equal(other.maxLength, 20);
   assert.ok(new RegExp(`^${other.pattern}$`).test("BU/22/CSC/001"));
@@ -302,4 +305,33 @@ test("Baze: grey structure with blue only for buttons and links, and good contra
   };
   for (const hex of [t.brand.a, t.bg.mid, t.bg.top, t.bg.bottom, t.chrome]) assert.ok(isGrey(hex), `${hex} is one of Baze's greys`);
   assert.ok(!isGrey(t.brand.b) && !isGrey(t.brand.text), "the button's other half and the links stay blue, so they read as tappable");
+});
+
+test("every school's own colors have good contrast: buttons stand out from the card and page, their white text and the links are readable", async () => {
+  const { getTheme } = await import("../src/lib/themes.js");
+  const lum = (hex) => {
+    const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (x, y) => {
+    const [a, b] = [lum(x), lum(y)].sort((p, q) => q - p);
+    return (a + 0.05) / (b + 0.05);
+  };
+  const css = read("src/themes.css");
+  const withThemes = SCHOOLS.filter((s) => s.theme);
+  assert.ok(withThemes.length >= 2, "Baze and Cosmopolitan have their own colors");
+  for (const school of withThemes) {
+    const t = getTheme(school.theme);
+    assert.equal(t.id, school.theme, school.id);
+    assert.equal(t.school, school.id, "a school's colors are offered only to that school");
+    const block = css.slice(css.indexOf(`[data-theme="${t.id}"]`));
+    const card = "#" + block.match(/--slate-900:\s*([0-9 ]+);/)[1].trim().split(/\s+/).map((n) => Number(n).toString(16).padStart(2, "0")).join("");
+    for (const end of [t.brand.a, t.brand.b]) {
+      assert.ok(ratio(end, card) >= 3, `${school.id}: button ${end} vs card ${card}`);
+      assert.ok(ratio(end, t.bg.mid) >= 3, `${school.id}: button ${end} vs page`);
+      assert.ok(ratio("#ffffff", end) >= 4.5, `${school.id}: white on button ${end}`);
+    }
+    assert.ok(ratio(t.brand.text, t.bg.mid) >= 4.5, `${school.id}: links`);
+    assert.ok(read(`public/manifests/${t.id}.json`).includes('"theme_color"'), `${school.id}: Home Screen icon`);
+  }
 });

@@ -1,7 +1,7 @@
 {
   "name": "FoundIT — Campus Lost & Found",
   "short_name": "FoundIT",
-  "description": "Lost something on campus? Found something? FoundIT reunites students, lecturers and staff at Nile University and Baze University with their lost belongings.",
+  "description": "Lost something on campus? Found something? FoundIT reunites students, lecturers and staff at Nile University, Baze University and Cosmopolitan University with their lost belongings.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

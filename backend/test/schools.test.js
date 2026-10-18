@@ -94,10 +94,10 @@ test("each school's email ending is its own real domain (checked in DNS on 2026-
 });
 
 test("a school whose ID format is not known yet accepts sensible IDs (letters, digits, / and -) and nothing else", () => {
-  const cosmo = idNumberSchemaFor("cosmopolitan");
-  for (const good of ["BU/22/CSC/001", "22-1234", "20231234", "abcd"]) assert.ok(ok(cosmo, good), `accepts ${good}`);
-  for (const bad of ["ab", "a".repeat(21), "has space", "<script>", "12;34", "é1234"]) assert.ok(!ok(cosmo, bad), `rejects ${JSON.stringify(bad)}`);
-  assert.ok(ok(cosmo, undefined));
+  const philomath = idNumberSchemaFor("philomath");
+  for (const good of ["BU/22/CSC/001", "22-1234", "20231234", "abcd"]) assert.ok(ok(philomath, good), `accepts ${good}`);
+  for (const bad of ["ab", "a".repeat(21), "has space", "<script>", "12;34", "é1234"]) assert.ok(!ok(philomath, bad), `rejects ${JSON.stringify(bad)}`);
+  assert.ok(ok(philomath, undefined));
   // an unknown school id falls back to the default school's rules, never to "anything goes"
   assert.ok(!ok(idNumberSchemaFor("nowhere"), "BU/22/001"));
   assert.ok(ok(idNumberSchemaFor("nowhere"), "123456789"));
@@ -111,8 +111,19 @@ test("Baze is open, and its ID numbers are digits (a Baze email is the surname f
   for (const good of ["12345", "1234", "12345678"]) assert.ok(ok(ids, good), `accepts ${good}`);
   for (const bad of ["123", "123456789", "BU/22/001", "12a45", "12 345", ""]) assert.ok(!ok(ids, bad), `rejects ${JSON.stringify(bad)}`);
   assert.equal(ids.safeParse("BU/22/001").error.issues[0].message, "Baze ID number must be digits only, e.g. 12345.");
-  // the other three are still closed
-  for (const id of ["cosmopolitan", "philomath", "veritas"]) assert.equal(getSchool(id).enabled, false, id);
+  // the other two are still closed
+  for (const id of ["philomath", "veritas"]) assert.equal(getSchool(id).enabled, false, id);
+});
+
+test("Cosmopolitan is open: its real domain only, and digits-only IDs that may start with 0", () => {
+  const cosmo = getSchool("cosmopolitan");
+  assert.equal(cosmo.enabled, true);
+  assert.equal(schoolForEmail("surname0123@cosmopolitan.edu.ng")?.id, "cosmopolitan");
+  assert.equal(schoolForEmail("surname0123@cosmopolitanuniversity.edu.ng"), null, "that domain does not exist: nobody may join with it");
+  const ids = idNumberSchemaFor("cosmopolitan");
+  for (const good of ["0455", "0123", "12345678"]) assert.ok(ok(ids, good), `accepts ${good}`);
+  for (const bad of ["045", "123456789", "CU/22/001", "04a5", ""]) assert.ok(!ok(ids, bad), `rejects ${JSON.stringify(bad)}`);
+  assert.equal(ids.safeParse("CU/22/001").error.issues[0].message, "Cosmopolitan ID number must be digits only, e.g. 0123.");
 });
 
 test("the welcome email names the school it is for, and says Nile for the default", () => {

@@ -472,3 +472,44 @@
   --bg-pattern: none;
   --bg-pattern-size: auto;
 }
+
+/* Cosmopolitan */
+:root[data-theme="cosmopolitan"] {
+  --slate-50: 249 250 251;
+  --slate-100: 243 245 246;
+  --slate-200: 229 233 235;
+  --slate-300: 210 216 218;
+  --slate-400: 160 168 172;
+  --slate-500: 113 123 127;
+  --slate-600: 83 92 95;
+  --slate-700: 63 71 75;
+  --slate-800: 38 45 48;
+  --slate-900: 23 30 33;
+  --slate-950: 9 14 16;
+  --brand-a: #a6650a;
+  --brand-b: #9c6a10;
+  --brand-teal: 212 175 55;
+  --brand-blue: 161 139 92;
+  --brand-solid: 166 101 10;
+  --bar-top: 9 11 12;
+  --bar-bottom: 16 20 22;
+  --logo-check: #fde68a;
+  --intro-top: #0f3a4c;
+  --intro-mid: #082c3c;
+  --intro-bottom: #04161f;
+  --intro-glow-one: #0e5a73;
+  --intro-glow-two: #a16207;
+  --intro-shadow-one: 14 90 115;
+  --intro-shadow-two: 161 98 7;
+  --bg-top: #0c3445;
+  --bg-mid: #082c3c;
+  --bg-bottom: #04161f;
+  --glow-one: rgba(212, 175, 55, 0.05);
+  --glow-two: rgba(14, 116, 144, 0.06);
+  --blob-one: #0e5a73;
+  --blob-two: #7a5a1e;
+  --doodle: #d4af37;
+  --body-text: 229 231 235;
+  --bg-pattern: none;
+  --bg-pattern-size: auto;
+}

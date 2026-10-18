@@ -198,6 +198,26 @@ export const THEMES = [
     doodle: "#9c9fa6",
     swatchBg: "linear-gradient(135deg, #3a3b40, #121316)",
   },
+  {
+    id: "cosmopolitan",
+    school: "cosmopolitan",
+    // Cosmopolitan University: the deep teal-navy and gold of its seal and website ("CUA, To the Summit"). Chosen with
+    // the UI/UX Pro Max color search ("institutional navy + dark gold accent"). The navy is the structure; gold is for
+    // "tap here" (buttons, links). The gold buttons are a deep gold so their white text stays readable; the links are
+    // the seal's bright gold. Contrast rules: test/schools.test.mjs.
+    chrome: "#082c3c", // the browser/phone status-bar color
+    label: "Cosmopolitan",
+    logoCheck: "#fde68a",
+    intro: { top: "#0f3a4c", mid: "#082c3c", bottom: "#04161f", glowOne: "#0e5a73", glowTwo: "#a16207", shadowOne: "14 90 115", shadowTwo: "161 98 7" },
+    suggestedDoodle: "none",
+    neutral: { hue: 198, sat: 0.35 },
+    brand: { a: "#a6650a", b: "#9c6a10", text: "#d4af37", shadow: "#a18b5c" }, // deep gold: white text 4.7:1, 3:1+ against page and card
+    bg: { top: "#0c3445", mid: "#082c3c", bottom: "#04161f" },
+    glow: { one: "rgba(212, 175, 55, 0.05)", two: "rgba(14, 116, 144, 0.06)" },
+    blobs: { one: "#0e5a73", two: "#7a5a1e" },
+    doodle: "#d4af37",
+    swatchBg: "linear-gradient(135deg, #0f3a4c, #04161f)",
+  },
 ];
 
 export const THEME_IDS = THEMES.map((t) => t.id);

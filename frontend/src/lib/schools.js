@@ -47,11 +47,14 @@ export const SCHOOLS = [
     name: "Cosmopolitan University",
     short: "Cosmopolitan",
     emailDomain: "cosmopolitan.edu.ng",
+    emailLocal: "surname0123", // a Cosmopolitan student email is the surname followed by the ID number
+    idFormat: { pattern: "\\d{4,8}", maxLength: 8, inputMode: "numeric", example: "0123", hint: "digits only, e.g. 0123" },
+    theme: "cosmopolitan", // its own colors (lib/themes.js): deep teal-navy and gold
     logo: "/schools/cosmopolitan.png",
     mark: "C",
     color: "#a18b5c",
     markText: "#06222f",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "philomath",
