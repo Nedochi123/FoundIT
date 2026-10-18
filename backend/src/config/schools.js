@@ -38,6 +38,7 @@ const SCHOOLS = [
     // 4 to 8 are accepted so a longer or shorter number in another year is not locked out.
     idPattern: /^\d{4,8}$/,
     idMessage: "Baze ID number must be digits only, e.g. 12345.",
+    theme: "baze", // its own colors (utils/themes.js): a new Baze student starts with them
     enabled: true,
   },
   {
@@ -50,6 +51,7 @@ const SCHOOLS = [
     // email is the surname followed by that last number. Either the full code or just the number is accepted.
     idPattern: /^(?:\d{2}[A-Za-z]-[A-Za-z]{2,4}-[A-Za-z]{2,4}-\d{3,5}|\d{4,8})$/,
     idMessage: "Cosmopolitan ID number: as on your ID card (e.g. 25C-ABC-DEF-0123), or just its last digits (e.g. 0123).",
+    theme: "cosmopolitan", // its own colors: a new Cosmopolitan student starts with them
     enabled: true,
   },
   { id: "philomath", name: "Philomath University", emailDomain: "philomath.edu.ng", ...LENIENT_ID, enabled: false },

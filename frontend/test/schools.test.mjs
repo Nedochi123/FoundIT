@@ -189,8 +189,8 @@ test("the website's list of schools and the server's list agree", () => {
   const server = require(join(ROOT, "..", "backend", "src", "config", "schools.js"));
   assert.equal(DEFAULT_SCHOOL_ID, server.DEFAULT_SCHOOL_ID);
   assert.deepEqual(
-    SCHOOLS.map((s) => [s.id, s.name, s.emailDomain, s.enabled]),
-    server.SCHOOLS.map((s) => [s.id, s.name, s.emailDomain, s.enabled])
+    SCHOOLS.map((s) => [s.id, s.name, s.emailDomain, s.enabled, s.theme || null]),
+    server.SCHOOLS.map((s) => [s.id, s.name, s.emailDomain, s.enabled, s.theme || null])
   );
   const nile = SCHOOLS.find((s) => s.id === "nile");
   assert.equal(`^${nile.idFormat.pattern}$`, server.getSchool("nile").idPattern.source.replace(/^\^?/, "^").replace(/\$?$/, "$"));

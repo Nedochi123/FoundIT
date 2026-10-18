@@ -59,7 +59,8 @@ for (const t of THEMES) {
     accent: worst(triplet(v["brand-teal"]), surfaces),
     heading: worst(triplet(v["slate-50"]), surfaces),
     secondary: worst(triplet(v["slate-300"]), surfaces),
-    hint: worst(triplet(v["slate-400"]), surfaces),
+    // hints, and the bottom menu's tabs (same grey), also measured on the menu bar itself
+    hint: worst(triplet(v["slate-400"]), [...surfaces, triplet(v["bar-bottom"])]),
   };
   const semantic = SEMANTIC.map(([name, darkRgb, variable]) => [name, worst(v[variable] ? triplet(v[variable]) : darkRgb, surfaces)]);
   const need = 4.5;

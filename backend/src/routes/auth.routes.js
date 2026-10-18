@@ -111,9 +111,10 @@ router.post("/signup", authLimiter, async (req, res, next) => {
 
     const passwordHash = await hashPassword(password);
     const userId = crypto.randomUUID();
+    // no color chosen: the school's own colors (Baze, Cosmopolitan...), or the original FoundIT look
     db.prepare(
       "INSERT INTO users (id, name, email, password_hash, id_number, theme, doodle) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    ).run(userId, name, email, passwordHash, idNumber || null, theme || DEFAULT_THEME, doodle || DEFAULT_DOODLE);
+    ).run(userId, name, email, passwordHash, idNumber || null, theme || requestSchool().theme || DEFAULT_THEME, doodle || DEFAULT_DOODLE);
 
     const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
 
