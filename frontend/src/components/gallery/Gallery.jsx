@@ -56,6 +56,23 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
     load();
   }, []);
 
+  // An item leaves the gallery as soon as its owner confirms the return (the server only lists open items). Keep a
+  // gallery that is already open up to date too: refresh quietly every 30 seconds while it is on screen, and whenever
+  // the student comes back to the app, so a returned item disappears without them leaving and coming back.
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "visible") load({ quiet: true });
+    };
+    const timer = setInterval(refresh, 30000);
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+
   // used up: these one-time hints should not come back next time the gallery opens
   useEffect(() => {
     try {
@@ -76,15 +93,16 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
       .catch(() => {});
   }, [justPosted]);
 
-  async function load() {
-    setLoading(true);
+  // quiet: a background refresh (no "Loading...", and a failed refresh just keeps what is on screen)
+  async function load({ quiet = false } = {}) {
+    if (!quiet) setLoading(true);
     try {
       const { items } = await api.listFoundItems("open");
       setItems(items);
     } catch (err) {
-      setError(err.message || "Couldn't load the gallery.");
+      if (!quiet) setError(err.message || "Couldn't load the gallery.");
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
   }
 
