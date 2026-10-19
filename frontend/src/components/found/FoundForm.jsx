@@ -66,7 +66,7 @@ export default function FoundForm({ onNavigate }) {
       <div>
         <h1 className="text-xl font-bold text-slate-50">Report something found</h1>
         <p className="mt-1 text-sm text-slate-300">
-          Snap a photo — everyone on FoundIT will be notified, and it'll be added to the shared gallery.
+          Snap a photo — everyone on FoundIT will be notified, and it'll be added to Items found.
         </p>
       </div>
 
@@ -133,7 +133,7 @@ export default function FoundForm({ onNavigate }) {
           disabled={submitting}
           className="mt-1 w-full rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 py-3 font-semibold text-white shadow-lg shadow-emerald-950/40 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
         >
-          {submitting ? "Posting..." : "Post to Gallery"}
+          {submitting ? "Posting..." : "Post to Items found"}
         </button>
       </form>
     </div>

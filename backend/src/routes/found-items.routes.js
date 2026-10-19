@@ -136,7 +136,7 @@ router.post("/", requireAuth, postItemLimiter, uploadPhoto, (req, res, next) => 
 
     broadcastPush({
       title: "Found something!",
-      body: `${req.user.name} found something on campus — check the gallery.`,
+      body: `${req.user.name} found something on campus — see it in Items found.`,
       url: "/gallery",
       excludeUserId: req.user.id,
       category: "found",

@@ -3,7 +3,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 const TABS = [
   { key: "home", label: "Home", Icon: Home },
-  { key: "gallery", label: "Gallery", Icon: Images },
+  { key: "gallery", label: "Items found", Icon: Images },
   { key: "tokens", label: "Tokens", Icon: Coins, accent: "amber" },
   { key: "conversations", label: "Messages", Icon: MessageCircle },
   { key: "profile", label: "Profile", Icon: User },
@@ -28,7 +28,7 @@ export default function NavBar({ view, onNavigate, unreadCount = 0 }) {
             <button
               key={key}
               onClick={() => onNavigate(key)}
-              className={`relative flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-semibold transition active:scale-95 ${
+              className={`relative flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-center text-[11px] font-semibold leading-tight transition active:scale-95 ${
                 active ? `bg-white/[0.06] ${activeColor}` : "text-slate-400 hover:text-slate-200" // the hint grey: kept readable on every look by npm run themes:check
               }`}
             >

@@ -100,7 +100,7 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
       const { items } = await api.listFoundItems("open");
       setItems(items);
     } catch (err) {
-      if (!quiet) setError(err.message || "Couldn't load the gallery.");
+      if (!quiet) setError(err.message || "Couldn't load the items found.");
     } finally {
       if (!quiet) setLoading(false);
     }
@@ -135,7 +135,7 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
       </button>
 
       <div>
-        <h1 className="text-xl font-bold text-slate-50">{onLost ? "Lost items" : "Found items"}</h1>
+        <h1 className="text-xl font-bold text-slate-50">{onLost ? "Lost items" : "Items found"}</h1>
         <p className="mt-1 text-sm text-slate-300">
           {onLost ? "Did you see something someone is looking for? Tap \"I found this\"." : "Recognize something? Message the person who found it."}
         </p>
