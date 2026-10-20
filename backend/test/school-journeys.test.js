@@ -106,6 +106,10 @@ for (const S of SCHOOLS) {
     const confirm = await call("POST", `/api/conversations/${cid}/confirm-return`, { ...as(owner), body: {} });
     assert.ok(confirm.status === 200 || confirm.status === 201, JSON.stringify(confirm.body));
     assert.equal(inSchool(S.id, "SELECT tokens FROM users WHERE id = ?", finder.user.id).tokens, 2);
+    // the item leaves the gallery automatically the moment the return is confirmed, and shows on the Wall of Reunions
+    assert.ok(!(await call("GET", "/api/found-items", as(owner))).body.items.some((i) => i.id === found.body.item.id), "a returned item is no longer in the gallery");
+    assert.ok(!(await call("GET", "/api/found-items", as(finder))).body.items.some((i) => i.id === found.body.item.id), "not for the finder either");
+    assert.ok((await call("GET", "/api/found-items?status=reunited", as(owner))).body.items.some((i) => i.id === found.body.item.id), "it shows on the Wall of Reunions");
     assert.ok((await call("GET", "/api/tokens/leaderboard", as(owner))).body.leaderboard.some((r) => r.name === "Ben Finder"));
     assert.ok(!(await call("GET", "/api/tokens/leaderboard", { school: "nile", token: nile.accessToken })).body.leaderboard.some((r) => r.name === "Ben Finder"));
 

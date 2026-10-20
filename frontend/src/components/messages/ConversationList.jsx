@@ -38,7 +38,7 @@ export default function ConversationList({ onOpenConversation, onUnreadChange })
       <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-600 py-12 text-center">
         <MessageCircle className="h-8 w-8 text-slate-500" />
         <p className="text-sm text-slate-300">No conversations yet.</p>
-        <p className="text-xs text-slate-400">Message someone from the Gallery to start one.</p>
+        <p className="text-xs text-slate-400">Message someone from Items found to start one.</p>
       </div>
     );
   }
