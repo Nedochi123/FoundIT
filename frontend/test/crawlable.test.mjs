@@ -49,3 +49,23 @@ test("search engines are allowed in and told where the sitemap is", () => {
   assert.match(read("public/sitemap.xml"), /<loc>https:\/\/founditapp\.nedochipublications\.com\/<\/loc>/);
   assert.ok(!/noindex/i.test(html), "no noindex tag");
 });
+
+// Google reads the page as the app draws it, and the text above is gone by then: the first screen itself (the Welcome
+// page, for anyone who has not picked a school, which includes every search engine) says what FoundIT is.
+test("the first screen explains FoundIT in real sentences, and only promises what the app does", () => {
+  const welcome = read("src/components/auth/Welcome.jsx");
+  assert.match(welcome, /<AboutFoundIT \/>/, "the Welcome page shows the explanation");
+  const about = read("src/components/auth/AboutFoundIT.jsx");
+  assert.match(about, /<h2 id="about-foundit"/, "under its own heading");
+  assert.match(about, /SCHOOLS\.filter\(isOpen\)/, "the universities come from the school list, never typed in");
+  assert.match(about, /How it works/);
+  assert.match(about, /<ol\b/, "the steps of a return are an ordered list: they happen in that order");
+  for (const step of ["Lost something? Report it", "Found something? Post a photo", "Chat, meet, return it"]) assert.ok(about.includes(step), step);
+  // the same honesty as the rest of the app: private from other universities, not from the administrators
+  assert.match(about, /students at other universities can&apos;t see/);
+  assert.match(about, /administrators can review chats/);
+  assert.match(about, /location/);
+  assert.match(about, /not an\s+official university service/);
+  assert.ok(!/paystack|premium|subscription|per month|guarantee/i.test(about), "no promises the app does not make");
+  assert.match(about, /getElementById\("school-search"\)/, "its button takes the student back to the university search");
+});
