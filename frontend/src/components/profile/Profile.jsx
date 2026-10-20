@@ -1,4 +1,6 @@
 import { useSchool } from "../school/SchoolProvider";
+import SchoolMark from "../school/SchoolMark";
+import { useUniversity } from "../school/UniversitySpace";
 import { idInputProps, idHint } from "../../lib/schools";
 import { useEffect, useState } from "react";
 import { LogOut, Bell, MailCheck, Award, MessageSquareHeart, QrCode, ChevronRight } from "lucide-react";
@@ -40,6 +42,7 @@ const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-
 export default function Profile({ onNavigate }) {
   const { user, updateProfile, logout } = useAuth();
   const { school } = useSchool();
+  const university = useUniversity();
   const [name, setName] = useState(user?.name || "");
   const [idNumber, setIdNumber] = useState(user?.idNumber || "");
   const [saving, setSaving] = useState(false);
@@ -122,6 +125,17 @@ export default function Profile({ onNavigate }) {
       <div>
         <h1 className="text-xl font-bold text-slate-50">Profile</h1>
         <p className="mt-1 text-sm text-slate-300">{user?.email}</p>
+      </div>
+
+      <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur">
+        <SchoolMark school={university} size={40} />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-slate-50">{university.name}</p>
+          <p className="text-xs text-slate-300">
+            Your private university workspace. Your account belongs to this university; to use another one, sign out and
+            choose it on the first screen.
+          </p>
+        </div>
       </div>
 
       <button

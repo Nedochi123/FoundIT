@@ -24,6 +24,7 @@ const { activityLogger } = require("./utils/monitor");
 const { originGuard } = require("./middleware/originGuard");
 const { schoolContext } = require("./middleware/school");
 const { SCHOOLS } = require("./config/schools");
+const { requireSignedPhoto } = require("./utils/photoLinks");
 
 const app = express();
 
@@ -74,17 +75,18 @@ app.get("/api/health", (req, res) => res.json({ ok: true, service: "foundit-back
 // The schools and whether each is open (public: the same names the Welcome page shows). The owner page uses it.
 app.get("/api/schools", (req, res) => res.json({ schools: SCHOOLS.map((s) => ({ id: s.id, name: s.name, open: Boolean(s.enabled) })) }));
 
-// Uploaded found-item photos — served from a different origin than the
-// frontend in dev (and often in production too), so helmet's default
-// same-origin CORP header has to be relaxed just for this path or the
-// browser silently refuses to render the images.
+// Uploaded found-item photos. Private to their university: only a signed link, which the API hands only to that
+// university's signed-in students, opens one (see utils/photoLinks.js). They are served from a different origin than the
+// frontend, so helmet's default same-origin CORP header has to be relaxed just for this path or the browser silently
+// refuses to render the images.
 app.use(
   "/uploads",
+  requireSignedPhoto,
   (req, res, next) => {
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     next();
   },
-  express.static(process.env.UPLOAD_ROOT || path.join(__dirname, "..", "uploads"))
+  express.static(process.env.UPLOAD_ROOT || path.join(__dirname, "..", "uploads"), { cacheControl: false, index: false })
 );
 
 app.use("/api/auth", authRoutes);

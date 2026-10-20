@@ -87,7 +87,7 @@ for (const S of SCHOOLS) {
     const found = await call("POST", "/api/found-items", { ...as(finder), form });
     assert.equal(found.status, 201, JSON.stringify(found.body));
     assert.ok(found.body.item.photoUrl.startsWith(`/uploads/found-items/${S.id}/`));
-    assert.ok(fs.existsSync(path.join(process.env.UPLOAD_ROOT, found.body.item.photoUrl.replace("/uploads/", ""))));
+    assert.ok(fs.existsSync(path.join(process.env.UPLOAD_ROOT, found.body.item.photoUrl.split("?")[0].replace("/uploads/", ""))));
     assert.ok((await call("GET", "/api/found-items", as(owner))).body.items.some((i) => i.id === found.body.item.id));
     assert.ok(!(await call("GET", "/api/found-items", { school: "nile", token: nile.accessToken })).body.items.some((i) => i.id === found.body.item.id));
 

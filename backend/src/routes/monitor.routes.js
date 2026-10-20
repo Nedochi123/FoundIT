@@ -6,6 +6,7 @@ const { isMonitorAccount, maskNumbers, RETENTION_DAYS } = require("../utils/moni
 const { MAX_LENGTH, notifyStudentOfReply, toMessage } = require("../utils/support");
 const { z } = require("zod");
 const { revenueReport, addStickerSale, listStickerSales, voidStickerSale, isRealDate, todayInNigeria, EARLIEST_SALE } = require("../utils/revenue");
+const { signPhotoUrl } = require("../utils/photoLinks");
 
 // The owner's security view: everything students did, where they were when they did it, and the chats. Read only:
 // nothing here changes a chat, marks a message as read, or lets the owner write as someone else. Only the monitor
@@ -217,7 +218,7 @@ router.get("/chats/item/:id", (req, res) => {
     item: {
       description: convo.item,
       location: convo.item_location,
-      photoUrl: convo.photo_url,
+      photoUrl: signPhotoUrl(convo.photo_url),
       returnConfirmedAt: convo.return_confirmed_at,
     },
     finder: { id: convo.finder_id, name: convo.finder_name, email: convo.finder_email },

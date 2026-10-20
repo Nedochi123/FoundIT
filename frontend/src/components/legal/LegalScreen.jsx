@@ -29,7 +29,7 @@ export default function LegalScreen({ onBack }) {
 
       <div>
         <h1 className="text-xl font-bold text-slate-50">Privacy &amp; Terms</h1>
-        <p className="mt-1 text-sm text-slate-400">Last updated 8 October 2026</p>
+        <p className="mt-1 text-sm text-slate-400">Last updated 20 October 2026</p>
       </div>
 
       <div className={`flex flex-col gap-5 ${cardClass}`}>
@@ -37,6 +37,27 @@ export default function LegalScreen({ onBack }) {
           <p>
             FoundIT is a lost-and-found service for the {school.name} community, built and run by
             Nedochi Publications. It is not an official {school.name} system.
+          </p>
+        </Section>
+
+        <Section title="Your university's private space">
+          <p>
+            Each university on FoundIT has its own separate space. The accounts, items, photos, chats, tokens and
+            alerts of {school.name} are kept in its own database and photo folder, apart from every other
+            university&apos;s, and the server checks on every request that you are signed in to this university.
+            Students at other universities cannot see or search anything here, and your account cannot be used in
+            another university&apos;s space.
+          </p>
+          <p>
+            Accounts in {school.name}&apos;s space are made with a {school.name} email address
+            {school.emailDomain ? ` (ending in @${school.emailDomain})` : ""}. Confirming that address with the link we
+            email is encouraged but not required, so an email address alone is not proof that someone is enrolled.
+          </p>
+          <p>
+            &ldquo;Private&rdquo; means private from other universities and the public, not from everyone: people in
+            your university&apos;s space can see what you post there (see below), and FoundIT&apos;s administrators can
+            review reports, activity and chats for safety, as described under &ldquo;Who can see what&rdquo;.
+            Photos of found items open only through short-lived links given to signed-in members of this space.
           </p>
         </Section>
 
@@ -73,9 +94,9 @@ export default function LegalScreen({ onBack }) {
 
         <Section title="Who can see what">
           <p>
-            A found item's description, location, photo, and your name are visible to everyone signed in,
-            so a seeker can recognize and message you. Messages inside a conversation are private between
-            its two participants: other students cannot read them. The only exception is the FoundIT
+            A found item's description, location, photo, and your name are visible to everyone signed in
+            to {school.name}&apos;s space, so a seeker can recognize and message you. Messages inside a conversation
+            are private between its two participants: other students cannot read them. The only exception is the FoundIT
             administrator (the owner of the app), who can read chats, and see the activity record and
             location notes described above, for security and to investigate theft. That access is read
             only, limited to that one account, and long numbers such as bank account numbers are hidden

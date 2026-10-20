@@ -21,11 +21,13 @@ export default function AuthGate({ children }) {
   const [mode, setMode] = useState(resetToken ? "reset" : "login");
   const [showLegal, setShowLegal] = useState(false);
 
-  // Someone already signed in has, by definition, picked a school: remember it, so that after they log out they land on
-  // their school's sign-in and not the Welcome page again.
+  // Someone signed in belongs to the university the server says (user.school): this device follows it, so the app always
+  // shows and asks for that university, and after they log out they land on its sign-in, not the Welcome page again.
+  // (A saved user from before the server said so has no school yet: the default school, as before.)
+  const accountSchoolId = user ? user.school?.id || (chosen ? school.id : DEFAULT_SCHOOL_ID) : null;
   useEffect(() => {
-    if (user && !chosen) choose(DEFAULT_SCHOOL_ID);
-  }, [user, chosen, choose]);
+    if (accountSchoolId && (!chosen || accountSchoolId !== school.id)) choose(accountSchoolId);
+  }, [accountSchoolId, chosen, school.id, choose]);
 
   if (showLegal) {
     return (

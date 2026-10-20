@@ -148,7 +148,9 @@ test("no screen hard-codes an ID format: every ID number box takes its rules fro
 
 test("the Welcome page lists every school, is the first thing shown to someone with no school chosen, and tells the truth about a school that is not open", () => {
   const welcome = read("src/components/auth/Welcome.jsx");
-  assert.match(welcome, /SCHOOLS\.map\(/, "every school in the list gets a button");
+  assert.match(welcome, /matches\.map\(/, "every school in the list gets a button");
+  assert.match(welcome, /if \(!q\) return SCHOOLS;/, "with nothing typed in the search, the list is every school");
+  assert.match(welcome, /<label htmlFor="school-search"/, "the search box has a label for screen readers");
   assert.match(welcome, /<SchoolLogoField \/>/, "the logos float behind it");
   assert.match(welcome, /Opening soon/);
   assert.match(welcome, /isn't open on FoundIT yet/);

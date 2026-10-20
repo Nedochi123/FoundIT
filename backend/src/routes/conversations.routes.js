@@ -6,6 +6,7 @@ const { requireAuth } = require("../middleware/auth");
 const { messageLimiter } = require("../middleware/rateLimiters");
 const { notifyUser } = require("../utils/push");
 const { REWARD_AMOUNTS, naira } = require("../utils/rewards");
+const { signPhotoUrl } = require("../utils/photoLinks");
 
 const TOKENS_PER_FIND = 2;
 
@@ -131,7 +132,7 @@ router.get("/", requireAuth, (req, res) => {
   const conversations = rows.map((r) => ({
     id: r.id,
     foundItemId: r.found_item_id,
-    itemPhotoUrl: r.photo_url,
+    itemPhotoUrl: signPhotoUrl(r.photo_url),
     itemDescription: r.item_description,
     otherUserName: r.finder_id === req.user.id ? r.seeker_name : r.finder_name,
     lastMessage: r.last_message,
