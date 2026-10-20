@@ -5,6 +5,7 @@ import { useSchool } from "../school/SchoolProvider";
 import SchoolMark from "../school/SchoolMark";
 import SchoolLogoField from "../school/SchoolLogoField";
 import Logo from "../theme/Logo";
+import AboutFoundIT from "./AboutFoundIT";
 
 /**
  * The first page anyone sees: pick your school. Every school's logo floats softly behind it. A school that
@@ -108,7 +109,9 @@ export default function Welcome({ onShowLegal }) {
           </p>
         </div>
 
-        <button type="button" onClick={onShowLegal} className="mt-4 w-full text-center text-xs text-slate-300 underline hover:text-slate-100">
+        <AboutFoundIT />
+
+        <button type="button" onClick={onShowLegal} className="mt-6 w-full text-center text-xs text-slate-300 underline hover:text-slate-100">
           Privacy &amp; Terms
         </button>
       </main>
