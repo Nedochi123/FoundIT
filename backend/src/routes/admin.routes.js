@@ -6,6 +6,7 @@ const { requireAuth, requireAdmin } = require("../middleware/auth");
 const { runBackup, listBackups, backupDir } = require("../utils/backup");
 const { revokeAllRefreshTokensForUser } = require("../utils/tokens");
 const { recordCashoutPaid } = require("../utils/revenue");
+const { signPhotoUrl } = require("../utils/photoLinks");
 
 const router = express.Router();
 
@@ -192,7 +193,7 @@ router.get("/stats", (req, res) => {
 function resolveReportTarget(report) {
   if (report.target_type === "found_item") {
     const item = db.prepare("SELECT description, photo_url FROM found_items WHERE id = ?").get(report.target_id);
-    return item ? { description: item.description, photoUrl: item.photo_url } : { deleted: true };
+    return item ? { description: item.description, photoUrl: signPhotoUrl(item.photo_url) } : { deleted: true };
   }
   if (report.target_type === "lost_item") {
     const item = db.prepare("SELECT description, status FROM lost_items WHERE id = ?").get(report.target_id);

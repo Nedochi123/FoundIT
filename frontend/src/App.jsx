@@ -60,9 +60,11 @@ function Screens() {
   const [view, setView] = useState(getInitialView);
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [legalFrom, setLegalFrom] = useState("profile"); // Privacy & Terms goes back to where it was opened
 
   function navigate(nextView) {
     setActiveConversationId(null);
+    if (nextView === "legal") setLegalFrom(view === "home" ? "home" : "profile");
     setView(nextView);
   }
 
@@ -91,7 +93,7 @@ function Screens() {
   } else if (view === "profile") {
     content = <Profile onNavigate={navigate} />;
   } else if (view === "legal") {
-    content = <LegalScreen onBack={() => navigate("profile")} />;
+    content = <LegalScreen onBack={() => navigate(legalFrom)} />;
   } else if (view === "tokens") {
     content = <TokensScreen />;
   } else if (view === "tags") {

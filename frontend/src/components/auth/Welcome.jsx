@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ChevronRight, Search, X } from "lucide-react";
 import { SCHOOLS, isOpen } from "../../lib/schools";
 import { useSchool } from "../school/SchoolProvider";
 import SchoolMark from "../school/SchoolMark";
@@ -14,6 +14,14 @@ import Logo from "../theme/Logo";
 export default function Welcome({ onShowLegal }) {
   const { choose } = useSchool();
   const [notice, setNotice] = useState("");
+  const [query, setQuery] = useState("");
+
+  // Search by name, short name or email ending: part of any of them is enough. An empty search lists every school.
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase().replace(/^@/, "");
+    if (!q) return SCHOOLS;
+    return SCHOOLS.filter((s) => [s.name, s.short, s.emailDomain].some((v) => v && v.toLowerCase().includes(q)));
+  }, [query]);
 
   function pick(school) {
     if (isOpen(school)) {
@@ -46,8 +54,39 @@ export default function Welcome({ onShowLegal }) {
 
         <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 shadow-2xl shadow-black/40 backdrop-blur">
           <h2 className="mb-3 text-sm font-semibold text-slate-200">Choose your school</h2>
-          <ul className="flex flex-col gap-2">
-            {SCHOOLS.map((school) => (
+          <div className="relative mb-3">
+            <label htmlFor="school-search" className="sr-only">
+              Search for your university
+            </label>
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <input
+              id="school-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search for your university"
+              autoComplete="off"
+              aria-controls="school-list"
+              className="w-full rounded-lg border border-slate-700 bg-slate-800/60 py-2.5 pl-9 pr-11 text-base text-slate-50 placeholder:text-slate-400 transition focus:border-brand-teal focus:outline-none focus:ring-2 focus:ring-brand-teal/60 [&::-webkit-search-cancel-button]:hidden"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-slate-400 hover:text-slate-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          {matches.length === 0 && (
+            <p className="rounded-xl border border-dashed border-slate-600 px-3 py-4 text-center text-sm text-slate-300">
+              No university matches &ldquo;{query.trim()}&rdquo;. FoundIT is coming to more universities soon.
+            </p>
+          )}
+          <ul id="school-list" className="flex flex-col gap-2">
+            {matches.map((school) => (
               <li key={school.id}>
                 <button
                   type="button"

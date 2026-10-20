@@ -13,6 +13,7 @@ const { broadcastPush } = require("../utils/push");
 const { idNumberSchema } = require("../utils/idNumber");
 const { ITEM_CATEGORIES } = require("../utils/itemCategories");
 const { fileIsImage } = require("../utils/imageCheck");
+const { signPhotoUrl } = require("../utils/photoLinks");
 
 const router = express.Router();
 
@@ -49,7 +50,7 @@ function serialize(row, posterName) {
     id: row.id,
     posterId: row.poster_id,
     posterName,
-    photoUrl: row.photo_url,
+    photoUrl: signPhotoUrl(row.photo_url),
     description: row.description,
     location: row.location,
     category: row.category,

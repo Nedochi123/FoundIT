@@ -3,6 +3,7 @@ import { ArrowLeft, Images, Rocket, Search, X } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import ItemCard from "./ItemCard";
+import { PrivateSpaceNote } from "../school/UniversitySpace";
 import LostBoard from "./LostBoard";
 
 const TAB_KEY = "foundit_gallery_tab";
@@ -139,6 +140,9 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
         <p className="mt-1 text-sm text-slate-300">
           {onLost ? "Did you see something someone is looking for? Tap \"I found this\"." : "Recognize something? Message the person who found it."}
         </p>
+        <div className="mt-2">
+          <PrivateSpaceNote />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-1.5 rounded-xl bg-slate-800/70 p-1" role="tablist" aria-label="Found or lost items">

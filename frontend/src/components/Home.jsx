@@ -8,6 +8,7 @@ import { TagsAlertCard, TagsPromoCard } from "./tags/HomeTagsCards";
 import HomeBoostedCards from "./boost/HomeBoostedCards";
 import HomeUrgentCards from "./urgent/HomeUrgentCards";
 import HomeSupportCard from "./support/HomeSupportCard";
+import { UniversityIdentityCard } from "./school/UniversitySpace";
 
 export default function Home({ onNavigate }) {
   const { user } = useAuth();
@@ -55,6 +56,8 @@ export default function Home({ onNavigate }) {
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">Hi, {firstName}</h1>
         <p className="mt-1 text-slate-300">What's going on today?</p>
       </div>
+
+      <UniversityIdentityCard onShowPrivacy={() => onNavigate("legal")} />
 
       <HomeUrgentCards items={urgentLost} currentUserId={user?.id} onFound={() => onNavigate("found")} onSeeAll={seeLostBoard} />
 

@@ -1,11 +1,39 @@
 # FoundIT
 
-Campus lost &amp; found for Nile University — report something lost or found, get notified campus-wide, and message another user in-app to verify and reunite items with their owners.
+Campus lost &amp; found for universities (Nile, Baze and Cosmopolitan today), each in its own private space — report something lost or found, get notified campus-wide, and message another user in-app to verify and reunite items with their owners.
 
 - `backend/` — Express 5 API (Node `node:sqlite`, JWT auth, Resend email, Web Push)
 - `frontend/` — React + Vite PWA (installable, camera capture, push notifications)
 
 See `backend/.env.example` and `frontend/.env.example` for required configuration. Deployed as backend → Railway, frontend → Vercel, matching the same pattern as the other Nedochi Publications projects.
+
+## University workspaces: each university is a private space
+
+**Decision (October 2026): one SQLite database file per university, plus server checks on every request.** SQLite has no
+row-level security, and a `school_id` column on every table would make one forgotten `WHERE` a leak. Separate files make
+the isolation physical: a query can only ever see the university it runs in.
+
+- **Which university a request is for:** `X-School` header → `src/middleware/school.js` runs the whole request inside that
+  university's database (`db/index.js`, AsyncLocalStorage). Unknown university → 400; one that is not open yet → 403.
+- **Membership is bound on the server:** a session token carries its university (`sch`); `requireAuth` refuses it at any
+  other university (401), so a student cannot switch by editing the header or the device's saved choice. Accounts are made
+  with the university's email domain (`config/schools.js`). Email verification stays optional (owner's decision,
+  20 October 2026), so the app says "made with an @… email address", never "verified students".
+- **The app shows the university the server decided:** every user answer includes `school: { id, name, emailDomain }`
+  (`utils/publicUser.js`); the device follows it (`AuthGate`). Home shows the name, logo, "Private university workspace"
+  and an honest privacy message (`components/school/UniversitySpace.jsx`): other universities can't see it, chats are between
+  the two students, and FoundIT's administrators can review reports, activity and chats. It never claims more.
+- **Photos are private too:** `/uploads` answers only signed links (`src/utils/photoLinks.js`, HMAC over university + file +
+  expiry, valid 1–2 hours, stable within the hour so browsers can keep them). Only API answers to that university's signed-in
+  students contain one; a link for one university never opens another's folder. Each university's photos are in their own folder.
+- **Jobs, alerts and admins** run per university (`forEachSchool`, `broadcastPush` inside the request's database); an admin
+  account lives in one university's database and manages only that one; the owner page picks a university and logs every view.
+- **Adding a university:** one entry in `backend/src/config/schools.js` and one in `frontend/src/lib/schools.js` (a test fails
+  if they differ), plus its logo in `frontend/public/schools/`. Its database file is created on start.
+- **Tests:** `backend/test/tenant-isolation.test.js` (forged university on every kind of route, copied ids, photo links edited,
+  expired or reused across universities, admins across universities, suspension on the next request, no session at all),
+  `school-databases.test.js`, `school-journeys.test.js`; `frontend/test/university-space.test.mjs` guards the identity and the
+  privacy wording.
 
 ## Thank-you rewards (voluntary, paid directly)
 

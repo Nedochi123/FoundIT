@@ -168,8 +168,9 @@ test("a found-item photo is saved in its school's database and folder (an upload
   form.append("location", "Cafeteria");
   const r = await call("POST", "/api/found-items", { school: "baze", token: baze.body.accessToken, form });
   assert.equal(r.status, 201, JSON.stringify(r.body));
-  assert.match(r.body.item.photoUrl, /^\/uploads\/found-items\/baze\/[0-9a-f-]+\.png$/);
-  assert.ok(fs.existsSync(path.join(process.env.UPLOAD_ROOT, r.body.item.photoUrl.replace("/uploads/", ""))));
+  // the link is signed for Baze (the photo is private to the school: utils/photoLinks.js); the file is in Baze's folder
+  assert.match(r.body.item.photoUrl, /^\/uploads\/found-items\/baze\/[0-9a-f-]+\.png\?school=baze&exp=\d+&sig=[\w-]{43}$/);
+  assert.ok(fs.existsSync(path.join(process.env.UPLOAD_ROOT, r.body.item.photoUrl.split("?")[0].replace("/uploads/", ""))));
   assert.equal(countIn("baze", "SELECT COUNT(*) AS n FROM found_items WHERE id = ?", r.body.item.id), 1);
   assert.equal(countIn("nile", "SELECT COUNT(*) AS n FROM found_items WHERE id = ?", r.body.item.id), 0);
 });
