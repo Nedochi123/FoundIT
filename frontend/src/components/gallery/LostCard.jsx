@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Rocket, CheckCircle2, Flag, Hourglass, Search, TriangleAlert } from "lucide-react";
+import { MapPin, Rocket, CheckCircle2, Flag, Hourglass, Pencil, Search, Trash2, TriangleAlert } from "lucide-react";
 import { getCategoryIcon } from "../../lib/itemCategories";
 import { timeAgo, timeLeft } from "../../lib/boosts";
 import { formatNaira } from "../../lib/rewards";
@@ -10,7 +10,7 @@ import ReportDialog from "../shared/ReportDialog";
  * their own post's boost state and can mark it found; everyone else sees "I found this".
  * boostEnabled: false until the admin has set up payments, so nobody is offered a boost that can't be paid yet.
  */
-export default function LostCard({ item, currentUserId, boostEnabled, onBoost, onResolve, onFound, resolving }) {
+export default function LostCard({ item, currentUserId, boostEnabled, onBoost, onResolve, onFound, resolving, onEdit, onDelete, deleting }) {
   const [reporting, setReporting] = useState(false);
   const isOwn = item.posterId === currentUserId;
   const boosted = Boolean(item.boostedUntil);
@@ -103,6 +103,23 @@ export default function LostCard({ item, currentUserId, boostEnabled, onBoost, o
               className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-slate-600 px-3 text-xs font-semibold text-slate-200 transition hover:bg-slate-800 disabled:opacity-60"
             >
               <CheckCircle2 className="h-4 w-4" /> Mark as found
+            </button>
+            <button
+              type="button"
+              onClick={() => onEdit(item)}
+              aria-label="Edit this post"
+              className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-slate-600 px-3 text-xs font-semibold text-slate-200 transition hover:bg-slate-800"
+            >
+              <Pencil className="h-4 w-4" aria-hidden="true" /> Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => onDelete(item)}
+              disabled={deleting}
+              aria-label="Delete this post"
+              className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-red-500/40 px-3 text-xs font-semibold text-red-300 transition hover:bg-red-500/10 disabled:opacity-60"
+            >
+              <Trash2 className="h-4 w-4" aria-hidden="true" /> {deleting ? "Deleting..." : "Delete"}
             </button>
           </>
         ) : (

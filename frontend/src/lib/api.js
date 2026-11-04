@@ -192,11 +192,15 @@ export const api = {
   listFoundItems: (status = "open") => apiRequest(`/api/found-items?status=${status}`),
   createFoundItem: (formData) => apiRequest("/api/found-items", { method: "POST", body: formData }),
   resolveFoundItem: (id) => apiRequest(`/api/found-items/${id}/resolve`, { method: "PATCH" }),
+  updateFoundItem: (id, body) => apiRequest(`/api/found-items/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  deleteFoundItem: (id) => apiRequest(`/api/found-items/${id}`, { method: "DELETE" }),
 
   // Lost items
   listLostItems: (status = "open") => apiRequest(`/api/lost-items?status=${status}`),
   createLostItem: (body) => apiRequest("/api/lost-items", { method: "POST", body: JSON.stringify(body) }),
   resolveLostItem: (id) => apiRequest(`/api/lost-items/${id}/resolve`, { method: "PATCH" }),
+  updateLostItem: (id, body) => apiRequest(`/api/lost-items/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  deleteLostItem: (id) => apiRequest(`/api/lost-items/${id}`, { method: "DELETE" }),
   // "Urgently need": a lost post with a compulsory reward; publishing alerts everyone
   listUrgentItems: () => apiRequest("/api/lost-items/urgent"),
   createUrgentItem: (body) => apiRequest("/api/lost-items/urgent", { method: "POST", body: JSON.stringify(body) }),

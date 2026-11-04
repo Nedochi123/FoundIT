@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import ItemCard from "./ItemCard";
 import { PrivateSpaceNote } from "../school/UniversitySpace";
 import LostBoard from "./LostBoard";
+import EditPostDialog from "./EditPostDialog";
 
 const TAB_KEY = "foundit_gallery_tab";
 const JUST_POSTED_KEY = "foundit_just_posted_lost";
@@ -40,6 +41,9 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [messagingId, setMessagingId] = useState(null);
+  const [editing, setEditing] = useState(null); // the found post whose edit dialog is open
+  const [deletingId, setDeletingId] = useState(null);
+  const [notice, setNotice] = useState(""); // "Your post was updated." and the like
   const [query, setQuery] = useState("");
 
   // Campus-scale item counts make a full search backend overkill — a
@@ -122,6 +126,22 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
   async function handleResolve(id) {
     await api.resolveFoundItem(id).catch(() => {});
     setItems((prev) => prev.filter((i) => i.id !== id));
+  }
+
+  async function handleDelete(item) {
+    if (!window.confirm("Delete this post for good? Its photo and any chats about it are removed, and it can't be brought back.")) return;
+    setDeletingId(item.id);
+    setError("");
+    setNotice("");
+    try {
+      await api.deleteFoundItem(item.id);
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+      setNotice("Your post was deleted.");
+    } catch (err) {
+      setError(err.message || "Couldn't delete that post. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   const onLost = tab === "lost";
@@ -217,7 +237,8 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
             </div>
           )}
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+          {notice && <p role="status" className="text-sm text-emerald-400">{notice}</p>}
 
           {loading ? (
             <p className="text-sm text-slate-300">Loading...</p>
@@ -241,12 +262,28 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
                     onMessage={handleMessage}
                     onResolve={handleResolve}
                     messaging={messagingId === item.id}
+                    onEdit={setEditing}
+                    onDelete={handleDelete}
+                    deleting={deletingId === item.id}
                   />
                 </div>
               ))}
             </div>
           )}
         </>
+      )}
+      {editing && (
+        <EditPostDialog
+          kind="found"
+          item={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(saved) => {
+            setItems((prev) => prev.map((i) => (i.id === saved.id ? { ...i, ...saved } : i)));
+            setEditing(null);
+            setError("");
+            setNotice("Your post was updated.");
+          }}
+        />
       )}
     </div>
   );

@@ -154,4 +154,44 @@ router.patch("/:id/resolve", requireAuth, requireOwnedFoundItem(db), (req, res) 
   res.json({ ok: true });
 });
 
+// Editing a post's details (the poster only, while it is still open). The photo stays as it is.
+const editSchema = z.object({
+  description: z.string().trim().max(1000).optional(),
+  location: z.string().trim().max(200).optional(),
+  category: z.enum(ITEM_CATEGORIES).nullable().optional(),
+});
+
+router.patch("/:id", requireAuth, requireOwnedFoundItem(db), (req, res, next) => {
+  try {
+    if (req.foundItem.status !== "open") {
+      return res.status(409).json({ error: "This post is closed, so it can't be edited any more." });
+    }
+    const parsed = editSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.issues[0].message });
+    }
+    const { description, location, category } = parsed.data;
+    db.prepare(
+      "UPDATE found_items SET description = ?, location = ?, category = ?, updated_at = datetime('now') WHERE id = ?"
+    ).run(description || null, location || null, category === undefined ? req.foundItem.category : category, req.params.id);
+    const item = db.prepare("SELECT * FROM found_items WHERE id = ?").get(req.params.id);
+    res.json({ item: serialize(item, req.user.name) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Deleting a post (the poster only), with its photo. Once a return has been confirmed the post is part of the record
+// (tokens, thank-you notes, rewards and the Wall of Reunions depend on it), so it is kept.
+router.delete("/:id", requireAuth, requireOwnedFoundItem(db), (req, res) => {
+  if (req.foundItem.return_confirmed_at) {
+    return res.status(409).json({ error: "This item's return was confirmed, so its record is kept." });
+  }
+  db.prepare("DELETE FROM found_items WHERE id = ?").run(req.params.id);
+  // remove the photo file too, but only ever a file inside the found-items upload folder
+  const file = path.resolve(UPLOAD_ROOT, String(req.foundItem.photo_url || "").replace(/^\/uploads\//, ""));
+  if (file.startsWith(path.resolve(UPLOAD_DIR) + path.sep)) fs.rm(file, { force: true }, () => {});
+  res.json({ ok: true });
+});
+
 module.exports = router;

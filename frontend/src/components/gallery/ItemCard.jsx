@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { MessageCircle, MapPin, CheckCircle2, Flag } from "lucide-react";
+import { MessageCircle, MapPin, CheckCircle2, Flag, Pencil, Trash2 } from "lucide-react";
 import { resolvePhotoUrl } from "../../lib/api";
 import { getCategoryIcon } from "../../lib/itemCategories";
 import ReportDialog from "../shared/ReportDialog";
 
-export default function ItemCard({ item, currentUserId, onMessage, onResolve, messaging }) {
+export default function ItemCard({ item, currentUserId, onMessage, onResolve, messaging, onEdit, onDelete, deleting }) {
   const isOwn = item.posterId === currentUserId;
   const [reporting, setReporting] = useState(false);
   const CategoryIcon = item.category ? getCategoryIcon(item.category) : null;
@@ -37,14 +37,35 @@ export default function ItemCard({ item, currentUserId, onMessage, onResolve, me
         </div>
 
         {isOwn ? (
-          onResolve && (
-            <button
-              onClick={() => onResolve(item.id)}
-              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-600 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800"
-            >
-              <CheckCircle2 className="h-3.5 w-3.5" /> Mark as resolved
-            </button>
-          )
+          <div className="mt-3 flex flex-col gap-1.5">
+            {onResolve && (
+              <button
+                onClick={() => onResolve(item.id)}
+                className="flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg border border-slate-600 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" /> Mark as resolved
+              </button>
+            )}
+            {onEdit && onDelete && (
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => onEdit(item)}
+                  aria-label="Edit this post"
+                  className="flex min-h-10 flex-1 items-center justify-center gap-1 rounded-lg border border-slate-600 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800"
+                >
+                  <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> Edit
+                </button>
+                <button
+                  onClick={() => onDelete(item)}
+                  disabled={deleting}
+                  aria-label="Delete this post"
+                  className="flex min-h-10 flex-1 items-center justify-center gap-1 rounded-lg border border-red-500/40 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-500/10 disabled:opacity-60"
+                >
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" /> {deleting ? "..." : "Delete"}
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="mt-3 flex gap-1.5">
             <button

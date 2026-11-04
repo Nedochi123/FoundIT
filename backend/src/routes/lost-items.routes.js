@@ -196,4 +196,42 @@ router.patch("/:id/resolve", requireAuth, requireOwnedLostItem(db), (req, res) =
   res.json({ ok: true });
 });
 
+// Editing a post's details (the poster only, while it is still open). Category can be cleared with null.
+const editSchema = z.object({
+  description: z.string().trim().min(1, "Describe what you lost.").max(1000),
+  location: z.string().trim().max(200).optional(),
+  category: z.enum(ITEM_CATEGORIES).nullable().optional(),
+});
+
+router.patch("/:id", requireAuth, requireOwnedLostItem(db), (req, res, next) => {
+  try {
+    if (req.lostItem.status !== "open") {
+      return res.status(409).json({ error: "This post is closed, so it can't be edited any more." });
+    }
+    const parsed = editSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.issues[0].message });
+    }
+    const { description, location, category } = parsed.data;
+    db.prepare(
+      "UPDATE lost_items SET description = ?, location = ?, category = ?, updated_at = datetime('now') WHERE id = ?"
+    ).run(description, location || null, category === undefined ? req.lostItem.category : category, req.params.id);
+    const item = db.prepare(`SELECT *, ${BOOSTED_UNTIL_SQL} AS boosted_until FROM lost_items WHERE id = ?`).get(req.params.id);
+    res.json({ item: serialize(item, req.user.name) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Deleting a post (the poster only). A post someone paid to boost keeps its record (the payment is tied to it), so it
+// is closed with "resolve" instead.
+router.delete("/:id", requireAuth, requireOwnedLostItem(db), (req, res) => {
+  const boosted = db.prepare("SELECT 1 FROM boosts WHERE lost_item_id = ? LIMIT 1").get(req.params.id);
+  if (boosted) {
+    return res.status(409).json({ error: "This post was boosted, so its record is kept. Mark it as resolved instead." });
+  }
+  db.prepare("DELETE FROM lost_items WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
 module.exports = router;
