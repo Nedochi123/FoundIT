@@ -7,6 +7,101 @@ Campus lost &amp; found for universities (Nile, Baze and Cosmopolitan today), ea
 
 See `backend/.env.example` and `frontend/.env.example` for required configuration. Deployed as backend → Railway, frontend → Vercel, matching the same pattern as the other Nedochi Publications projects.
 
+**Live app:** https://founditapp.nedochipublications.com · **API health check:** https://foundit-backend-production-e380.up.railway.app/api/health
+
+## Project overview
+
+FoundIT is a full-stack web app (installable on phones) where university students post things they have **lost** and
+things they have **found**, browse every post from their own campus, chat privately to check that an item really belongs
+to someone, and confirm the return. Each post is an **Item Post**, either Lost or Found.
+
+## Problem being solved
+
+Students lose phones, ID cards, bottles, keys and books every day, and other students find them. Notices on walls and
+messages in group chats are easily missed, so lost and found items are rarely matched. FoundIT gives each campus one place
+where lost and found posts meet, with a safe way to arrange the return.
+
+## Features
+
+**CRUD on the main record (Item Post), all through the API and the database:**
+
+| Operation | In the app | API endpoint |
+| --- | --- | --- |
+| **Create** | "I lost something" form; "I found something" form (with a photo) | `POST /api/lost-items`, `POST /api/found-items` |
+| **Read** | Lost board and the "Items found" gallery (search, category icons) | `GET /api/lost-items`, `GET /api/found-items` |
+| **Update** | **Edit** on your own post (description, place, category); **Mark as found / resolved** changes the status | `PATCH /api/lost-items/:id`, `PATCH /api/found-items/:id`, `PATCH /api/…/:id/resolve` |
+| **Delete** | **Delete** on your own post, after "Are you sure?" (a found post's photo is deleted too) | `DELETE /api/lost-items/:id`, `DELETE /api/found-items/:id` |
+
+Only the student who posted can edit or delete a post (the server answers `403` to anyone else and `404` for a post that
+does not exist). Two kinds of post are kept as a record instead of deleted: a lost post someone paid to boost (mark it
+resolved instead), and a found post whose return was confirmed (tokens and the Wall of Reunions depend on it).
+
+**Also:** sign-up and login, private chat between finder and owner, confirming a return, tokens for finders, a
+leaderboard, thank-you notes, reporting posts, push notifications, colour themes, and a separate private space for each
+university. These extras are described in the sections further down.
+
+## Technology stack
+
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 18, Vite, Tailwind CSS, installable PWA (service worker) |
+| Backend / API | Node.js 24+, Express 5, Zod (input validation), JWT (login sessions), Multer (photo uploads) |
+| Database | SQLite through Node's built-in `node:sqlite` (one database file per university) |
+| Hosting | Frontend on Vercel, backend on Railway, database file and photos on a Railway persistent volume |
+| Tools | VS Code, Git and GitHub (pull requests, GitHub Actions CI), browser developer tools, Claude Code (see `AI_USAGE.md`) |
+
+## Setup and installation (run it on your own computer)
+
+1. Install **Node.js 24 or newer** and Git.
+2. Clone the repository: `git clone https://github.com/Nedochi123/FoundIT.git` and `cd FoundIT`.
+3. **Backend:** `cd backend`, `npm install`, copy `.env.example` to `.env` (the defaults work locally), then `npm run dev` or
+   `npm start`. The API runs on http://localhost:4000 (check http://localhost:4000/api/health).
+4. **Frontend:** in a second terminal, `cd frontend`, `npm install`, copy `.env.example` to `.env`, then `npm run dev`.
+   Open http://localhost:5173.
+5. Sign up with an email that ends in the university's domain (locally the default is `@nileuniversity.edu.ng`; set
+   `ALLOWED_EMAIL_DOMAIN` to change it). Use made-up details only.
+
+## Environment variables
+
+Names only, never real values. Full lists with comments: `backend/.env.example` and `frontend/.env.example` (and the
+summary in the root `.env.example`).
+
+- **Backend (required):** `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `PORT`, `CLIENT_ORIGIN`,
+  `ALLOWED_EMAIL_DOMAIN`, `UPLOAD_ROOT` (a persistent folder in production)
+- **Backend (optional):** `ACCESS_TOKEN_TTL`, `REFRESH_TOKEN_TTL_DAYS`, `NODE_ENV`, `ADMIN_EMAILS`, `VAPID_PUBLIC_KEY`,
+  `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `RESEND_API_KEY`, `EMAIL_FROM`, `SENTRY_DSN`
+- **Frontend:** `VITE_API_BASE_URL` (the live backend URL in production), `VITE_SENTRY_DSN`, `VITE_GA_MEASUREMENT_ID`
+
+In production these are set in Railway's **Variables** (backend) and Vercel's **Environment Variables** (frontend), never
+in the repository.
+
+## Database setup
+
+Nothing to install: SQLite is built into Node. On start-up the server creates the database file named in `DATABASE_URL`
+and runs `backend/db/schema.sql` (every `CREATE TABLE IF NOT EXISTS`), then applies small in-place upgrades for older
+databases. The main tables are `users`, `lost_items` and `found_items` (plus chats, tokens and the extras). Each other
+university gets its own file next to the main one (for example `dev-baze.db`). In production `DATABASE_URL` points at a
+file on a Railway **persistent volume**, so data survives restarts and redeploys.
+
+## Testing instructions
+
+**Automated:** `cd backend && npm test` (158 tests: the API end to end on throwaway databases, including
+`test/crud.test.js` for create, read, edit and delete with every refusal) and `cd frontend && npm test` (78 tests).
+GitHub Actions runs both on every push.
+
+**By hand (locally, then on the live URL, also on a phone and in a private window):**
+
+1. Create a lost post and a found post: a success message, and each appears in its list.
+2. Refresh the page: both are still there (read from the database).
+3. Edit a post's description: the change shows and stays after a refresh.
+4. Delete a post and confirm: it disappears and stays gone after a refresh.
+5. Submit an empty description on a lost post: a clear error, and nothing is saved.
+6. Stop the backend (or use a wrong post id): the app shows a helpful message instead of crashing.
+
+## Screenshots
+
+See the live app (link at the top). Sign-up needs a university email ending; use made-up details.
+
 ## University workspaces: each university is a private space
 
 **Decision (October 2026): one SQLite database file per university, plus server checks on every request.** SQLite has no
