@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import LostCard from "./LostCard";
 import BoostSheet from "../boost/BoostSheet";
+import EditPostDialog from "./EditPostDialog";
 
 /** The Lost tab: everything people on campus are looking for, boosted posts pinned first. */
 export default function LostBoard({ onNavigate }) {
@@ -14,6 +15,9 @@ export default function LostBoard({ onNavigate }) {
   const [boostEnabled, setBoostEnabled] = useState(false);
   const [boosting, setBoosting] = useState(null); // the post whose boost sheet is open
   const [resolvingId, setResolvingId] = useState(null);
+  const [editing, setEditing] = useState(null); // the post whose edit dialog is open
+  const [deletingId, setDeletingId] = useState(null);
+  const [notice, setNotice] = useState(""); // "Your post was updated." and the like
 
   const load = useCallback(async () => {
     try {
@@ -49,11 +53,28 @@ export default function LostBoard({ onNavigate }) {
     }
   }
 
+  async function handleDelete(item) {
+    if (!window.confirm("Delete this post for good? It will disappear for everyone and can't be brought back.")) return;
+    setDeletingId(item.id);
+    setError("");
+    setNotice("");
+    try {
+      await api.deleteLostItem(item.id);
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+      setNotice("Your post was deleted.");
+    } catch (err) {
+      setError(err.message || "Couldn't delete that post. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   if (loading) return <p className="text-sm text-slate-300">Loading...</p>;
 
   return (
     <div className="flex flex-col gap-3">
       {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+      {notice && <p role="status" className="text-sm text-emerald-400">{notice}</p>}
       <button
         type="button"
         onClick={() => onNavigate("urgent")}
@@ -77,9 +98,26 @@ export default function LostBoard({ onNavigate }) {
               onResolve={handleResolve}
               onFound={() => onNavigate("found")}
               resolving={resolvingId === item.id}
+              onEdit={setEditing}
+              onDelete={handleDelete}
+              deleting={deletingId === item.id}
             />
           </div>
         ))
+      )}
+
+      {editing && (
+        <EditPostDialog
+          kind="lost"
+          item={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(saved) => {
+            setItems((prev) => prev.map((i) => (i.id === saved.id ? { ...i, ...saved, boostedUntil: i.boostedUntil, urgent: i.urgent, boost: i.boost } : i)));
+            setEditing(null);
+            setError("");
+            setNotice("Your post was updated.");
+          }}
+        />
       )}
 
       {boosting && (
