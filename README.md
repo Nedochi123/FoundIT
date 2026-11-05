@@ -100,7 +100,18 @@ GitHub Actions runs both on every push.
 
 ## Screenshots
 
-See the live app (link at the top). Sign-up needs a university email ending; use made-up details.
+Taken on a phone-sized screen with sample data only (made-up students and posts). The live app looks the same; sign-up needs
+a university email ending, so use made-up details.
+
+| Home | Lost board (Read) | Your own post |
+| --- | --- | --- |
+| <img src="docs/screenshots/1-home.png" alt="Home: Hi, Amaka, with I lost something, I urgently need something and I found something" width="240"> | <img src="docs/screenshots/2-lost-board.png" alt="Lost board listing lost posts from other students, each with I found this" width="240"> | <img src="docs/screenshots/3-your-post.png" alt="The student's own post with Mark as found, Edit and Delete buttons" width="240"> |
+
+| Edit a post (Update) | Saved, with a success message |
+| --- | --- |
+| <img src="docs/screenshots/4-edit-post.png" alt="Edit your lost post dialog with description, where and category" width="240"> | <img src="docs/screenshots/5-post-updated.png" alt="Lost board showing Your post was updated and the edited description" width="240"> |
+
+Delete asks "Delete this post for good?" first, then shows "Your post was deleted." (see the CRUD table under Features).
 
 ## University workspaces: each university is a private space
 
