@@ -6,6 +6,7 @@ import ItemCard from "./ItemCard";
 import { PrivateSpaceNote } from "../school/UniversitySpace";
 import LostBoard from "./LostBoard";
 import EditPostDialog from "./EditPostDialog";
+import { GridSkeleton } from "../shared/Skeleton";
 
 const TAB_KEY = "foundit_gallery_tab";
 const JUST_POSTED_KEY = "foundit_just_posted_lost";
@@ -241,7 +242,7 @@ export default function Gallery({ onNavigate, onOpenConversation }) {
           {notice && <p role="status" className="text-sm text-emerald-400">{notice}</p>}
 
           {loading ? (
-            <p className="text-sm text-slate-300">Loading...</p>
+            <GridSkeleton label="Loading items found..." />
           ) : items.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-600 py-12 text-center">
               <Images className="h-8 w-8 text-slate-500" />

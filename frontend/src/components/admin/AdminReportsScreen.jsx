@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Flag, Trash2, UserX, X } from "lucide-react";
 import { api, resolvePhotoUrl } from "../../lib/api";
+import { ListSkeleton } from "../shared/Skeleton";
 
 const FILTERS = [
   { key: "pending", label: "Pending" },
@@ -80,7 +81,7 @@ export default function AdminReportsScreen() {
       {error && <p className="text-sm text-red-400">{error}</p>}
 
       {loading ? (
-        <p className="text-sm text-slate-300">Loading...</p>
+        <ListSkeleton label="Loading..." rows={3} thumb={false} />
       ) : reports.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-600 py-12 text-center">
           <Flag className="h-8 w-8 text-slate-500" />

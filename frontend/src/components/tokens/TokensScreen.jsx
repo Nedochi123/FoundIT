@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import CashoutForm from "./CashoutForm";
 import { RewardsGuideLink } from "../rewards/RewardsGuide";
+import { TokensSkeleton } from "../shared/Skeleton";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
@@ -56,7 +57,7 @@ export default function TokensScreen() {
     await refreshMe();
   }
 
-  if (loading) return <p className="text-sm text-slate-300">Loading...</p>;
+  if (loading) return <TokensSkeleton />;
 
   return (
     <div className="flex flex-col gap-6">

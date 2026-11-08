@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Users, PackageCheck, HandHeart, Coins, Wallet2 } from "lucide-react";
 import { api } from "../../lib/api";
+import { ListSkeleton } from "../shared/Skeleton";
 
 const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20";
 
@@ -103,7 +104,7 @@ export default function AdminStatsScreen() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-sm text-slate-300">Loading...</p>;
+  if (loading) return <ListSkeleton label="Loading..." rows={3} thumb={false} />;
   if (error) return <p className="text-sm text-red-400">{error}</p>;
   if (!stats) return null;
 

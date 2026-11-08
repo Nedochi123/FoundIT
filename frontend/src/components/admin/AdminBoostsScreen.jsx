@@ -3,6 +3,7 @@ import { Check, X, Rocket, Landmark } from "lucide-react";
 import { api } from "../../lib/api";
 import { formatNaira } from "../../lib/rewards";
 import { timeAgo } from "../../lib/boosts";
+import { ListSkeleton } from "../shared/Skeleton";
 
 const cardClass = "rounded-xl border border-white/10 bg-slate-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur";
 const inputClass =
@@ -139,7 +140,7 @@ export default function AdminBoostsScreen() {
     }
   }
 
-  if (!data) return <p className="text-sm text-slate-300">{error || "Loading..."}</p>;
+  if (!data) return error ? <p className="text-sm text-slate-300">{error}</p> : <ListSkeleton label="Loading boosts..." rows={3} thumb={false} />;
 
   return (
     <div className="flex flex-col gap-5">

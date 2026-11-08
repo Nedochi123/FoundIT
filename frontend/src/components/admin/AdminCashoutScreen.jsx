@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Check, X, Banknote } from "lucide-react";
 import { api } from "../../lib/api";
+import { ListSkeleton } from "../shared/Skeleton";
 
 const FILTERS = [
   { key: "pending", label: "Pending" },
@@ -72,7 +73,7 @@ export default function AdminCashoutScreen() {
       {error && <p className="text-sm text-red-400">{error}</p>}
 
       {loading ? (
-        <p className="text-sm text-slate-300">Loading...</p>
+        <ListSkeleton label="Loading..." rows={3} thumb={false} />
       ) : requests.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-600 py-12 text-center">
           <Banknote className="h-8 w-8 text-slate-500" />

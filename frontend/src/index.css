@@ -249,3 +249,28 @@ h1, h2, h3 {
     font-size: 16px;
   }
 }
+
+/* Loading skeletons (components/shared/Skeleton.jsx): soft shapes in the student's own slate colours, with a slow shimmer
+   that only runs when the phone does not ask for less motion. */
+.fi-bone {
+  position: relative;
+  overflow: hidden;
+  background-color: rgb(var(--slate-700) / 0.55);
+}
+.fi-bone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(var(--slate-400) / 0.18), transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fi-bone::after {
+    animation: fi-shimmer 1.6s ease-in-out infinite;
+  }
+}
+@keyframes fi-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}

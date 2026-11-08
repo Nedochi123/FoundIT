@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, QrCode, Pause, Play, Trash2, MessageSquare, ChevronRight } from "lucide-react";
 import { api } from "../../lib/api";
 import TagChat from "./TagChat";
+import { ChatSkeleton, LinesSkeleton, ListSkeleton } from "../shared/Skeleton";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -126,7 +127,7 @@ function TagCard({ tag, onChanged, onOpenChat }) {
       {open && (
         <div className="mt-3 flex flex-col gap-2 border-t border-white/10 pt-3">
           {threads === null ? (
-            <p className="text-xs text-slate-400">Loading...</p>
+            <LinesSkeleton label="Loading chats..." lines={2} />
           ) : threads.length === 0 ? (
             <p className="text-xs text-slate-400">No one has scanned this tag yet. When they do, you can chat with them here.</p>
           ) : (
@@ -208,7 +209,7 @@ function ChatScreen({ tag, threadId, onBack }) {
       </div>
       <div className={cardClass}>
         {chat === null ? (
-          <p className="text-sm text-slate-400">{error || "Loading..."}</p>
+          error ? <p className="text-sm text-slate-400">{error}</p> : <ChatSkeleton label="Loading the chat..." />
         ) : (
           <TagChat
             messages={chat.messages}
@@ -317,7 +318,7 @@ export default function TagsScreen({ onBack, initialCode = "" }) {
       <div>
         <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Your tags ({tags?.length ?? 0} of {maxTags})</p>
         {tags === null ? (
-          <p className="text-sm text-slate-400">Loading...</p>
+          <ListSkeleton label="Loading your tags..." rows={2} />
         ) : tags.length === 0 ? (
           <p className="text-sm text-slate-400">You haven't activated a tag yet. Got a FoundIT sticker? Enter its code above.</p>
         ) : (
