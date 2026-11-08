@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import LostCard from "./LostCard";
 import BoostSheet from "../boost/BoostSheet";
 import EditPostDialog from "./EditPostDialog";
+import { ListSkeleton } from "../shared/Skeleton";
 
 /** The Lost tab: everything people on campus are looking for, boosted posts pinned first. */
 export default function LostBoard({ onNavigate }) {
@@ -69,7 +70,7 @@ export default function LostBoard({ onNavigate }) {
     }
   }
 
-  if (loading) return <p className="text-sm text-slate-300">Loading...</p>;
+  if (loading) return <ListSkeleton label="Loading lost posts..." rows={3} />;
 
   return (
     <div className="flex flex-col gap-3">

@@ -23,6 +23,7 @@ import TagScan from "./components/tags/TagScan";
 import TagsScreen from "./components/tags/TagsScreen";
 import LocationGate from "./components/location/LocationGate";
 import SupportScreen from "./components/support/SupportScreen";
+import { ListSkeleton } from "./components/shared/Skeleton";
 
 // Split out of the main bundle — the admin screen is only ever loaded by
 // one account, so every other visitor's initial load shouldn't pay to
@@ -100,7 +101,7 @@ function Screens() {
     content = <TagsScreen onBack={() => navigate("profile")} initialCode={getClaimCode()} />;
   } else if (view === "admin") {
     content = user?.isAdmin ? (
-      <Suspense fallback={<p className="text-sm text-slate-300">Loading...</p>}>
+      <Suspense fallback={<ListSkeleton label="Loading admin..." rows={3} thumb={false} />}>
         <AdminScreen />
       </Suspense>
     ) : (

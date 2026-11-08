@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Send, Siren } from "lucide-react";
 import { api } from "../../lib/api";
 import { usePolling } from "../../hooks/usePolling";
+import { ChatSkeleton } from "../shared/Skeleton";
 
 const MAX = 1000;
 
@@ -76,7 +77,7 @@ export default function SupportScreen({ onNavigate }) {
       </div>
 
       <div className="flex min-h-40 flex-col gap-2" aria-live="polite">
-        {messages === null && <p className="text-sm text-slate-300">Loading...</p>}
+        {messages === null && <ChatSkeleton label="Loading your messages..." />}
         {messages && messages.length === 0 && (
           <p className="rounded-xl border border-dashed border-slate-600 py-8 text-center text-sm text-slate-300">
             No messages yet. Write your complaint below.

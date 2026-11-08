@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PackageCheck, CircleCheck, TriangleAlert, Loader2, MessagesSquare } from "lucide-react";
+import { PackageCheck, CircleCheck, TriangleAlert, MessagesSquare } from "lucide-react";
 import { api } from "../../lib/api";
 import TagChat from "./TagChat";
 import Logo from "../theme/Logo";
 import { getSchool, handInTo } from "../../lib/schools";
 import { setApiSchool } from "../../lib/api";
+import { LinesSkeleton } from "../shared/Skeleton";
 
 // The school the scanned sticker belongs to: its link says ?school=... (stickers printed before there were several
 // schools say nothing, and those are all the default school's).
@@ -184,9 +185,7 @@ export default function TagScan({ code }) {
   if (!info || checkingChat) {
     return (
       <Shell>
-        <div className="flex items-center gap-2 text-slate-300">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading...
-        </div>
+        <LinesSkeleton label="Loading..." lines={3} />
       </Shell>
     );
   }

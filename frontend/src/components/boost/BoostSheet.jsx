@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Rocket, X, Copy, Check, ShieldAlert, Loader2, Clock, PartyPopper } from "lucide-react";
+import { Rocket, X, Copy, Check, ShieldAlert, Clock, PartyPopper } from "lucide-react";
 import { api } from "../../lib/api";
 import { formatNaira } from "../../lib/rewards";
 import { formatWhen, timeLeft } from "../../lib/boosts";
+import { LinesSkeleton } from "../shared/Skeleton";
 
 const inputClass =
   "w-full rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-slate-50 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-brand-teal/60 focus:border-brand-teal";
@@ -122,7 +123,7 @@ export default function BoostSheet({ item, onClose, onChanged }) {
         <p className="line-clamp-2 rounded-lg bg-slate-800/60 px-3 py-2 text-sm text-slate-200">{item.description}</p>
 
         {loading ? (
-          <p className="flex items-center gap-2 text-sm text-slate-300"><Loader2 className="h-4 w-4 animate-spin" /> Loading...</p>
+          <LinesSkeleton label="Loading boost details..." lines={4} />
         ) : !boost ? (
           <>
             <ul className="flex flex-col gap-1.5 text-sm text-slate-300">

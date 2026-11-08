@@ -9,6 +9,7 @@ import Logo from "../theme/Logo";
 import Welcome from "./Welcome";
 import { useSchool } from "../school/SchoolProvider";
 import { DEFAULT_SCHOOL_ID } from "../../lib/schools";
+import { AppSkeleton } from "../shared/Skeleton";
 
 function getResetTokenFromUrl() {
   return new URLSearchParams(window.location.search).get("resetToken");
@@ -71,9 +72,7 @@ export default function AuthGate({ children }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-app items-center justify-center">
-        <p className="text-slate-400">Loading...</p>
-      </div>
+      <AppSkeleton />
     );
   }
 

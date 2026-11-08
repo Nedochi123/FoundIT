@@ -3,6 +3,7 @@ import { MessageCircle } from "lucide-react";
 import { api, resolvePhotoUrl } from "../../lib/api";
 import { usePolling } from "../../hooks/usePolling";
 import { PrivateSpaceNote } from "../school/UniversitySpace";
+import { ListSkeleton } from "../shared/Skeleton";
 
 // Who can read a chat, said plainly at the top of the list (Privacy & Terms has the detail).
 const header = (
@@ -48,7 +49,7 @@ export default function ConversationList({ onOpenConversation, onUnreadChange })
     return (
       <div>
         {header}
-        <p className="text-sm text-slate-300">Loading...</p>
+        <ListSkeleton label="Loading your conversations..." rows={4} />
       </div>
     );
 
