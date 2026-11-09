@@ -3,6 +3,9 @@
 FoundIT was built with an AI coding assistant doing most of the typing, while I decided what to build, reviewed what it
 produced, tested it, and decided what to keep, change or undo. This report is an honest account of that.
 
+*This report was itself drafted with Claude Code from the project's history (my requests, the commits and the pull
+requests), then read and checked by me.*
+
 ## 1. AI tools used
 
 | Tool | What I used it for |
@@ -45,8 +48,17 @@ per-university databases, and the automated tests.
 - **Chose the rules** the AI then implemented: fixed reward amounts, no money handled by FoundIT, which universities to
   open, each university's colours, and that posts with paid boosts or confirmed returns must not be deletable.
 - **Asked for changes after testing it myself**, for example the complaints section's wording and the delete rules above.
-
-*(Add any lines you changed yourself, in your own words.)*
+- **Changed the reward amounts twice** before settling on ₦3,000 to ₦20,000 (I first asked for ₦1,000 to ₦10,000).
+- **Chose one database per university** instead of the AI's suggestion of one shared database with a school column, so one
+  campus can never see another's posts.
+- **Sent the AI back on colours more than once:** Baze's look was redone three times ("more of grey", then "good
+  contrast", then the previous look with grey in the right places), and Cosmopolitan's colours were changed to match the
+  university's real student ID card.
+- **Asked for the universities' official logos** instead of the plain coloured letters the AI first used.
+- **Kept email verification optional** when the AI asked, so all the app's wording says "accounts made with a university
+  email address", never "verified students".
+- **Renamed "Gallery" to "Items found"** so students understand the screen at a glance, and asked for returned items to
+  leave it by themselves.
 
 ## 5. Errors and how I resolved them
 
@@ -61,7 +73,7 @@ per-university databases, and the automated tests.
 ## 6. How I tested and verified AI-generated code
 
 - **Automated tests:** `cd backend && npm test` (158 tests, the API end to end on throwaway databases) and
-  `cd frontend && npm test` (78 tests). `backend/test/crud.test.js` checks create, read, edit and delete, and that other
+  `cd frontend && npm test` (82 tests). `backend/test/crud.test.js` checks create, read, edit and delete, and that other
   students, bad input and missing posts are refused.
 - **GitHub Actions** runs every test on each push; a pull request is only merged when the checks are green.
 - **By hand on the live app:** creating, editing and deleting posts, refreshing to check the data stayed, empty and
@@ -70,10 +82,17 @@ per-university databases, and the automated tests.
 
 ## 7. What I learned
 
-*(Write this in your own words. Points you might cover:)*
-
-- How a request travels from a button in React, through the Express API and its checks, to the SQLite database and back.
-- Why validation must happen on the server, not only in the form.
-- That clear, specific prompts work better than vague ones, and that AI output has to be tested, not trusted.
-- How Git branches, commits and pull requests keep a record of every change, and how deployment and environment
-  variables work on Railway and Vercel.
+- **How a request travels:** a button in React calls the API, Express checks the login and validates the input with Zod,
+  the route reads or writes SQLite, and the answer comes back to the screen as data or a clear error message.
+- **Validation and security belong on the server.** The form can be skipped: the gallery was readable without signing in
+  until a security check with `curl` showed it, and only a server check (with a test) closed it.
+- **Specific prompts work better than vague ones.** "Make it not look like AI" flattened the whole design; asking for
+  exactly what to change works first time.
+- **AI output has to be tested, not trusted.** The tests caught real mistakes, and some bugs only showed on the live app,
+  like two logins renewing at once and wiping each other, or Railway reporting every deploy as a crash.
+- **Git and pull requests keep a record.** Every change is a branch, a commit with a clear message and a pull request with
+  green checks, so I can see what changed, when and why, and undo it if needed.
+- **Deployment and secrets:** merging to `master` deploys the website (Vercel) and the API (Railway); real keys live only
+  in those dashboards' environment variables, never in the code or the repository.
+- **Data has to outlive the server:** the database files and photos sit on a Railway persistent volume, so they survive
+  restarts and redeploys.
