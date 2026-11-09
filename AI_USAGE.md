@@ -61,7 +61,7 @@ per-university databases, and the automated tests.
 ## 6. How I tested and verified AI-generated code
 
 - **Automated tests:** `cd backend && npm test` (158 tests, the API end to end on throwaway databases) and
-  `cd frontend && npm test` (78 tests). `backend/test/crud.test.js` checks create, read, edit and delete, and that other
+  `cd frontend && npm test` (82 tests). `backend/test/crud.test.js` checks create, read, edit and delete, and that other
   students, bad input and missing posts are refused.
 - **GitHub Actions** runs every test on each push; a pull request is only merged when the checks are green.
 - **By hand on the live app:** creating, editing and deleting posts, refreshing to check the data stayed, empty and
